@@ -40,16 +40,22 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
     ...EMPTY_FILTERS,
     pods: initialPod ? [initialPod] : [],
   });
+  const [topicQuery, setTopicQuery] = useState("");
 
   const topics = useMemo(() => uniqueTopics(questions), [questions]);
+  const visibleTopics = useMemo(() => {
+    const q = topicQuery.trim().toLowerCase();
+    if (!q) return topics;
+    return topics.filter((t) => t.toLowerCase().includes(q));
+  }, [topics, topicQuery]);
   const filtered = useMemo(
     () => applyFilters(questions, filters),
     [questions, filters],
   );
 
   return (
-    <div className="grid md:grid-cols-[260px_1fr] gap-6">
-      <aside className="space-y-5 md:sticky md:top-20 self-start bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 text-sm">
+    <div className="grid md:grid-cols-[260px_1fr] gap-6 md:h-[calc(100vh-9rem)]">
+      <aside className="md:h-full md:overflow-y-auto md:pr-1 space-y-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 text-sm">
         <div>
           <input
             type="search"
@@ -121,20 +127,67 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
         </FilterGroup>
 
         <FilterGroup label="Topic">
-          <div className="max-h-44 overflow-y-auto pr-1">
-            {topics.map((t) => (
-              <Check
-                key={t}
-                label={t}
-                checked={filters.topics.includes(t)}
-                onChange={() =>
-                  setFilters({
-                    ...filters,
-                    topics: toggle(filters.topics, t),
-                  })
-                }
+          <div className="space-y-2">
+            <div className="relative">
+              <input
+                type="search"
+                value={topicQuery}
+                onChange={(e) => setTopicQuery(e.target.value)}
+                placeholder={`Search ${topics.length} topics...`}
+                className="w-full px-2 py-1.5 pr-6 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded text-xs placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
-            ))}
+              {topicQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setTopicQuery("")}
+                  aria-label="Clear topic search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm leading-none"
+                >
+                  ×
+                </button>
+              ) : null}
+            </div>
+            {filters.topics.length ? (
+              <div className="flex flex-wrap gap-1">
+                {filters.topics.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() =>
+                      setFilters({
+                        ...filters,
+                        topics: filters.topics.filter((x) => x !== t),
+                      })
+                    }
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-brand-600 text-white hover:bg-brand-700"
+                    title="Remove"
+                  >
+                    {t} ×
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <div className="max-h-44 overflow-y-auto pr-1">
+              {visibleTopics.length === 0 ? (
+                <div className="text-xs text-slate-400 dark:text-slate-500 italic px-1 py-2">
+                  No topics match “{topicQuery}”
+                </div>
+              ) : (
+                visibleTopics.map((t) => (
+                  <Check
+                    key={t}
+                    label={t}
+                    checked={filters.topics.includes(t)}
+                    onChange={() =>
+                      setFilters({
+                        ...filters,
+                        topics: toggle(filters.topics, t),
+                      })
+                    }
+                  />
+                ))
+              )}
+            </div>
           </div>
         </FilterGroup>
 
@@ -147,8 +200,8 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
         </button>
       </aside>
 
-      <section className="space-y-3">
-        <div className="text-xs text-slate-500 dark:text-slate-400">
+      <section className="md:h-full md:overflow-y-auto md:pr-2 space-y-3">
+        <div className="text-xs text-slate-500 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-950 py-1 z-[1]">
           Showing <strong>{filtered.length}</strong> of {questions.length}{" "}
           questions
         </div>
