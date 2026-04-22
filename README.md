@@ -1,4 +1,4 @@
-# Interview Prep Hub
+# Interview Hub
 
 A curated, filterable interview question bank for our three Azure delivery PODs:
 

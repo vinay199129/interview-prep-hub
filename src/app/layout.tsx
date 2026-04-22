@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
-  title: "Interview Prep Hub",
+  title: "Interview Hub",
   description:
     "Curated, filterable interview question bank for POD 1 (.NET), POD 2 (Java), and POD 3 (Python + AI) on Azure.",
 };
@@ -29,7 +29,7 @@ export default function RootLayout({
               href="/"
               className="font-semibold text-brand-700 dark:text-brand-100 text-lg"
             >
-              Interview Prep Hub
+              Interview Hub
             </Link>
             <nav className="flex gap-4 text-sm">
               <Link
@@ -77,7 +77,7 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-500 dark:text-slate-400">
           <div className="max-w-6xl mx-auto px-6 py-3">
-            Interview Prep Hub — content for internal hiring & self-prep.
+            Interview Hub — content for internal hiring & self-prep.
           </div>
         </footer>
       </body>
