@@ -1,0 +1,1885 @@
+[
+  {
+    "id": "p1-cs-001",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Value vs Reference types",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "What is the difference between a value type and a reference type in C#? Give an example of each and describe what happens when you pass them into a method.",
+    "answer": "**Value types** (e.g. `int`, `bool`, `struct`, `enum`) live on the stack (or inline in their containing object) and are copied on assignment and on parameter passing. **Reference types** (e.g. `class`, `string`, `object`, arrays, delegates) live on the managed heap; the variable holds a reference. Assignment and parameter passing copy the *reference*, not the object, so multiple variables can point at the same instance.\n\nBy default both are passed *by value* — but for reference types the value being copied is the reference. To pass a value type by reference you use `ref`, `in`, or `out`.\n\n```csharp\nvoid Mutate(Point p) { p.X = 42; }      // struct: caller's copy unchanged\nvoid Mutate(Person p) { p.Name = \"X\"; } // class: caller sees the change\n```\n\n`string` is a reference type but is **immutable**, which is why it often *behaves* like a value.",
+    "keyPoints": [
+      "Value types: stack/inline, copied on assignment",
+      "Reference types: heap, variable holds reference",
+      "Both passed by value by default; ref/out/in for value-by-reference",
+      "string is reference type but immutable",
+      "struct vs class allocation/identity differences"
+    ],
+    "followUps": [
+      "When would you choose a struct over a class?",
+      "What is boxing/unboxing and what is its cost?",
+      "How does `readonly struct` change behavior?"
+    ],
+    "redFlags": [
+      "Says strings are value types",
+      "Confuses pass-by-reference with reference types",
+      "Cannot give a concrete example"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Value types (C# reference)",
+        "url": "https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/value-types"
+      },
+      {
+        "title": "Microsoft Learn — Reference types",
+        "url": "https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/reference-types"
+      }
+    ],
+    "tags": [
+      "c#",
+      "fundamentals",
+      "memory"
+    ],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-002",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "async/await",
+    "difficulty": "medium",
+    "experienceBands": [
+      "junior",
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Explain how async/await works in C#. What does `await` actually do, and when does it create a new thread?",
+    "answer": "`async`/`await` is a compiler-rewrite over the **Task-based Asynchronous Pattern**. The compiler turns an async method into a state machine: code before the first `await` runs synchronously on the calling thread; at `await`, if the awaited task is not yet complete, the method *returns a Task* to its caller and registers a continuation that resumes when the awaited task completes.\n\n`await` does **not** create a new thread. It frees the current thread to do other work and resumes execution later — typically on a thread from the thread pool, or back on the original `SynchronizationContext` (UI thread, ASP.NET Core request context with `ConfigureAwait(true)`, etc.).\n\nKey nuances:\n- Use `ConfigureAwait(false)` in libraries to avoid forcing resumption on the captured context.\n- `async void` should only be used for event handlers — exceptions can crash the process.\n- I/O-bound work benefits from async; CPU-bound work should use `Task.Run` to offload to the pool.",
+    "keyPoints": [
+      "Compiler-generated state machine over TAP",
+      "await yields control, registers a continuation; does NOT spawn a thread",
+      "Resumption thread depends on SynchronizationContext / ConfigureAwait",
+      "async void is for event handlers only",
+      "I/O-bound vs CPU-bound: async vs Task.Run"
+    ],
+    "followUps": [
+      "What is a deadlock caused by `.Result` / `.Wait()` in ASP.NET classic? Why doesn't ASP.NET Core have a SynchronizationContext?",
+      "What does `ValueTask` solve over `Task`?",
+      "How would you cancel a long-running async operation?"
+    ],
+    "redFlags": [
+      "Believes await creates a thread",
+      "Uses async void without justification",
+      "Mixes blocking calls (.Result) with async without understanding deadlocks"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Asynchronous programming with async and await",
+        "url": "https://learn.microsoft.com/dotnet/csharp/asynchronous-programming/"
+      },
+      {
+        "title": "Stephen Cleary — There Is No Thread",
+        "url": "https://blog.stephencleary.com/2013/11/there-is-no-thread.html"
+      }
+    ],
+    "tags": [
+      "c#",
+      "async",
+      "concurrency"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-003",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "IDisposable",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "What problem does `IDisposable` solve? Walk through the standard Dispose pattern and when you'd implement a finalizer.",
+    "answer": "`IDisposable` provides a deterministic way to release **unmanaged** resources (file handles, sockets, native memory, db connections) and large managed resources whose lifetime you want to control instead of waiting for GC.\n\nStandard pattern for a class that owns unmanaged resources directly:\n\n```csharp\npublic class Resource : IDisposable\n{\n    private bool _disposed;\n    private IntPtr _handle; // native\n    private readonly Stream _managed;\n\n    public void Dispose()\n    {\n        Dispose(true);\n        GC.SuppressFinalize(this);\n    }\n\n    protected virtual void Dispose(bool disposing)\n    {\n        if (_disposed) return;\n        if (disposing) { _managed.Dispose(); }\n        ReleaseHandle(_handle);\n        _disposed = true;\n    }\n\n    ~Resource() => Dispose(false);\n}\n```\n\nIn modern code, prefer `SafeHandle` so you usually don't need a finalizer at all. Use `using` / `await using` (for `IAsyncDisposable`) to ensure deterministic cleanup.",
+    "keyPoints": [
+      "Deterministic cleanup of unmanaged/expensive resources",
+      "Dispose(bool disposing) pattern + SuppressFinalize",
+      "Finalizer only when directly holding unmanaged resources; prefer SafeHandle",
+      "IAsyncDisposable + await using for async cleanup",
+      "using statement / declaration ensures Dispose on scope exit"
+    ],
+    "followUps": [
+      "Difference between `using var x = ...;` and `using (var x = ...) { }`",
+      "When does the GC run finalizers and what is the cost?",
+      "How does `IAsyncDisposable` differ from `IDisposable`?"
+    ],
+    "redFlags": [
+      "Adds finalizers without unmanaged resources",
+      "Forgets GC.SuppressFinalize",
+      "Doesn't know `using` translates to try/finally Dispose"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Implement a Dispose method",
+        "url": "https://learn.microsoft.com/dotnet/standard/garbage-collection/implementing-dispose"
+      }
+    ],
+    "tags": [
+      "c#",
+      "resources",
+      "patterns"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-004",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "LINQ",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "coding",
+    "prompt": "Given `IEnumerable<Order> orders`, write LINQ to return the top 3 customer IDs by total order amount in the last 30 days, descending.",
+    "answer": "```csharp\nvar cutoff = DateTime.UtcNow.AddDays(-30);\nvar top = orders\n    .Where(o => o.PlacedUtc >= cutoff)\n    .GroupBy(o => o.CustomerId)\n    .Select(g => new { CustomerId = g.Key, Total = g.Sum(o => o.Amount) })\n    .OrderByDescending(x => x.Total)\n    .Take(3)\n    .Select(x => x.CustomerId)\n    .ToList();\n```\n\nDiscuss: deferred execution (nothing runs until `ToList`), behavior on empty data (returns empty list, not null), and that against `IQueryable<Order>` (EF) the same code translates to a single SQL query with `GROUP BY ... ORDER BY ... LIMIT 3`.",
+    "keyPoints": [
+      "GroupBy + Sum aggregation",
+      "Filter before grouping",
+      "OrderByDescending + Take",
+      "Deferred execution; ToList materializes",
+      "IEnumerable (LINQ to objects) vs IQueryable (provider translation)"
+    ],
+    "followUps": [
+      "How would you do this in EF Core efficiently? What does the SQL look like?",
+      "What if the dataset is huge — how would you stream it?"
+    ],
+    "redFlags": [
+      "Materializes too early with multiple ToList calls",
+      "Sorts before grouping",
+      "Doesn't handle the empty case"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — LINQ in C#",
+        "url": "https://learn.microsoft.com/dotnet/csharp/linq/"
+      }
+    ],
+    "tags": [
+      "c#",
+      "linq",
+      "coding"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-cs-005",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Dependency Injection",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Compare `AddSingleton`, `AddScoped`, and `AddTransient` in ASP.NET Core DI. Give a real-world example of when each is appropriate, and a common pitfall.",
+    "answer": "- **Singleton**: one instance per application lifetime. Use for stateless services, caches, configuration, expensive-to-construct clients (e.g. `HttpClient` via `IHttpClientFactory`'s typed clients pool, `IMemoryCache`).\n- **Scoped**: one instance per HTTP request (or per `IServiceScope`). Default for EF Core `DbContext`, per-request user/tenant context.\n- **Transient**: a new instance every time it's resolved. Use for cheap, stateless utilities or when no shared state is desired.\n\n**Common pitfall: captive dependencies.** Injecting a Scoped (e.g. `DbContext`) into a Singleton captures it for the singleton's entire lifetime — across all requests — leading to threading bugs and stale data. Use `IServiceScopeFactory` to create a scope inside a singleton when you need scoped services.\n\nAnother pitfall: making something Transient when it holds a heavy resource (sockets/connections) will create churn; prefer pooled clients.",
+    "keyPoints": [
+      "Singleton: app lifetime; Scoped: per request; Transient: per resolve",
+      "Captive dependency anti-pattern",
+      "DbContext is Scoped by default",
+      "Use IServiceScopeFactory inside singletons",
+      "Validate scopes in Development (ValidateScopes)"
+    ],
+    "followUps": [
+      "How would you register the same interface with two different implementations and pick one at runtime?",
+      "What does `services.AddHttpClient<TClient>` give you over `new HttpClient()`?"
+    ],
+    "redFlags": [
+      "Doesn't recognize the captive dependency problem",
+      "Always picks Transient",
+      "Manually news up DbContext"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Dependency injection in ASP.NET Core",
+        "url": "https://learn.microsoft.com/aspnet/core/fundamentals/dependency-injection"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "di",
+      "patterns"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-006",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Middleware",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "How does the ASP.NET Core middleware pipeline work? Describe ordering, short-circuiting, and how you would add a custom logging/correlation-id middleware.",
+    "answer": "The pipeline is an ordered chain of `RequestDelegate` components built in `Program.cs` via `app.Use...`. Each component receives the `HttpContext` and a `next` delegate; it can do work before calling `next`, after `next` returns (response phase), or **short-circuit** by not calling `next` (e.g. auth failure → 401).\n\nOrder matters: e.g. `UseExceptionHandler` first to catch downstream errors, then `UseHttpsRedirection`, `UseRouting`, `UseAuthentication`, `UseAuthorization`, then `MapControllers`/endpoints last.\n\nCustom correlation-id middleware:\n\n```csharp\npublic class CorrelationIdMiddleware\n{\n    private readonly RequestDelegate _next;\n    public CorrelationIdMiddleware(RequestDelegate next) => _next = next;\n    public async Task Invoke(HttpContext ctx)\n    {\n        var id = ctx.Request.Headers[\"X-Correlation-Id\"].FirstOrDefault()\n                 ?? Guid.NewGuid().ToString(\"N\");\n        ctx.Response.Headers[\"X-Correlation-Id\"] = id;\n        using (LogContext.PushProperty(\"CorrelationId\", id)) // Serilog\n            await _next(ctx);\n    }\n}\n// Program.cs\napp.UseMiddleware<CorrelationIdMiddleware>();\n```\n\nAdd it early — before logging/auth — so all downstream logs include it.",
+    "keyPoints": [
+      "Ordered pipeline of RequestDelegate components",
+      "Pre/post phases around `await next(ctx)`",
+      "Short-circuit by not calling next",
+      "Standard order matters (Exception → Routing → Auth → Endpoints)",
+      "Register with UseMiddleware<T> or inline app.Use"
+    ],
+    "followUps": [
+      "Difference between `Use`, `Map`, and `Run`?",
+      "How is middleware different from an MVC filter?"
+    ],
+    "redFlags": [
+      "Cannot articulate ordering implications",
+      "Mutates headers after the response has started",
+      "Doesn't dispose scoped services correctly in middleware"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — ASP.NET Core middleware",
+        "url": "https://learn.microsoft.com/aspnet/core/fundamentals/middleware/"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "middleware",
+      "observability"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-007",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Minimal APIs vs MVC",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "scenario",
+    "prompt": "Your team is building a new microservice with ~20 endpoints. Would you choose Minimal APIs or controller-based MVC, and why?",
+    "answer": "Either is valid; trade-offs:\n\n**Minimal APIs**: lightweight, low ceremony, great for small services, lambdas/functions-style endpoints, low cold-start. Good with endpoint groups (`MapGroup`) and `RequestEndpointMetadata` for OpenAPI/auth filters. Slightly less mature for very complex filter pipelines, model binding edge cases, and conventions.\n\n**Controllers**: structured, familiar, rich filter pipeline (action/result/exception filters), conventions, integration with model binding, `[ApiController]` automatic 400s, `[ProducesResponseType]` for OpenAPI. Slightly more boilerplate.\n\nFor ~20 endpoints in a focused microservice I'd pick **Minimal APIs with `MapGroup` per resource and an `IEndpointFilter` for cross-cutting concerns**, because the surface is small and the perf/clarity wins are real. If the team is scaling to many endpoints with complex auth/validation, controllers may pay back the boilerplate.\n\nKey: the choice should be a *team* decision tied to consistency across services, not a personal preference.",
+    "keyPoints": [
+      "Both production-ready in modern .NET",
+      "Minimal: low ceremony, perf, MapGroup, EndpointFilter",
+      "Controllers: filters, conventions, [ApiController] niceties",
+      "Decision = service size + team consistency",
+      "OpenAPI works with both"
+    ],
+    "followUps": [
+      "How would you do FluentValidation in Minimal APIs?",
+      "How do you share auth policies between groups?"
+    ],
+    "redFlags": [
+      "Dismisses one option as obsolete",
+      "Mentions only syntax, not pipeline/filter trade-offs"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Choose between Minimal APIs and controllers",
+        "url": "https://learn.microsoft.com/aspnet/core/fundamentals/apis"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "minimal-apis",
+      "architecture"
+    ],
+    "estimatedTimeMin": 7
+  },
+  {
+    "id": "p1-cs-008",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "EF Core",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "debugging",
+    "prompt": "An EF Core endpoint is slow under load. SQL Server CPU is fine, but app servers show high CPU and memory. How do you diagnose and what are the usual culprits?",
+    "answer": "Approach:\n1. **Reproduce + measure** — capture a single slow request with logging set to `Information` for `Microsoft.EntityFrameworkCore.Database.Command` to see the actual SQL and parameters.\n2. **Profile** — dotnet-counters / dotnet-trace / Application Insights dependencies; look at SQL count and duration per request.\n3. **Look for N+1**: many small queries per request → enable `AsSplitQuery()` or use eager loading via `Include`/projection (`Select`).\n4. **Tracking overhead**: add `AsNoTracking()` for read-only queries; the change tracker is the usual app-CPU/memory culprit.\n5. **Over-fetching**: project to DTOs with `Select` instead of materializing entire entity graphs.\n6. **Long-lived DbContext**: ensure scoped lifetime; never share across threads.\n7. **Cartesian explosion**: with multiple `Include`s on collections, EF can multiply rows; use `AsSplitQuery()`.\n8. **Compiled queries** (`EF.CompileAsyncQuery`) for very hot paths.\n9. **Pagination**: `Skip/Take` on indexed columns, not in-memory.\n\nFix top offender, re-measure. Don't speculate — use the logged SQL.",
+    "keyPoints": [
+      "Turn on EF Core SQL logging first",
+      "N+1 → Include / projection / split query",
+      "AsNoTracking for reads",
+      "Project DTOs to avoid over-fetching",
+      "Cartesian explosion → AsSplitQuery",
+      "Profile with dotnet-counters / App Insights"
+    ],
+    "followUps": [
+      "What is the difference between `Include().ThenInclude()` and a `Select` projection?",
+      "When would you drop to Dapper or raw SQL?"
+    ],
+    "redFlags": [
+      "Jumps to caching without diagnosing",
+      "Uses `AsNoTracking` for everything by default without thinking about updates",
+      "Doesn't know about split queries / cartesian explosion"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — EF Core performance",
+        "url": "https://learn.microsoft.com/ef/core/performance/"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "ef-core",
+      "performance",
+      "debugging"
+    ],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-apim-001",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Azure APIM",
+    "subTopic": "Core concepts",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "What is Azure API Management and what problems does it solve in front of an Azure Functions / App Service backend?",
+    "answer": "Azure API Management (APIM) is a managed API gateway that sits in front of one or more backend services and gives you a single, governed surface for them. It addresses cross-cutting API concerns:\n- **Security**: subscription keys, JWT validation, OAuth, IP filtering, mutual TLS.\n- **Traffic management**: rate-limit/quota policies, caching, request/response transformation.\n- **Observability**: built-in analytics, App Insights integration, request tracing.\n- **Developer experience**: developer portal, OpenAPI import/export, versions and revisions.\n- **Composition**: combine multiple backends behind one façade; shape responses.\n\nIn front of Functions/App Service it lets you put a public, secure, throttled, cacheable, versioned API in front of internal services that may live in a VNet — and decouples your consumers from backend implementation.",
+    "keyPoints": [
+      "Managed gateway / single front door",
+      "Security: keys, JWT, OAuth, IP filtering",
+      "Policies: rate-limit, cache, transform",
+      "Observability + dev portal",
+      "Versions and revisions"
+    ],
+    "followUps": [
+      "Difference between a version and a revision?",
+      "When would you NOT use APIM?"
+    ],
+    "redFlags": [
+      "Confuses APIM with Application Gateway / Front Door",
+      "Thinks APIM is just for auth"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — About API Management",
+        "url": "https://learn.microsoft.com/azure/api-management/api-management-key-concepts"
+      }
+    ],
+    "tags": [
+      "apim",
+      "azure",
+      "fundamentals"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-apim-002",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Azure APIM",
+    "subTopic": "Policies",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "scenario",
+    "prompt": "Show an APIM policy that validates a JWT, rate-limits at 100 calls/min per subscription, and caches GET responses for 60 seconds.",
+    "answer": "```xml\n<policies>\n  <inbound>\n    <base />\n    <validate-jwt header-name=\"Authorization\"\n                  failed-validation-httpcode=\"401\"\n                  failed-validation-error-message=\"Unauthorized\">\n      <openid-config url=\"https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration\" />\n      <audiences>\n        <audience>api://my-api</audience>\n      </audiences>\n    </validate-jwt>\n    <rate-limit-by-key calls=\"100\" renewal-period=\"60\"\n                      counter-key=\"@(context.Subscription.Id)\" />\n    <cache-lookup vary-by-developer=\"false\"\n                  vary-by-developer-groups=\"false\"\n                  downstream-caching-type=\"none\">\n      <vary-by-header>Accept</vary-by-header>\n    </cache-lookup>\n  </inbound>\n  <backend><base /></backend>\n  <outbound>\n    <base />\n    <cache-store duration=\"60\" />\n  </outbound>\n  <on-error><base /></on-error>\n</policies>\n```\n\nNotes: use `validate-azure-ad-token` (newer) for AAD specifically. Apply rate-limit at the *product* level if it should apply across APIs. `cache-lookup`/`cache-store` only run for cacheable methods — pair with method-level scoping if needed.",
+    "keyPoints": [
+      "Policy structure: inbound/backend/outbound/on-error + base",
+      "validate-jwt with openid-config + audiences",
+      "rate-limit-by-key with subscription counter",
+      "cache-lookup + cache-store with vary-by",
+      "Scope: API vs Operation vs Product vs Global"
+    ],
+    "followUps": [
+      "What's the difference between `rate-limit` and `rate-limit-by-key`?",
+      "How do you debug a policy in the Azure portal?"
+    ],
+    "redFlags": [
+      "Forgets `<base />`",
+      "Caches POST responses",
+      "Hardcodes secrets in policies instead of named values"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — APIM policy reference",
+        "url": "https://learn.microsoft.com/azure/api-management/api-management-policies"
+      }
+    ],
+    "tags": [
+      "apim",
+      "policies",
+      "security",
+      "caching"
+    ],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p1-apim-003",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Azure APIM",
+    "subTopic": "Versioning",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Difference between APIM **revisions** and **versions**, and when do you use each?",
+    "answer": "**Revisions** are non-breaking iterations of the *same* version. They share the version's URL/contract; you stage changes (e.g. new policy, fix) on a non-current revision, test, then make it current. Consumers don't need to change anything.\n\n**Versions** are explicit, breaking variants exposed under a distinct identifier (path segment, header, or query string), e.g. `/v1` vs `/v2`. Consumers opt in by addressing the new version; multiple versions can be live at once for migration windows.\n\nRule of thumb: *Revision = safe change behind the curtain. Version = breaking change consumers must adopt.*",
+    "keyPoints": [
+      "Revisions: non-breaking, same surface, staged",
+      "Versions: breaking, separate surface, opt-in",
+      "Versioning schemes: path/query/header",
+      "Multiple versions live simultaneously",
+      "Use revisions for hotfixes/policy changes"
+    ],
+    "followUps": [
+      "How do you communicate version deprecation to consumers?",
+      "How does this interact with the developer portal docs?"
+    ],
+    "redFlags": [
+      "Uses versions for every change",
+      "Pushes breaking changes as revisions"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Versions and revisions in APIM",
+        "url": "https://learn.microsoft.com/azure/api-management/api-management-versions"
+      }
+    ],
+    "tags": [
+      "apim",
+      "versioning"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-fn-001",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Azure Functions",
+    "subTopic": "Triggers & bindings",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "Explain triggers vs bindings in Azure Functions and give an example combining both.",
+    "answer": "A **trigger** is what causes a function to run — exactly one per function (HTTP, Timer, Service Bus, Event Hub, Blob, Cosmos DB change feed, etc.).\n\nA **binding** is declarative I/O the runtime wires up for you (input bindings provide data; output bindings persist data). You can have zero or many of each.\n\nExample (.NET isolated worker): a Service Bus queue triggers the function, an input binding fetches a related row from Cosmos DB, and an output binding writes a response message to another queue.\n\n```csharp\n[Function(\"ProcessOrder\")]\n[ServiceBusOutput(\"order-status\", Connection = \"SbConn\")]\npublic string Run(\n    [ServiceBusTrigger(\"orders\", Connection = \"SbConn\")] OrderMsg order,\n    [CosmosDBInput(\"db\", \"customers\", Connection = \"CosmosConn\",\n        Id = \"{customerId}\", PartitionKey = \"{customerId}\")] Customer cust,\n    FunctionContext ctx)\n{\n    var status = process(order, cust);\n    return status; // goes to ServiceBusOutput\n}\n```\n\nBindings reduce SDK boilerplate; for advanced scenarios you can always inject clients directly.",
+    "keyPoints": [
+      "Exactly one trigger per function",
+      "Bindings: input (read) and output (write)",
+      "Many trigger types: HTTP, Timer, queues, blob, Cosmos change feed",
+      "Bindings reduce boilerplate but you can also inject SDK clients",
+      "Configured via attributes / function.json"
+    ],
+    "followUps": [
+      "When would you inject a client instead of using a binding?",
+      "What is the Functions worker model in .NET (isolated vs in-process)?"
+    ],
+    "redFlags": [
+      "Says you can have multiple triggers on one function",
+      "Confuses binding with middleware"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Azure Functions triggers and bindings",
+        "url": "https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings"
+      }
+    ],
+    "tags": [
+      "functions",
+      "azure"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-fn-002",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Azure Functions",
+    "subTopic": "Hosting plans",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Compare Consumption, Premium, and Dedicated (App Service) plans for Azure Functions. Which would you pick for a low-latency public API and why?",
+    "answer": "- **Consumption**: pay per execution, scales to zero, cold starts, max ~10 min execution. Cheapest for spiky low-volume work.\n- **Premium (Elastic Premium / Flex Consumption)**: pre-warmed instances eliminate cold starts, VNet integration, longer durations, supports private endpoints/managed identity for backend resources. Costs more but predictable.\n- **Dedicated (App Service Plan)**: runs on the same VMs as your other App Service apps; useful if you already have under-utilized capacity; no per-execution scaling story.\n\nFor a **low-latency public API**: avoid cold starts → **Premium / Flex Consumption** with min instance count > 0, plus VNet integration for private dependencies. APIM in front for caching, throttling, and OpenAPI. Pair with App Insights for latency tracking. Consumption only acceptable if cold-start tolerance is high (background jobs).",
+    "keyPoints": [
+      "Consumption: cheap, scale-to-zero, cold starts",
+      "Premium/Flex: pre-warmed, VNet, longer runs",
+      "Dedicated: reuse existing App Service capacity",
+      "Low-latency API → Premium/Flex with always-ready instances",
+      "Pair with APIM for cache/throttling"
+    ],
+    "followUps": [
+      "What is Flex Consumption and how does it differ from classic Premium?",
+      "How would you mitigate cold starts on Consumption?"
+    ],
+    "redFlags": [
+      "Picks Consumption for a strict low-latency SLA",
+      "Doesn't mention cold start"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Azure Functions hosting options",
+        "url": "https://learn.microsoft.com/azure/azure-functions/functions-scale"
+      }
+    ],
+    "tags": [
+      "functions",
+      "hosting",
+      "performance"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-fn-003",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Azure Functions",
+    "subTopic": "Durable Functions",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "Design a long-running order-fulfillment workflow with retries, timeouts, and human approval using Azure Functions. Why Durable Functions?",
+    "answer": "**Why Durable**: stateless Azure Functions can't natively coordinate multi-step, long-running workflows with retries, fan-out/fan-in, timers, and waiting for external events. Durable Functions add an orchestrator that uses event-sourced state to give you reliable, replayable workflows.\n\n**Pattern**:\n- **Client function** (HTTP trigger) starts the orchestration with the order id.\n- **Orchestrator function** (deterministic, no I/O) drives the workflow:\n  1. `CallActivityWithRetryAsync(\"ChargePayment\", retryOptions, ...)`\n  2. `CallActivityWithRetryAsync(\"ReserveInventory\", ...)`\n  3. If order > $10k: raise approval. Use **WaitForExternalEvent + Timer**:\n     ```csharp\n     using var cts = new CancellationTokenSource();\n     var approval = ctx.WaitForExternalEvent<bool>(\"Approval\");\n     var timeout = ctx.CreateTimer(ctx.CurrentUtcDateTime.AddHours(24), cts.Token);\n     var winner = await Task.WhenAny(approval, timeout);\n     if (winner == timeout) { await CompensateAsync(); return; }\n     cts.Cancel();\n     ```\n  4. `CallActivityAsync(\"ShipOrder\", ...)`.\n- **Compensation**: on failure run reverse activities (refund, release inventory) — saga pattern.\n- **Approval API**: another HTTP function calls `client.RaiseEventAsync(instanceId, \"Approval\", true)`.\n\n**Constraints**: orchestrator code must be deterministic — no DateTime.UtcNow (use `ctx.CurrentUtcDateTime`), no random, no I/O. All side effects go in activities.",
+    "keyPoints": [
+      "Orchestrator + activity functions; event-sourced replay",
+      "WaitForExternalEvent + Timer for human approval / timeout",
+      "RetryOptions on activity calls",
+      "Saga / compensation for failures",
+      "Determinism rules in orchestrator"
+    ],
+    "followUps": [
+      "How do you handle versioning of an in-flight orchestration when you deploy code changes?",
+      "What's the difference between sub-orchestrations and entities?"
+    ],
+    "redFlags": [
+      "Does I/O directly in the orchestrator",
+      "Uses Thread.Sleep instead of CreateTimer",
+      "No compensation strategy"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Durable Functions overview",
+        "url": "https://learn.microsoft.com/azure/azure-functions/durable/durable-functions-overview"
+      }
+    ],
+    "tags": [
+      "functions",
+      "durable",
+      "workflow",
+      "saga"
+    ],
+    "estimatedTimeMin": 15
+  },
+  {
+    "id": "p1-la-001",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Azure Logic Apps",
+    "subTopic": "When to use",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "scenario",
+    "prompt": "When would you choose Azure Logic Apps over Azure Functions for an integration?",
+    "answer": "Use **Logic Apps** when:\n- The workflow is mostly **glue between SaaS/connectors** (Office 365, Dynamics, Salesforce, SAP, ServiceNow, SFTP) — Logic Apps has 1000+ managed connectors.\n- You want a **visual designer** that non-developers can read or maintain.\n- The logic is mostly orchestration/decision/transform with little custom code.\n- You need built-in retry, scheduling, durable run history without writing it.\n\nUse **Functions** when:\n- You need fine-grained custom code or libraries.\n- Performance / latency / cost-per-call matters.\n- The workload is event-driven compute, not orchestration.\n\nCommon pattern: **Logic App orchestrates** the integration and **calls Functions** for custom transformations or business rules. Use APIM in front for the public surface.",
+    "keyPoints": [
+      "Logic Apps = SaaS connectors + visual workflows",
+      "Functions = custom code, perf, low-level",
+      "Hybrid pattern: Logic App + Function activities",
+      "Logic Apps Standard runs on Functions runtime (single-tenant)",
+      "Cost model is per-action vs per-execution"
+    ],
+    "followUps": [
+      "Difference between Logic Apps Consumption vs Standard?",
+      "How do you source-control a Logic App?"
+    ],
+    "redFlags": [
+      "Says Logic Apps replaces Functions entirely",
+      "Doesn't know connectors exist"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Choose between Azure messaging/integration services",
+        "url": "https://learn.microsoft.com/azure/logic-apps/logic-apps-overview"
+      }
+    ],
+    "tags": [
+      "logic-apps",
+      "integration"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-la-002",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Azure Logic Apps",
+    "subTopic": "Standard vs Consumption",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Explain Logic Apps Standard vs Consumption and when you'd pick Standard.",
+    "answer": "**Consumption** (multi-tenant): pay per action execution, low entry cost, runs in shared infra, harder to do source-control / local dev / VNet at scale.\n\n**Standard** (single-tenant, runs on the Functions runtime): predictable hosting (App Service plan or Workflow Standard plan), VS Code local development, source-control friendly (workflow JSON in repo + parameters/connections), VNet integration / private endpoints, multiple workflows per app, stateful or stateless.\n\nPick **Standard** when you need:\n- Source control + CI/CD pipelines for workflows.\n- VNet integration / private endpoints for backend systems.\n- Predictable performance / pricing for steady traffic.\n- Multiple related workflows packaged together.\n- Stateless workflows (low-latency, no run-history overhead) alongside stateful ones.\n\nPick **Consumption** for ad-hoc, low-volume or business-team workflows where governance and dev tooling matter less.",
+    "keyPoints": [
+      "Consumption = multi-tenant, per-action billing",
+      "Standard = single-tenant on Functions runtime, App Service hosting",
+      "Standard supports VNet, local dev, source control",
+      "Stateful vs stateless workflows in Standard",
+      "Pick Standard for enterprise/CI/CD scenarios"
+    ],
+    "followUps": [
+      "How do you parameterize connections across environments in Standard?",
+      "How does the workflow.json schema differ between the two?"
+    ],
+    "redFlags": [
+      "Recommends Consumption for an enterprise, source-controlled solution",
+      "Doesn't know Standard exists"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Single-tenant vs multi-tenant Logic Apps",
+        "url": "https://learn.microsoft.com/azure/logic-apps/single-tenant-overview-compare"
+      }
+    ],
+    "tags": [
+      "logic-apps",
+      "hosting"
+    ],
+    "estimatedTimeMin": 7
+  },
+  {
+    "id": "p1-spa-001",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Frontend (Angular/React)",
+    "subTopic": "State management",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "How do you decide between component state, context, and a state library (Redux/NgRx, Zustand, RxJS) in a React or Angular app?",
+    "answer": "Start with the **smallest scope that works**:\n1. **Local component state** (`useState` / Angular component property) — for UI-only state owned by one component.\n2. **Lift state up** to the closest common parent if a few siblings need it.\n3. **Context (React) / shared service (Angular)** for low-frequency, app-wide values: theme, current user, feature flags. Avoid putting high-churn data in React Context — every consumer re-renders.\n4. **Server cache library** (TanStack Query / SWR / RTK Query / Angular `HttpClient` + signals) for *server* state: caching, deduping, background refetch. Most apps need this *before* a global store.\n5. **Global store** (Redux Toolkit, Zustand, NgRx) only for genuinely shared *client* state with complex transitions, time-travel debugging needs, or many slices touched by many components.\n\nKey rule: **separate server state from client state**. Most teams reach for Redux when they actually needed a query cache.",
+    "keyPoints": [
+      "Smallest scope first: local → lifted → context → global",
+      "Server state ≠ client state",
+      "Use a query cache (TanStack/RTK Query) for server data",
+      "Global stores only for genuinely shared client state",
+      "React Context causes re-renders; not a store substitute"
+    ],
+    "followUps": [
+      "How do React Server Components change this picture?",
+      "How do Angular Signals fit alongside RxJS?"
+    ],
+    "redFlags": [
+      "Reaches for Redux for everything",
+      "Treats Context as a free state library"
+    ],
+    "references": [
+      {
+        "title": "TanStack Query — Why use it",
+        "url": "https://tanstack.com/query/latest/docs/framework/react/overview"
+      },
+      {
+        "title": "Angular — Signals",
+        "url": "https://angular.dev/guide/signals"
+      }
+    ],
+    "tags": [
+      "react",
+      "angular",
+      "state-management"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-spa-002",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Frontend (Angular/React)",
+    "subTopic": "Auth with APIM",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "Design auth for a React SPA calling APIs through APIM, with Azure AD as the IdP. Walk through the token flow.",
+    "answer": "Use **OAuth 2.0 Authorization Code with PKCE** (no client secret in the SPA):\n\n1. SPA uses **MSAL.js** to redirect to AAD, obtains an **ID token** (user identity) and an **access token** scoped to your API (`api://my-api/.default`).\n2. SPA calls APIM with `Authorization: Bearer <access-token>`.\n3. APIM policy `validate-azure-ad-token` (or `validate-jwt` against AAD's OIDC config) validates signature, issuer, audience, expiry.\n4. APIM forwards to the backend (Functions/App Service). The backend can re-validate or trust APIM via mTLS / VNet isolation / `Ocp-Apim-Subscription-Key` if appropriate.\n5. SPA refreshes tokens silently via MSAL's hidden iframe / refresh token (depending on browser policies).\n\n**Don't**:\n- Don't store access tokens in `localStorage` if you can avoid it; prefer `sessionStorage` or in-memory + silent refresh.\n- Don't use Implicit flow (deprecated).\n- Don't put client secrets in the SPA.\n\n**APIM extras**: subscription keys for app-level identity (separate from user identity), rate-limit per user via `context.User.Id`, CORS policy for the SPA origin.",
+    "keyPoints": [
+      "OAuth 2.0 Auth Code + PKCE via MSAL.js",
+      "Access token scoped to API (audience)",
+      "APIM validates JWT with validate-azure-ad-token",
+      "Backend trust model: re-validate vs network isolation",
+      "Don't use Implicit flow; mind token storage"
+    ],
+    "followUps": [
+      "How would you call multiple APIs requiring different scopes?",
+      "How do you handle B2C vs Workforce AAD?"
+    ],
+    "redFlags": [
+      "Uses Implicit flow",
+      "Stores tokens carelessly",
+      "Skips APIM JWT validation"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — MSAL.js single-page app",
+        "url": "https://learn.microsoft.com/entra/identity-platform/scenario-spa-overview"
+      },
+      {
+        "title": "APIM — validate-azure-ad-token policy",
+        "url": "https://learn.microsoft.com/azure/api-management/validate-azure-ad-token-policy"
+      }
+    ],
+    "tags": [
+      "auth",
+      "oauth",
+      "spa",
+      "apim"
+    ],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-spa-003",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Frontend (Angular/React)",
+    "subTopic": "Performance",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "debugging",
+    "prompt": "Users report your React app's first page load is slow. How do you investigate and what are the typical fixes?",
+    "answer": "**Investigate**:\n1. Run **Lighthouse** + WebPageTest. Look at LCP, TBT, CLS, transfer size.\n2. Inspect the **bundle** (`webpack-bundle-analyzer`, `source-map-explorer`, Vite `--report`). Find large dependencies.\n3. Use the browser **Performance tab** for main-thread blocking and long tasks.\n4. Check the **network waterfall** for blocking JS/CSS, missing HTTP/2, no compression, no cache headers.\n\n**Typical fixes**:\n- **Code-split** route-level (`React.lazy` + `Suspense`, dynamic imports).\n- **Tree-shake** / drop heavy libs (replace moment with date-fns, lodash → native or per-method imports).\n- **Image optimization**: responsive sizes, modern formats (AVIF/WebP), `loading=\"lazy\"`.\n- **Server-side render or static-generate** with Next.js for first paint.\n- Move expensive client work to **Web Workers** if applicable.\n- Cache and CDN: long-cache hashed assets; preconnect to API origin.\n- Defer non-critical JS (analytics, chat widgets).\n- Avoid hydration mismatches; minimize client component tree in RSC.",
+    "keyPoints": [
+      "Measure first: Lighthouse, bundle analyzer, perf trace",
+      "Code-splitting per route, dynamic imports",
+      "Drop / replace heavy libs",
+      "Image optimization + CDN + caching",
+      "SSR/SSG for first paint",
+      "Defer non-critical scripts"
+    ],
+    "followUps": [
+      "What is the difference between LCP and FCP?",
+      "How does HTTP/2 server push or HTTP/3 affect this?"
+    ],
+    "redFlags": [
+      "Optimizes blindly without measuring",
+      "Doesn't mention bundle size"
+    ],
+    "references": [
+      {
+        "title": "web.dev — Optimize Largest Contentful Paint",
+        "url": "https://web.dev/articles/optimize-lcp"
+      }
+    ],
+    "tags": [
+      "frontend",
+      "performance",
+      "react"
+    ],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p1-ghcp-001",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "GitHub Copilot",
+    "subTopic": "Effective use",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "How do you use GitHub Copilot effectively in day-to-day coding without sacrificing quality or security?",
+    "answer": "Treat Copilot as a **fast pair programmer that needs supervision**, not as a code generator you trust blindly:\n\n- **Context matters**: open the relevant files, name variables clearly, write a leading comment describing the intent. Copilot uses surrounding context. In Copilot Chat, attach files/symbols rather than pasting.\n- **Iterate**: accept a suggestion, then ask Copilot to refactor / add error handling / write tests. Use chat for explanations and reviews.\n- **Always read what you accept** — especially for: auth/crypto, SQL strings (injection risk), serialization, regex, anything touching secrets, external network calls.\n- **Ask it to write the test first** for risky code, then implement.\n- **Don't paste secrets** into prompts; configure org policies for content exclusions.\n- Use **`/explain`, `/fix`, `/tests`, `/doc`** slash commands and edit mode for multi-file changes.\n- Use **Copilot in PR reviews** to spot diffs, but human reviewers remain accountable.\n\nMeasure: are you faster *and* still passing CI / code review? If suggestions trend toward poor patterns, give clearer context or rewrite the surrounding code.",
+    "keyPoints": [
+      "Pair-programmer mindset; review every suggestion",
+      "Context = open files + clear names + intent comments",
+      "Use chat slash commands and edit mode",
+      "Be careful with auth/crypto/SQL/secrets",
+      "Generate tests first for risky code",
+      "Org-level content exclusions"
+    ],
+    "followUps": [
+      "How do you use Copilot for code review on a PR?",
+      "What is Copilot Workspace / agent mode and when is it useful?"
+    ],
+    "redFlags": [
+      "Accepts suggestions without reading",
+      "Pastes secrets into prompts",
+      "Treats Copilot as an authority on security"
+    ],
+    "references": [
+      {
+        "title": "GitHub Docs — Best practices for using GitHub Copilot",
+        "url": "https://docs.github.com/copilot/using-github-copilot/best-practices-for-using-github-copilot"
+      }
+    ],
+    "tags": [
+      "copilot",
+      "productivity",
+      "ai"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-aks-001",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "AKS / Containers",
+    "subTopic": "Containerizing .NET",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "coding",
+    "prompt": "Write a production-ready multi-stage Dockerfile for an ASP.NET Core 8 web API. What are the key choices?",
+    "answer": "```dockerfile\n# ---- build stage ----\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\nCOPY *.sln ./\nCOPY src/MyApi/*.csproj src/MyApi/\nRUN dotnet restore src/MyApi/MyApi.csproj\nCOPY . .\nRUN dotnet publish src/MyApi/MyApi.csproj -c Release -o /app/publish \\\n    /p:UseAppHost=false\n\n# ---- runtime stage ----\nFROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final\nWORKDIR /app\nENV ASPNETCORE_URLS=http://+:8080 \\\n    DOTNET_RUNNING_IN_CONTAINER=true \\\n    DOTNET_USE_POLLING_FILE_WATCHER=false\nEXPOSE 8080\nUSER $APP_UID  # non-root user provided by base image (>=8.0)\nCOPY --from=build /app/publish .\nENTRYPOINT [\"dotnet\", \"MyApi.dll\"]\nHEALTHCHECK CMD wget -qO- http://localhost:8080/health || exit 1\n```\n\nKey choices:\n- **Multi-stage build**: SDK only at build time → small runtime image (~100 MB) using `aspnet:8.0` (not `sdk`).\n- **Restore separately** (copy csproj first) to maximise Docker layer caching on rebuilds.\n- **Non-root** (`USER $APP_UID`) — required by many AKS Pod Security Standards (restricted).\n- **Port 8080** + `ASPNETCORE_URLS` (8.0+ runs as non-root, can't bind 80).\n- **Healthcheck** for orchestrator probes.\n- For even smaller / hardened images, use `chiseled` Ubuntu base or `alpine`.\n- Don't bake secrets; pass via env / Key Vault / managed identity at runtime.",
+    "keyPoints": [
+      "Multi-stage SDK → aspnet runtime",
+      "Layer caching: copy csproj, restore, then copy rest",
+      "Non-root user, port 8080",
+      "Healthcheck endpoint",
+      "Small base images (chiseled/alpine) for prod",
+      "No secrets in image"
+    ],
+    "followUps": [
+      "How do you wire managed identity from AKS into this app?",
+      "What does AOT compilation buy you for container images?"
+    ],
+    "redFlags": [
+      "Uses sdk image at runtime",
+      "Runs as root",
+      "Hardcodes secrets"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Containerize a .NET app",
+        "url": "https://learn.microsoft.com/dotnet/core/docker/build-container"
+      }
+    ],
+    "tags": [
+      "docker",
+      "aks",
+      "dotnet"
+    ],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p1-aks-002",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "AKS / Containers",
+    "subTopic": "Workload identity",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "How would you give a pod in AKS access to Azure Key Vault and Cosmos DB without using secrets?",
+    "answer": "Use **AKS workload identity** (the modern replacement for pod-managed identity) + **Azure RBAC**:\n\n1. Enable workload identity + OIDC issuer on the AKS cluster (`--enable-workload-identity --enable-oidc-issuer`).\n2. Create a **user-assigned managed identity (UAMI)** in Azure.\n3. Create a **federated credential** on the UAMI that trusts the cluster's OIDC issuer + a specific service account in a specific namespace.\n4. Create a Kubernetes **ServiceAccount** annotated with the UAMI's client id and labeled `azure.workload.identity/use: \"true\"`. Apply the same label to the pod.\n5. Grant the UAMI **Azure RBAC** roles: `Key Vault Secrets User` on the vault, `Cosmos DB Built-in Data Reader` (or custom data plane role) on Cosmos.\n6. App code uses `DefaultAzureCredential` (.NET) which picks up the projected token automatically — no secrets, no connection strings.\n\nResult: short-lived OIDC tokens federated to AAD, scoped per-workload, auditable, rotated automatically. Pair with **Key Vault Secret Provider for CSI** if you need secrets mounted as files for legacy apps.",
+    "keyPoints": [
+      "AKS workload identity + OIDC issuer",
+      "Federated credential trust on UAMI",
+      "K8s ServiceAccount annotation + pod label",
+      "Azure RBAC: data-plane roles (Key Vault Secrets User, Cosmos data roles)",
+      "DefaultAzureCredential just works",
+      "Short-lived tokens, no static secrets"
+    ],
+    "followUps": [
+      "Difference vs pod-managed identity (deprecated)?",
+      "How would you constrain blast radius across namespaces?"
+    ],
+    "redFlags": [
+      "Mounts a service principal secret",
+      "Uses cluster-wide identity for everything",
+      "Doesn't know workload identity replaces pod identity"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — AKS workload identity",
+        "url": "https://learn.microsoft.com/azure/aks/workload-identity-overview"
+      }
+    ],
+    "tags": [
+      "aks",
+      "identity",
+      "security"
+    ],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-iot-001",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "IoT Migration",
+    "subTopic": "Greengrass → Azure IoT",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "Map AWS IoT Greengrass concepts to Azure IoT and outline a migration plan.",
+    "answer": "**Concept mapping**:\n| AWS | Azure |\n|---|---|\n| IoT Core (cloud broker) | IoT Hub (and DPS for provisioning) |\n| Greengrass Core (edge runtime) | Azure IoT Edge runtime |\n| Greengrass components/recipes | IoT Edge modules (containers) + deployment manifests |\n| Lambda on Greengrass | Custom IoT Edge module (container) or Azure Functions on Edge |\n| Stream Manager | Edge Hub routing + custom modules |\n| Device Shadow | Device Twin |\n| Greengrass groups | IoT Hub automatic deployments + tags |\n| Local MQTT broker | Edge Hub (MQTT/AMQP) |\n| AWS Sitewise / Timestream sink | IoT Hub → Event Hubs → ADX/Timeseries Insights |\n\n**Migration plan**:\n1. **Inventory**: device fleet, components, message schemas, cloud sinks, downstream analytics.\n2. **Provisioning**: stand up Azure IoT Hub + DPS; choose attestation (X.509 recommended over SAS for fleet).\n3. **Edge runtime**: install IoT Edge on a pilot device; package Greengrass Lambdas as container modules.\n4. **Routing**: replicate stream/route topology with Edge Hub routes and module-to-module messaging.\n5. **Twin parity**: translate shadow JSON → device twin desired/reported sections.\n6. **Cloud side**: replace AWS sinks with IoT Hub built-in endpoints → Event Hubs → Functions / Stream Analytics / ADX.\n7. **Dual-run pilot**: device sends to both clouds during cutover, compare metrics.\n8. **Cutover wave**: roll fleet by region/group; keep AWS as failover for N days.\n9. **Decommission** Greengrass groups; rotate credentials.\n\nWatch out for: timestamp/clock conventions, message size limits, certificate management, and downstream consumer schema changes.",
+    "keyPoints": [
+      "Greengrass Core ↔ IoT Edge runtime",
+      "Lambda components ↔ container modules / Functions on Edge",
+      "Shadow ↔ Device Twin",
+      "DPS for at-scale provisioning, X.509",
+      "Phased migration: inventory → pilot → dual-run → cutover → decommission",
+      "Replace AWS sinks with Event Hubs/ADX"
+    ],
+    "followUps": [
+      "How do you do OTA updates on IoT Edge?",
+      "How would you handle offline buffering during the migration?"
+    ],
+    "redFlags": [
+      "No dual-run / rollback plan",
+      "Treats it as a connection-string swap",
+      "Ignores certificate / provisioning at scale"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Azure IoT Edge overview",
+        "url": "https://learn.microsoft.com/azure/iot-edge/about-iot-edge"
+      },
+      {
+        "title": "Microsoft Learn — Device Provisioning Service",
+        "url": "https://learn.microsoft.com/azure/iot-dps/about-iot-dps"
+      }
+    ],
+    "tags": [
+      "iot",
+      "migration",
+      "edge",
+      "aws"
+    ],
+    "estimatedTimeMin": 15
+  },
+  {
+    "id": "p1-arch-001",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Architecture",
+    "subTopic": "Resilience patterns",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Explain Retry, Circuit Breaker, and Bulkhead. How would you implement them in a .NET service calling a flaky downstream API?",
+    "answer": "- **Retry**: re-attempt a transient failure with backoff and jitter.\n- **Circuit breaker**: after N failures, *stop calling* the downstream for a cool-off period (Open), then probe (Half-Open), then resume (Closed). Prevents hammering an already-failing dependency and cascading failure.\n- **Bulkhead**: isolate concurrent calls per dependency (fixed-size pool/semaphore) so one slow dep doesn't exhaust threads/connections used by others.\n\nIn .NET, use **Microsoft.Extensions.Resilience** / **Polly v8** with `IHttpClientFactory`:\n\n```csharp\nbuilder.Services.AddHttpClient<MyClient>()\n    .AddStandardResilienceHandler(o => {\n        o.Retry.MaxRetryAttempts = 3;\n        o.Retry.UseJitter = true;\n        o.CircuitBreaker.FailureRatio = 0.5;\n        o.CircuitBreaker.MinimumThroughput = 20;\n        o.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);\n        o.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(30);\n        o.AttemptTimeout.Timeout = TimeSpan.FromSeconds(2);\n        o.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);\n    });\n```\n\nBulkhead: `RateLimiter` strategy or a `SemaphoreSlim` around the dependency client. Always tie this to **App Insights / OpenTelemetry** so you can see when the breaker opens.",
+    "keyPoints": [
+      "Retry: backoff + jitter, only for transient",
+      "Circuit breaker prevents cascading failure",
+      "Bulkhead isolates concurrency per dependency",
+      "Polly v8 / AddStandardResilienceHandler in .NET",
+      "Always combine with timeouts and observability"
+    ],
+    "followUps": [
+      "Why is jitter important in retries?",
+      "How do you avoid retry storms across services?"
+    ],
+    "redFlags": [
+      "Retries on non-transient errors (4xx)",
+      "No timeouts",
+      "No observability on the breaker state"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — .NET Resilience library",
+        "url": "https://learn.microsoft.com/dotnet/core/resilience/"
+      }
+    ],
+    "tags": [
+      "resilience",
+      "polly",
+      "patterns"
+    ],
+    "estimatedTimeMin": 9
+  },
+  {
+    "id": "p1-arch-002",
+    "podIds": [
+      "pod1",
+      "pod2"
+    ],
+    "topic": "Architecture",
+    "subTopic": "Messaging",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "When would you use Service Bus vs Event Hubs vs Event Grid in Azure?",
+    "answer": "- **Service Bus**: enterprise messaging — queues + topics/subscriptions, sessions, dead-letter, ordering, transactions, FIFO. Use when you need reliable command/work-queue semantics, ordered processing per session, scheduled messages. Per-message scale is moderate (thousands/sec/topic).\n- **Event Hubs**: high-throughput **event streaming** (millions of events/sec) with partitioned consumers and Kafka protocol. Use for telemetry, IoT, log/click streams, anything analytics-ish where consumers process partitions and track offsets/checkpoints.\n- **Event Grid**: lightweight pub/sub for **discrete events** with push delivery to handlers (Functions, Logic Apps, webhooks) — great for reactive workflows on Azure resource changes (blob created, etc.) and custom topic fan-out. Low cost, near-real-time.\n\nMnemonic: **Commands → Service Bus, Streams → Event Hubs, Reactions → Event Grid**.",
+    "keyPoints": [
+      "Service Bus: enterprise commands, queues/topics, sessions, FIFO",
+      "Event Hubs: massive event stream, partitions, Kafka",
+      "Event Grid: lightweight pub/sub of discrete events, push",
+      "Combine: Event Grid → Function, Service Bus for work, Event Hubs for telemetry",
+      "Different scale and ordering models"
+    ],
+    "followUps": [
+      "What is a partition key and why does it matter for Event Hubs ordering?",
+      "How do you do exactly-once with Service Bus?"
+    ],
+    "redFlags": [
+      "Conflates them",
+      "Picks Service Bus for high-volume telemetry",
+      "Picks Event Hubs for command messages"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Choose between Azure messaging services",
+        "url": "https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services"
+      }
+    ],
+    "tags": [
+      "messaging",
+      "architecture",
+      "azure"
+    ],
+    "estimatedTimeMin": 7
+  },
+  {
+    "id": "p1-arch-003",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Architecture",
+    "subTopic": "Observability",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "scenario",
+    "prompt": "Your APIM → Functions → Cosmos DB chain has intermittent 504s. How do you set up observability to find the bottleneck?",
+    "answer": "**Three pillars**: traces, metrics, logs — correlated end-to-end.\n\n1. **Enable App Insights everywhere**: APIM (`log-to-eventhub` or built-in App Insights), Function app (built-in App Insights), and the SDK clients (Cosmos, HttpClient) auto-instrument with OpenTelemetry / DiagnosticSource.\n2. **Propagate correlation IDs** end to end: APIM `set-header` to forward `Request-Id` / W3C `traceparent`; Functions middleware reads it; SDK clients honor it. Result: one request shows as a single distributed transaction in App Insights.\n3. **Set the right metrics**: APIM duration, Functions execution time, Cosmos RU consumption, dependency call duration, throttling counters (429s).\n4. **Look at the end-to-end transaction view** for a failing request — find the slow segment.\n5. Common 504 culprits: cold start, Cosmos 429s (under-provisioned RUs), downstream timeouts < APIM timeout, network egress saturation. Each shows distinctly in dependency telemetry.\n6. Add **alerts on SLO burn rate** (e.g. > 1% 5xx over 5 min).\n7. Use **availability tests** for synthetic baselines.",
+    "keyPoints": [
+      "App Insights on each tier",
+      "End-to-end correlation via traceparent / Request-Id",
+      "End-to-end transaction view",
+      "Cosmos: watch RU + 429s",
+      "Functions: watch cold start + duration",
+      "Alert on SLO burn rate"
+    ],
+    "followUps": [
+      "What is the W3C trace context standard?",
+      "How would you add OpenTelemetry to a Function app?"
+    ],
+    "redFlags": [
+      "Greps app logs only",
+      "No correlation IDs",
+      "Doesn't mention Cosmos RU throttling"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Distributed tracing with App Insights",
+        "url": "https://learn.microsoft.com/azure/azure-monitor/app/distributed-tracing-telemetry-correlation"
+      }
+    ],
+    "tags": [
+      "observability",
+      "appinsights",
+      "tracing"
+    ],
+    "estimatedTimeMin": 9
+  },
+  {
+    "id": "p1-arch-004",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Architecture",
+    "subTopic": "Secrets management",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "How should an Azure Function fetch a database password without storing secrets in app settings?",
+    "answer": "1. Store the secret in **Azure Key Vault**.\n2. Give the Function app a **managed identity** (system-assigned or user-assigned).\n3. Grant that identity the **Key Vault Secrets User** RBAC role on the vault (data-plane RBAC; avoid legacy access policies for new work).\n4. Either:\n   - **App setting reference**: `@Microsoft.KeyVault(SecretUri=https://kv.vault.azure.net/secrets/dbpw/)` — Functions resolves it at startup, code reads `Environment.GetEnvironmentVariable(\"DbPw\")`.\n   - Or, in code, use `SecretClient` with `DefaultAzureCredential` for runtime fetches with caching.\n5. Even better, eliminate the secret entirely: use **managed identity to authenticate to Azure SQL / Cosmos / Storage** directly (`Authentication=Active Directory Managed Identity`). No password to leak.\n\nNever check secrets into source control or local app settings shared in repos.",
+    "keyPoints": [
+      "Key Vault as secret store",
+      "Managed identity (no client secret)",
+      "Key Vault references in app settings or SDK fetches",
+      "Prefer passwordless auth to Azure data services",
+      "RBAC over legacy access policies"
+    ],
+    "followUps": [
+      "What is the difference between system-assigned and user-assigned MI?",
+      "How do you rotate a secret without downtime?"
+    ],
+    "redFlags": [
+      "Suggests storing the password in app settings as plaintext",
+      "Uses a service principal client secret"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Use Key Vault references in App Service / Functions",
+        "url": "https://learn.microsoft.com/azure/app-service/app-service-key-vault-references"
+      }
+    ],
+    "tags": [
+      "security",
+      "key-vault",
+      "managed-identity"
+    ],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p1-arch-005",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "Architecture",
+    "subTopic": "End-to-end design",
+    "difficulty": "expert",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "Design an end-to-end .NET solution: a public REST API for an online catalog with 10M items, search, low-latency reads, and a back-office for inventory updates. Use Azure.",
+    "answer": "**Goals**: low-latency reads at scale, eventual consistency on writes, search over 10M items, secure back-office, observability, cost-aware.\n\n**Topology**:\n- **Front Door + WAF** for global ingress, TLS termination, caching of static assets.\n- **APIM** (Premium for VNet) as the API gateway with JWT validation, rate-limit, response cache (60s) for catalog reads, OpenAPI portal for partners.\n- **ASP.NET Core API** on **Azure Container Apps** (or Functions Premium). Stateless, autoscale on HTTP + concurrency.\n- **Azure AI Search** as the read/search index over the catalog (faceted search, typeahead). Indexer pulls from the source of truth + change feed.\n- **Cosmos DB** (SQL API) as the system of record. Partition by `categoryId` (or hash for hot-spot avoidance). Provisioned RUs with autoscale.\n- **Azure Cache for Redis** for read-through cache of hot items (top sellers).\n- **Service Bus** for back-office update commands; back-office Function processes, writes Cosmos, emits domain event to **Event Grid**.\n- **Event Grid** triggers an **AI Search indexer** refresh function and invalidates Redis keys.\n- **Back-office** on App Service / Container Apps with AAD auth + RBAC.\n- **Storage** + CDN for product images.\n- **Key Vault** for secrets; **managed identity** everywhere.\n- **Observability**: App Insights end-to-end, Log Analytics workspace, alerts on SLOs.\n- **CI/CD**: GitHub Actions, Bicep IaC, blue/green via Container Apps revisions.\n\n**Trade-offs to discuss**: eventual consistency between Cosmos and AI Search (acceptable for catalog browse); cache stampede protection; cost of search index updates; multi-region (paired regions, Cosmos multi-write or single-write with failover).\n\n**Resilience**: Polly retries + circuit breaker on Cosmos and Search; APIM retry policy for backend transient errors; outbox pattern from API → Service Bus to avoid dual-write inconsistencies.\n\n**Security**: WAF rules, APIM JWT, Cosmos RBAC for app, Defender for Cloud, private endpoints to data services from Container Apps subnet.",
+    "keyPoints": [
+      "Layered: Front Door + APIM + Container Apps/Functions",
+      "AI Search for catalog read/search",
+      "Cosmos DB as source of truth with partitioning",
+      "Redis for hot-item cache",
+      "Service Bus + Event Grid for back-office writes / index refresh",
+      "Outbox pattern, eventual consistency call-out",
+      "MI + Key Vault, App Insights, Bicep IaC",
+      "Multi-region & cost trade-offs discussed"
+    ],
+    "followUps": [
+      "How would you handle a hot partition in Cosmos?",
+      "How do you keep AI Search and Cosmos in sync without dual-write bugs?",
+      "What changes for multi-region active-active?"
+    ],
+    "redFlags": [
+      "Single instance / no scale story",
+      "Dual-writes Cosmos and Search from API directly",
+      "No security or observability",
+      "Picks SQL Server for full-text search over 10M items without justification"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Azure Architecture Center",
+        "url": "https://learn.microsoft.com/azure/architecture/"
+      },
+      {
+        "title": "Microsoft Learn — Outbox pattern",
+        "url": "https://learn.microsoft.com/azure/architecture/databases/guide/transactional-outbox-cosmos"
+      }
+    ],
+    "tags": [
+      "system-design",
+      "architecture",
+      "azure"
+    ],
+    "estimatedTimeMin": 25
+  },
+  {
+    "id": "p1-cs-009",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Records & immutability",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "What are C# `record` types and when would you use one over a `class`?",
+    "answer": "`record` (and `record struct`) is a reference type (or value type) with **value-based equality**, **`with` expressions** for non-destructive mutation, and a concise **positional syntax** that auto-generates a primary constructor + properties + `Deconstruct`.\n\n```csharp\npublic record Address(string Street, string City, string Zip);\nvar a = new Address(\"1 Main\", \"Seattle\", \"98101\");\nvar b = a with { Zip = \"98102\" };\nConsole.WriteLine(a == new Address(\"1 Main\", \"Seattle\", \"98101\")); // True (value equality)\n```\n\nUse records for **DTOs, value objects, immutable domain types, message contracts**. Use a `class` when identity matters more than value, when you need mutable state with controlled invariants, or when you need inheritance hierarchies with reference semantics.\n\n`record struct` for small immutable values to avoid heap allocation.",
+    "keyPoints": [
+      "Value-based equality and ToString",
+      "with expressions for non-destructive copy",
+      "Positional syntax generates ctor + props + Deconstruct",
+      "Great for DTOs / value objects / messages",
+      "record struct for stack-allocated values"
+    ],
+    "followUps": [
+      "How does inheritance work with records?",
+      "When would `record class` vs `record struct` matter for perf?"
+    ],
+    "redFlags": [
+      "Says records are mutable by default",
+      "Doesn't know about value equality"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Records (C# reference)",
+        "url": "https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record"
+      }
+    ],
+    "tags": [
+      "c#",
+      "records",
+      "immutability"
+    ],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-010",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Authentication",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "coding",
+    "prompt": "Show how to wire JWT bearer authentication for Azure AD into an ASP.NET Core 8 Web API and protect a controller with a scope-based policy.",
+    "answer": "```csharp\n// Program.cs\nbuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(\"AzureAd\"));\n\nbuilder.Services.AddAuthorization(options =>\n{\n    options.AddPolicy(\"Catalog.Read\", p =>\n        p.RequireAuthenticatedUser()\n         .RequireClaim(\"scp\", \"Catalog.Read\"));\n});\n\nvar app = builder.Build();\napp.UseAuthentication();\napp.UseAuthorization();\napp.MapControllers();\n\n// CatalogController.cs\n[ApiController]\n[Route(\"items\")]\n[Authorize(Policy = \"Catalog.Read\")]\npublic class CatalogController : ControllerBase { /* ... */ }\n```\n\n`appsettings.json`:\n```json\n\"AzureAd\": {\n  \"Instance\": \"https://login.microsoftonline.com/\",\n  \"TenantId\": \"<tenant>\",\n  \"ClientId\": \"<api-client-id>\",\n  \"Audience\": \"api://<api-client-id>\"\n}\n```\n\nNotes: `Microsoft.Identity.Web` is the recommended package; it handles OpenID config discovery, signing key rotation, and audience validation. Use `RequireRole` for app roles, `RequireClaim(\"scp\", ...)` for delegated scopes, or write a custom `IAuthorizationHandler` for fine-grained policies.",
+    "keyPoints": [
+      "Microsoft.Identity.Web + AddMicrosoftIdentityWebApi",
+      "AzureAd config: TenantId, ClientId, Audience",
+      "Policies: RequireClaim(\"scp\", ...) for scopes; RequireRole for app roles",
+      "UseAuthentication before UseAuthorization",
+      "Custom IAuthorizationHandler for complex rules"
+    ],
+    "followUps": [
+      "Difference between scopes (`scp`) and app roles (`roles`)?",
+      "How do you accept tokens from multiple tenants?"
+    ],
+    "redFlags": [
+      "Manually validates tokens",
+      "Hardcodes audience or tenant",
+      "Missing UseAuthentication"
+    ],
+    "references": [
+      {
+        "title": "Microsoft Learn — Protected web API with Microsoft Identity Web",
+        "url": "https://learn.microsoft.com/entra/identity-platform/scenario-protected-web-api-overview"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "auth",
+      "azure-ad"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-011",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Collections",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "When would you pick `List<T>` vs `Dictionary<TKey,TValue>` vs `HashSet<T>`? What are the Big-O characteristics?",
+    "answer": "**Pick by access pattern:**\n\n| Collection | Lookup | Insert | Order | Use when |\n|---|---|---|---|---|\n| `List<T>` | O(n) | O(1) amortized at end | Insertion order | Iterating, indexed access, small sets |\n| `Dictionary<K,V>` | O(1) avg | O(1) avg | Unordered | Key→value lookup |\n| `HashSet<T>` | O(1) avg | O(1) avg | Unordered | Membership tests, dedup |\n\n```csharp\nvar byId = users.ToDictionary(u => u.Id);   // O(1) lookups by Id\nvar seen  = new HashSet<string>();           // dedup\nif (seen.Add(email)) { /* first time */ }\n```\n\n**Pitfalls:** mutating a `List<T>` while enumerating throws; using a custom key type in a `Dictionary` requires correct `GetHashCode`/`Equals`.",
+    "keyPoints": [
+      "List = ordered, indexed; Dictionary/HashSet = hashed",
+      "Custom key types must override Equals + GetHashCode",
+      "ToDictionary / ToHashSet are common conversions"
+    ],
+    "followUps": [
+      "What if you need ordered key lookups? (SortedDictionary, SortedSet, ImmutableSortedDictionary)",
+      "When would you use ConcurrentDictionary?"
+    ],
+    "redFlags": [
+      "Says lookup is O(1) for List<T>",
+      "Doesn't mention hash code requirement"
+    ],
+    "references": [
+      {
+        "title": "Collections (System.Collections.Generic)",
+        "url": "https://learn.microsoft.com/dotnet/standard/collections/"
+      }
+    ],
+    "tags": [
+      "c#",
+      "collections",
+      "fundamentals"
+    ],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-012",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Exception handling",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "What's the difference between `throw` and `throw ex`? When should you wrap an exception?",
+    "answer": "- `throw;` **rethrows** the original exception preserving the stack trace.\n- `throw ex;` **resets** the stack trace to the rethrow point — you lose the original call site.\n- Wrap (throw a *new* exception with `innerException`) when you want to translate a low-level error into a domain-meaningful one.\n\n```csharp\ntry { return await _db.Orders.FindAsync(id); }\ncatch (SqlException ex)\n{\n    // good: preserve original via inner\n    throw new OrderRepositoryException($\"Failed to load order {id}\", ex);\n}\n```\n\n**Use `catch when` (filters)** to avoid catching what you can't handle:\n\n```csharp\ncatch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)\n```",
+    "keyPoints": [
+      "`throw;` preserves stack; `throw ex;` does not",
+      "Use exception filters (`catch when`) to be selective",
+      "Wrap low-level errors as domain exceptions with InnerException"
+    ],
+    "followUps": [
+      "When should you NOT catch an exception?",
+      "How do you log exceptions without leaking PII?"
+    ],
+    "redFlags": [
+      "Uses `throw ex` everywhere",
+      "Catches base Exception silently"
+    ],
+    "references": [
+      {
+        "title": "Exception handling (C#)",
+        "url": "https://learn.microsoft.com/dotnet/csharp/fundamentals/exceptions/"
+      }
+    ],
+    "tags": [
+      "c#",
+      "exceptions"
+    ],
+    "estimatedTimeMin": 4
+  },
+  {
+    "id": "p1-cs-013",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Generics & constraints",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid"
+    ],
+    "type": "conceptual",
+    "prompt": "Explain generic constraints. Give an example using `where T : class, new()`.",
+    "answer": "Constraints tell the compiler what `T` is allowed to be, enabling extra operations.\n\n| Constraint | Means |\n|---|---|\n| `where T : class` | Reference type |\n| `where T : struct` | Value type (non-nullable) |\n| `where T : new()` | Has parameterless ctor |\n| `where T : IFoo` | Implements interface |\n| `where T : SomeBase` | Inherits from base |\n| `where T : notnull` | Non-nullable |\n| `where T : unmanaged` | Blittable, no refs |\n\n```csharp\npublic T CreateAndInit<T>(Action<T> setup)\n    where T : class, new()\n{\n    var instance = new T();\n    setup(instance);\n    return instance;\n}\n```\n\nWithout `new()`, `new T()` won't compile.",
+    "keyPoints": [
+      "Constraints unlock operations on T",
+      "Multiple constraints separated by commas",
+      "`unmanaged` enables low-level scenarios (Span<T>, P/Invoke)"
+    ],
+    "followUps": [
+      "What is variance (in/out) on generic interfaces?",
+      "Why isn't `List<Derived>` assignable to `List<Base>`?"
+    ],
+    "redFlags": [
+      "Confuses generics with reflection",
+      "Doesn't know `new()` constraint"
+    ],
+    "references": [
+      {
+        "title": "Constraints on type parameters",
+        "url": "https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters"
+      }
+    ],
+    "tags": [
+      "c#",
+      "generics"
+    ],
+    "estimatedTimeMin": 4
+  },
+  {
+    "id": "p1-cs-014",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Nullable reference types",
+    "difficulty": "easy",
+    "experienceBands": [
+      "junior",
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "What are nullable reference types (NRTs)? How do `?`, `!`, and `[NotNull]`/`[MaybeNull]` differ?",
+    "answer": "NRTs (enabled with `<Nullable>enable</Nullable>`) make the compiler track whether a reference can be null.\n\n```csharp\nstring name;        // non-nullable; compiler warns if assigned null\nstring? nickname;   // nullable; must check before deref\n\nvar len = nickname!.Length; // ! = null-forgiving; tells compiler 'trust me'\n```\n\nAttributes for richer flow analysis:\n\n- `[NotNull]` — parameter/return is never null after the call.\n- `[MaybeNull]` — value may be null even if type isn't `T?`.\n- `[NotNullWhen(true)]` — output is non-null when method returns true (e.g. `TryGetValue`).\n\n**Best practice:** treat warnings as errors; avoid `!` except at well-understood boundaries.",
+    "keyPoints": [
+      "`?` declares nullable; `!` suppresses warning",
+      "Attributes encode preconditions/postconditions for nullability",
+      "Enable in csproj; treat NRT warnings as errors"
+    ],
+    "followUps": [
+      "How do you migrate a large solution to NRTs incrementally?",
+      "What does `Nullable=annotations` vs `Nullable=enable` do?"
+    ],
+    "redFlags": [
+      "Sprinkles `!` everywhere",
+      "Disables NRTs because of warnings"
+    ],
+    "references": [
+      {
+        "title": "Nullable reference types",
+        "url": "https://learn.microsoft.com/dotnet/csharp/nullable-references"
+      }
+    ],
+    "tags": [
+      "c#",
+      "nullable",
+      "quality"
+    ],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-015",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Configuration & Options",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "conceptual",
+    "prompt": "Walk through the Options pattern. When do you use `IOptions<T>` vs `IOptionsSnapshot<T>` vs `IOptionsMonitor<T>`?",
+    "answer": "Bind config sections to a strongly-typed POCO and inject it.\n\n```csharp\n// appsettings.json\n// { \"Smtp\": { \"Host\": \"...\", \"Port\": 587 } }\n\nbuilder.Services\n    .AddOptions<SmtpOptions>()\n    .Bind(builder.Configuration.GetSection(\"Smtp\"))\n    .ValidateDataAnnotations()\n    .ValidateOnStart();\n```\n\n| Interface | Lifetime | Reload? |\n|---|---|---|\n| `IOptions<T>` | Singleton | No |\n| `IOptionsSnapshot<T>` | Scoped | Per-request |\n| `IOptionsMonitor<T>` | Singleton | Yes; subscribe to `OnChange` |\n\nUse `IOptionsMonitor` in singletons (background services) that need fresh config; use `IOptionsSnapshot` in request-scoped services; use `IOptions` for static, app-startup config.",
+    "keyPoints": [
+      "Bind once, validate, fail fast with ValidateOnStart",
+      "Snapshot = per-request reload; Monitor = push-based reload",
+      "Avoid `IConfiguration` directly in business code"
+    ],
+    "followUps": [
+      "How do you load secrets without putting them in appsettings?",
+      "How does Azure App Configuration / Key Vault provider integrate?"
+    ],
+    "redFlags": [
+      "Reads from IConfiguration in random places",
+      "Uses IOptions and complains it doesn't reload"
+    ],
+    "references": [
+      {
+        "title": "Options pattern",
+        "url": "https://learn.microsoft.com/aspnet/core/fundamentals/configuration/options"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "configuration",
+      "options"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-016",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "CQRS / MediatR",
+    "difficulty": "medium",
+    "experienceBands": [
+      "mid",
+      "senior"
+    ],
+    "type": "scenario",
+    "prompt": "Your team uses MediatR with CQRS. Why split commands and queries? Where do cross-cutting concerns (logging, validation) live?",
+    "answer": "**Why split:** commands change state and return minimal data; queries are side-effect-free and can be optimized independently (read models, projections, caching). Different scaling, security, and persistence strategies become possible.\n\n```csharp\npublic record CreateOrder(Guid CustomerId, List<OrderLine> Lines) : IRequest<Guid>;\n\npublic class CreateOrderHandler : IRequestHandler<CreateOrder, Guid>\n{\n    public async Task<Guid> Handle(CreateOrder cmd, CancellationToken ct) { /* ... */ }\n}\n```\n\n**Cross-cutting via pipeline behaviors:**\n\n```csharp\npublic class ValidationBehavior<TReq, TRes> : IPipelineBehavior<TReq, TRes>\n{\n    public async Task<TRes> Handle(TReq r, RequestHandlerDelegate<TRes> next, CancellationToken ct)\n    {\n        await _validator.ValidateAndThrowAsync(r, ct);\n        return await next();\n    }\n}\n```\n\nRegister behaviors in order: logging → validation → transaction → handler.",
+    "keyPoints": [
+      "CQRS = separate read/write models, not necessarily separate DBs",
+      "Behaviors give clean cross-cutting (logging, validation, retry, tx)",
+      "Avoid CQRS if your domain is CRUD — it's overkill"
+    ],
+    "followUps": [
+      "When would you NOT use MediatR?",
+      "How do you keep read models eventually consistent?"
+    ],
+    "redFlags": [
+      "Treats CQRS as 'separate databases mandatory'",
+      "Puts validation inside every handler"
+    ],
+    "references": [
+      {
+        "title": "MediatR",
+        "url": "https://github.com/jbogard/MediatR"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "cqrs",
+      "mediatr",
+      "architecture"
+    ],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p1-cs-017",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Async streams",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "coding",
+    "prompt": "Implement an async paged reader of an external API as `IAsyncEnumerable<Order>` with cancellation support.",
+    "answer": "```csharp\npublic async IAsyncEnumerable<Order> ReadOrdersAsync(\n    [EnumeratorCancellation] CancellationToken ct = default)\n{\n    string? cursor = null;\n    do\n    {\n        ct.ThrowIfCancellationRequested();\n        var page = await _http.GetFromJsonAsync<Page<Order>>(\n            $\"/orders?cursor={cursor}\", ct)\n            ?? throw new InvalidOperationException(\"null page\");\n\n        foreach (var o in page.Items)\n            yield return o;\n\n        cursor = page.NextCursor;\n    } while (cursor is not null);\n}\n\n// consumer\nawait foreach (var order in repo.ReadOrdersAsync(ct).WithCancellation(ct))\n{\n    await ProcessAsync(order, ct);\n}\n```\n\n**Why this works:**\n- `[EnumeratorCancellation]` flows the consumer's token into the iterator.\n- `await foreach` pulls one page at a time — bounded memory.\n- Backpressure is natural: the producer waits for the consumer.\n\n**Pitfalls:** wrap network calls with retry/Polly; don't materialize with `.ToListAsync()` on huge streams; close resources via `await using`.",
+    "keyPoints": [
+      "Use [EnumeratorCancellation] to flow tokens into iterators",
+      "yield return inside async iterator — no Task.FromResult needed",
+      "Bounded memory; natural backpressure"
+    ],
+    "followUps": [
+      "How would you parallelize consumption with Channels?",
+      "How do you add retries without breaking streaming?"
+    ],
+    "redFlags": [
+      "Buffers entire result before yielding",
+      "Ignores cancellation token"
+    ],
+    "references": [
+      {
+        "title": "IAsyncEnumerable",
+        "url": "https://learn.microsoft.com/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream"
+      }
+    ],
+    "tags": [
+      "c#",
+      "async",
+      "streaming"
+    ],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-cs-018",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Channels",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "coding",
+    "prompt": "Build a producer/consumer pipeline using `System.Threading.Channels` with bounded capacity and N consumers.",
+    "answer": "```csharp\nvar channel = Channel.CreateBounded<WorkItem>(new BoundedChannelOptions(100)\n{\n    FullMode = BoundedChannelFullMode.Wait,\n    SingleReader = false,\n    SingleWriter = true\n});\n\n// producer\n_ = Task.Run(async () =>\n{\n    foreach (var item in source)\n        await channel.Writer.WriteAsync(item, ct);\n    channel.Writer.Complete();\n});\n\n// N consumers\nvar consumers = Enumerable.Range(0, 8).Select(_ => Task.Run(async () =>\n{\n    await foreach (var item in channel.Reader.ReadAllAsync(ct))\n        await HandleAsync(item, ct);\n}));\n\nawait Task.WhenAll(consumers);\n```\n\n**Why Channels over BlockingCollection / ConcurrentQueue:**\n- Async-first (no blocking threads)\n- Built-in backpressure via `BoundedChannelFullMode.Wait`\n- Clean completion signaling via `Writer.Complete()`\n\nUse for in-process pipelines; use Service Bus / Event Hubs for cross-process.",
+    "keyPoints": [
+      "Bounded channel = backpressure, fixed memory",
+      "Always call Writer.Complete() so readers exit",
+      "Channels are in-process only — not durable"
+    ],
+    "followUps": [
+      "How do you handle a slow consumer without dropping items?",
+      "When would you choose Dataflow (TPL) over Channels?"
+    ],
+    "redFlags": [
+      "Uses unbounded channel for unbounded input",
+      "Forgets Writer.Complete and consumers hang"
+    ],
+    "references": [
+      {
+        "title": "System.Threading.Channels",
+        "url": "https://learn.microsoft.com/dotnet/core/extensions/channels"
+      }
+    ],
+    "tags": [
+      "c#",
+      "concurrency",
+      "channels"
+    ],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-cs-019",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "gRPC",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "conceptual",
+    "prompt": "When would you choose gRPC over REST? What are the four call types and how do they map to scenarios?",
+    "answer": "gRPC = HTTP/2 + Protobuf. Strongly-typed contracts, binary, multiplexed, streaming.\n\n**Pick gRPC when:** internal service-to-service, high throughput / low latency, streaming, polyglot teams sharing a `.proto`. Pick REST/JSON for browser-facing APIs and public partner APIs.\n\n| Call type | Pattern | Example |\n|---|---|---|\n| Unary | req → res | `GetOrder` |\n| Server streaming | req → stream res | Live ticker, log tail |\n| Client streaming | stream req → res | Bulk upload |\n| Bidirectional | stream ↔ stream | Chat, telemetry |\n\n```proto\nservice Orders {\n  rpc GetOrder (OrderId) returns (Order);\n  rpc Watch (OrderId) returns (stream OrderEvent);\n}\n```\n\n**Caveats:** browser support requires gRPC-Web; debugging binary needs tooling (grpcurl, Postman). APIM supports gRPC pass-through but most policies expect HTTP/JSON — often fronted as REST at the edge.",
+    "keyPoints": [
+      "Contract-first via .proto; codegen for clients",
+      "Streaming is first-class",
+      "Use gRPC-Web for browsers; pair with REST gateway for public APIs"
+    ],
+    "followUps": [
+      "How do you do auth / interceptors in gRPC?",
+      "How does gRPC compare with GraphQL?"
+    ],
+    "redFlags": [
+      "Wants gRPC for browser-facing public API",
+      "Doesn't know HTTP/2 requirement"
+    ],
+    "references": [
+      {
+        "title": "gRPC for .NET",
+        "url": "https://learn.microsoft.com/aspnet/core/grpc/"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "grpc"
+    ],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-020",
+    "podIds": [
+      "pod1",
+      "pod2",
+      "pod3"
+    ],
+    "topic": "Architecture",
+    "subTopic": "Multi-tenant SaaS",
+    "difficulty": "expert",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "system-design",
+    "prompt": "Design tenancy for a SaaS app: tenant isolation strategy, identity, data, noisy-neighbor protection, and onboarding/offboarding.",
+    "answer": "**1. Isolation choices** (continuum):\n\n| Model | Isolation | Cost | Use when |\n|---|---|---|---|\n| Pool (shared everything + tenantId) | Logical | Lowest | Many small tenants |\n| Bridge (shared compute, DB-per-tenant) | DB level | Mid | Compliance/data residency |\n| Silo (compute + data per tenant) | Strong | Highest | Enterprise, regulated |\n\nMost SaaS = **pool by default, silo for premium**.\n\n**2. Identity** — Entra External ID (CIAM) or B2C; one tenant = one Entra group/role; emit `tid` claim, validate in middleware:\n\n```csharp\napp.Use(async (ctx, next) =>\n{\n    var tid = ctx.User.FindFirst(\"tid\")?.Value\n        ?? throw new UnauthorizedAccessException();\n    ctx.Items[\"TenantId\"] = tid;\n    await next();\n});\n```\n\n**3. Data** — global filter on every query (`HasQueryFilter(o => o.TenantId == _ctx.Tid)`), defense-in-depth with Row-Level Security in SQL.\n\n**4. Noisy-neighbor** — per-tenant rate limits at APIM (`rate-limit-by-key` on `tid`), Cosmos partition key = tenant, separate Service Bus queues for high-volume tenants.\n\n**5. Onboarding** — IaC pipeline provisions tenant resources (DB schema, blob container, secrets in Key Vault) idempotently; offboarding triggers retention timer + cryptographic shred (delete CMK).\n\n**6. Observability** — every log/metric/trace tagged with `tenant.id` for per-tenant SLIs and chargeback.",
+    "keyPoints": [
+      "Choose isolation per tier, not per company",
+      "Tenant claim → ambient context → automatic data filter + RLS",
+      "Per-tenant quotas at the gateway",
+      "Provisioning via IaC pipeline; offboarding includes crypto shred",
+      "Tag all telemetry with tenantId"
+    ],
+    "followUps": [
+      "How would you migrate a noisy tenant from pool → silo?",
+      "How do you handle a tenant in the EU when most are in the US?",
+      "How do you safely run schema migrations across N tenant DBs?"
+    ],
+    "redFlags": [
+      "Filters by tenantId only in queries, no defense in depth",
+      "Manual onboarding via runbook",
+      "No per-tenant rate limiting"
+    ],
+    "references": [
+      {
+        "title": "SaaS architecture (Azure)",
+        "url": "https://learn.microsoft.com/azure/architecture/guide/saas/"
+      },
+      {
+        "title": "Multitenancy patterns",
+        "url": "https://learn.microsoft.com/azure/architecture/guide/multitenant/overview"
+      }
+    ],
+    "tags": [
+      "architecture",
+      "saas",
+      "multi-tenant"
+    ],
+    "estimatedTimeMin": 30
+  },
+  {
+    "id": "p1-cs-021",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "ASP.NET Core",
+    "subTopic": "Zero-downtime deploys",
+    "difficulty": "expert",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "scenario",
+    "prompt": "Walk through a zero-downtime deployment of an API + breaking DB migration on Azure.",
+    "answer": "**Goal:** ship breaking schema change with no errors and no maintenance window.\n\n**Pattern: expand–migrate–contract**\n\n1. **Expand (V1.1)** — additive only. Add new column nullable, new table, or new index `WITH ONLINE = ON`. Code still reads/writes old shape but starts dual-writing.\n2. **Backfill** — background job (Function or hosted service) populates new column for existing rows in batches with throttling.\n3. **Switch reads (V1.2)** — feature flag flips read path to new column; old path remains as fallback.\n4. **Contract (V2.0)** — once monitored stable for N days, drop old column / old code path.\n\n**Deployment plumbing:**\n- App Service / Container Apps **slot or revision** with traffic split: 0% → 5% → 25% → 100%.\n- Health probes that fail on missing migration so a bad slot never gets traffic.\n- Migrations run **before** swap by a separate idempotent job (`dotnet ef database update` or `DbUp`), not at app startup.\n- Connection draining: `Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature` + graceful shutdown timeout > longest in-flight request.\n\n**Rollback:** since each step is additive and feature-flagged, rollback = flip flag back; never `DROP COLUMN` until contract step.\n\n**Observability:** golden signals dashboard during rollout; auto-rollback on error-rate / latency SLO breach via deployment gate.",
+    "keyPoints": [
+      "Expand → migrate → contract; no breaking change in any single deploy",
+      "Migrations run as a job, not at app startup",
+      "Slot/revision traffic split + health probes + auto-rollback gate",
+      "Feature flags switch behavior independently of deploy"
+    ],
+    "followUps": [
+      "What if the backfill job runs for days and a row is updated mid-flight?",
+      "How do you do this on a multi-region active-active setup?",
+      "How do you handle a failed expand on a 100M-row table?"
+    ],
+    "redFlags": [
+      "Runs migrations in app startup",
+      "Single deploy with breaking schema change",
+      "No traffic-split / canary"
+    ],
+    "references": [
+      {
+        "title": "App Service deployment slots",
+        "url": "https://learn.microsoft.com/azure/app-service/deploy-staging-slots"
+      },
+      {
+        "title": "Container Apps revisions",
+        "url": "https://learn.microsoft.com/azure/container-apps/revisions"
+      }
+    ],
+    "tags": [
+      "aspnetcore",
+      "deployment",
+      "ef-core",
+      "operations"
+    ],
+    "estimatedTimeMin": 25
+  },
+  {
+    "id": "p1-cs-022",
+    "podIds": [
+      "pod1"
+    ],
+    "topic": "C# Language",
+    "subTopic": "Source generators",
+    "difficulty": "hard",
+    "experienceBands": [
+      "senior",
+      "lead"
+    ],
+    "type": "conceptual",
+    "prompt": "What problems do Roslyn source generators solve? Give a real example (e.g. System.Text.Json, LoggerMessage, Regex).",
+    "answer": "Source generators run **at compile time**, inspecting the syntax tree and emitting additional C# code into the compilation. No runtime reflection, no startup cost, AOT-friendly.\n\n**Real wins:**\n\n- **`[JsonSerializable]` (System.Text.Json)** — generates serializers per type; eliminates reflection, ~2× faster, works with Native AOT.\n- **`[LoggerMessage]`** — generates allocation-free, structured logging methods:\n\n```csharp\npublic static partial class Log\n{\n    [LoggerMessage(EventId = 1001, Level = LogLevel.Warning,\n        Message = \"Order {OrderId} failed after {Attempts} attempts\")]\n    public static partial void OrderFailed(ILogger logger, Guid orderId, int attempts);\n}\n```\n\n- **`[GeneratedRegex]`** — compiled regex without `RegexOptions.Compiled` startup cost.\n\n**Trade-offs:** harder to debug (use `EmitCompilerGeneratedFiles`), longer build times if abused, IDE tooling can lag.",
+    "keyPoints": [
+      "Compile-time codegen — no reflection, AOT-safe",
+      "JsonSerializable, LoggerMessage, GeneratedRegex are first-party examples",
+      "Inspect generated files via EmitCompilerGeneratedFiles"
+    ],
+    "followUps": [
+      "What's the difference between an analyzer and a source generator?",
+      "When would you write your own source generator?"
+    ],
+    "redFlags": [
+      "Confuses with T4 or Fody",
+      "Doesn't know AOT implications"
+    ],
+    "references": [
+      {
+        "title": "Source generators overview",
+        "url": "https://learn.microsoft.com/dotnet/csharp/roslyn-sdk/source-generators-overview"
+      }
+    ],
+    "tags": [
+      "c#",
+      "performance",
+      "aot"
+    ],
+    "estimatedTimeMin": 8
+  }
+]

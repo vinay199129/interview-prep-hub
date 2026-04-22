@@ -1,0 +1,53 @@
+[
+  {
+    "id": "pod1",
+    "name": "POD 1 — .NET / C# + Azure Integration",
+    "shortName": "POD 1 (.NET)",
+    "description": "Full-stack .NET engineering on Azure: building APIs and integrations with C#, APIM, Functions and Logic Apps, with Angular/React on the front end and GitHub Copilot for productivity. Bonus depth in AKS containerization and AWS Greengrass → Azure IoT migration.",
+    "mustHave": [
+      ".NET / C#",
+      "Azure API Management (APIM)",
+      "Azure Functions",
+      "Azure Logic Apps",
+      "Angular or ReactJS",
+      "GitHub Copilot (GHCP)"
+    ],
+    "goodToHave": [
+      "Containerization on AKS",
+      "AWS Greengrass to Azure IoT Migration"
+    ],
+    "accent": "blue"
+  },
+  {
+    "id": "pod2",
+    "name": "POD 2 — Java + Azure Integration",
+    "shortName": "POD 2 (Java)",
+    "description": "Java/Spring engineers building enterprise integrations on Azure with APIM, Functions and Logic Apps, plus modern web UIs in Angular/React. GitHub Copilot is part of the daily workflow. Bonus depth in AWS-to-Azure migration patterns.",
+    "mustHave": [
+      "Java",
+      "Azure API Management (APIM)",
+      "Azure Functions",
+      "Azure Logic Apps",
+      "Angular or ReactJS",
+      "GitHub Copilot (GHCP)"
+    ],
+    "goodToHave": ["Migration from AWS to Azure"],
+    "accent": "amber"
+  },
+  {
+    "id": "pod3",
+    "name": "POD 3 — Python + Azure AI",
+    "shortName": "POD 3 (Python + AI)",
+    "description": "Python engineers building AI-powered applications on Azure: Functions and APIM for the platform, AI Search for retrieval, Document Intelligence for extraction, and RAG patterns for grounded LLM responses.",
+    "mustHave": [
+      "Python",
+      "Azure API Management (APIM)",
+      "Azure Functions",
+      "Azure AI Search (Cognitive Search)",
+      "Document Intelligence (basics)",
+      "Retrieval-Augmented Generation (RAG)"
+    ],
+    "goodToHave": [],
+    "accent": "emerald"
+  }
+]

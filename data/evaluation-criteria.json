@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Technical Skills Match",
+    "description": "At least 80% match on the POD's Must-Have skills is mandatory. Note coverage gaps explicitly."
+  },
+  {
+    "id": 2,
+    "title": "Coding Skills",
+    "description": "Demonstrates clean, idiomatic, working code; understands data structures, complexity, and language idioms."
+  },
+  {
+    "id": 3,
+    "title": "System Architecture",
+    "description": "Designs sensible end-to-end systems with clear component boundaries, data flow, scaling, and trade-offs."
+  },
+  {
+    "id": 4,
+    "title": "AI Awareness",
+    "description": "Understands modern AI/ML concepts relevant to delivery: prompts, RAG, embeddings, evaluation, responsible-AI considerations."
+  },
+  {
+    "id": 5,
+    "title": "Debugging & Troubleshooting Mindset",
+    "description": "Forms hypotheses, isolates variables, uses logs/telemetry, and reasons through failure modes."
+  },
+  {
+    "id": 6,
+    "title": "Logical Thinking & Learning Ability",
+    "description": "Breaks problems down, reasons from first principles, picks up new concepts quickly during the conversation."
+  },
+  {
+    "id": 7,
+    "title": "Communication & Clarity of Thought",
+    "description": "Explains ideas crisply, structures answers, listens and adapts to questions."
+  },
+  {
+    "id": 8,
+    "title": "Seeks Clarity Before Solutioning",
+    "description": "Asks clarifying questions, validates assumptions, and confirms scope before jumping to a solution."
+  },
+  {
+    "id": 9,
+    "title": "Ownership & Responsibility",
+    "description": "Demonstrates accountability for outcomes, follow-through, and care for users/team."
+  }
+]

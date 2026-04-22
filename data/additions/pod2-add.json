@@ -1,0 +1,498 @@
+[
+  {
+    "id": "p2-java-004",
+    "podIds": ["pod2"],
+    "topic": "Java Language",
+    "subTopic": "equals & hashCode",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "What's the contract between `equals()` and `hashCode()`? What breaks if you violate it?",
+    "answer": "Contract:\n\n1. If `a.equals(b)` then `a.hashCode() == b.hashCode()`.\n2. `hashCode()` must be consistent within a JVM run.\n3. `equals` is reflexive, symmetric, transitive, consistent, and `null`-safe.\n\nViolation symptoms:\n- Object goes into a `HashMap` and **can't be found** because it lands in a different bucket on lookup.\n- `HashSet` allows duplicates.\n- Test passes locally, fails after a refactor that changes one method but not the other.\n\n```java\n@Override public boolean equals(Object o) {\n    if (this == o) return true;\n    if (!(o instanceof Order other)) return false;\n    return id.equals(other.id);\n}\n@Override public int hashCode() { return Objects.hash(id); }\n```\n\nPrefer `record` (Java 16+) — equals/hashCode/toString are auto-generated correctly.",
+    "keyPoints": [
+      "Always override both together",
+      "Use the same fields in both",
+      "Records solve this for value classes"
+    ],
+    "followUps": [
+      "How does this affect HashMap performance?",
+      "Why are records final?"
+    ],
+    "redFlags": [
+      "Overrides only equals",
+      "Uses mutable fields in equals"
+    ],
+    "references": [
+      { "title": "Object.equals contract", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" }
+    ],
+    "tags": ["java", "fundamentals"],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p2-java-005",
+    "podIds": ["pod2"],
+    "topic": "Java Language",
+    "subTopic": "Optional",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "When should you use `Optional<T>`? What are common anti-patterns?",
+    "answer": "**Use `Optional` for return types** that might legitimately have no value:\n\n```java\npublic Optional<User> findById(UUID id) { ... }\n\nfindById(id)\n    .map(User::email)\n    .ifPresentOrElse(this::send, () -> log.warn(\"missing\"));\n```\n\n**Anti-patterns:**\n- `Optional` as a **field** (not Serializable, wastes memory).\n- `Optional` as a **method parameter** — just overload or accept null with `@Nullable`.\n- Calling `.get()` without `.isPresent()` — defeats the purpose; use `.orElseThrow(...)`.\n- Wrapping a known-non-null: `Optional.of(value).get()`.\n\nPrefer `orElse`, `orElseGet`, `orElseThrow`, `map`, `flatMap`.",
+    "keyPoints": [
+      "Return type only — not fields, not parameters",
+      "Never blind .get(); use orElseThrow",
+      "Use orElseGet for expensive defaults (lazy)"
+    ],
+    "followUps": [
+      "When is `orElse` vs `orElseGet` important?",
+      "How does `Optional` interact with primitive types?"
+    ],
+    "redFlags": [
+      "Uses Optional as a method parameter",
+      "Always calls .get()"
+    ],
+    "references": [
+      { "title": "Optional (Java SE)", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" }
+    ],
+    "tags": ["java", "fundamentals"],
+    "estimatedTimeMin": 4
+  },
+  {
+    "id": "p2-java-006",
+    "podIds": ["pod2"],
+    "topic": "Java Language",
+    "subTopic": "Records",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "What is a Java `record`? When would you use one vs a regular class or Lombok `@Data`?",
+    "answer": "A `record` (Java 16+) is a transparent carrier for immutable data. The compiler generates the canonical constructor, accessors, `equals`, `hashCode`, and `toString`.\n\n```java\npublic record Money(BigDecimal amount, Currency currency) {\n    public Money {\n        Objects.requireNonNull(amount);\n        Objects.requireNonNull(currency);\n    }\n}\n```\n\n**Use a record when:** the type's identity = its data (DTOs, value objects, command/query payloads, query projections).\n\n**Don't use when:** you need mutability, inheritance, or JPA entities (records can't have no-arg constructor + setters that JPA needs).\n\n**vs Lombok:** records are language-level, no annotation processor, no IDE plugin needed, and final by design.",
+    "keyPoints": [
+      "Immutable, final, no inheritance",
+      "Auto equals/hashCode/toString",
+      "Compact constructor for validation/normalization",
+      "Not for JPA entities"
+    ],
+    "followUps": [
+      "Can a record implement an interface?",
+      "How do you use records with Jackson?"
+    ],
+    "redFlags": [
+      "Tries to extend a record",
+      "Uses records as JPA entities"
+    ],
+    "references": [
+      { "title": "Records (JEP 395)", "url": "https://openjdk.org/jeps/395" }
+    ],
+    "tags": ["java", "records"],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p2-spring-006",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Profiles & config",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "How do Spring profiles work? How would you configure dev/test/prod for an app deployed to Azure App Service?",
+    "answer": "A profile is a named environment. Beans/properties activate based on the active profile.\n\n```yaml\n# application.yml\nspring:\n  config:\n    activate:\n      on-profile: dev\nlogging:\n  level: { root: DEBUG }\n---\nspring:\n  config:\n    activate:\n      on-profile: prod\nlogging:\n  level: { root: INFO }\n```\n\nSet active profile via env var: `SPRING_PROFILES_ACTIVE=prod`.\n\nOn Azure App Service:\n- Set `SPRING_PROFILES_ACTIVE` in **App Settings** (per slot).\n- Pull secrets from **Key Vault** via `azure-spring-cloud-starter-keyvault-secrets`, not from properties files.\n- Bind to managed identity for Key Vault & DB; never check connection strings into git.\n\n**Conditional beans:** `@Profile(\"!test\")` excludes a bean from test runs.",
+    "keyPoints": [
+      "SPRING_PROFILES_ACTIVE selects profile",
+      "App Settings per slot for env-specific values",
+      "Secrets via Key Vault + managed identity",
+      "@Profile annotates conditional beans"
+    ],
+    "followUps": [
+      "How would you do blue/green with deployment slots?",
+      "How do you keep dev DB schema in sync with prod?"
+    ],
+    "redFlags": [
+      "Stores connection strings in application.yml",
+      "Reuses dev secrets in prod"
+    ],
+    "references": [
+      { "title": "Spring profiles", "url": "https://docs.spring.io/spring-boot/reference/features/profiles.html" },
+      { "title": "Key Vault Spring starter", "url": "https://learn.microsoft.com/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault" }
+    ],
+    "tags": ["spring", "config", "azure"],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p2-spring-007",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Spring Data JPA",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "Explain `@Transactional` in Spring. What's the default propagation and isolation? Common pitfalls?",
+    "answer": "`@Transactional` wraps a method in a DB transaction (open → commit, or rollback on unchecked exception by default).\n\nDefaults:\n- Propagation = `REQUIRED` (join existing or start new).\n- Isolation = the DB default (READ_COMMITTED on most).\n- Rollback only on `RuntimeException` / `Error` — **not** checked exceptions unless you set `rollbackFor`.\n\n```java\n@Transactional(rollbackFor = Exception.class)\npublic Order place(OrderRequest req) { ... }\n```\n\n**Pitfalls:**\n1. **Self-invocation** — calling `this.method()` inside the same class bypasses the proxy → no transaction. Inject the bean via `ApplicationContext` or refactor.\n2. **`@Transactional` on a `private` method** — proxies don't see private methods. Make it package-private or public.\n3. **Long transactions** holding DB connections. Keep them short; do I/O outside.\n4. **N+1** — pair with proper fetch joins, not just `@Transactional`.",
+    "keyPoints": [
+      "Default = REQUIRED, rollback only on RuntimeException",
+      "Self-invocation bypasses proxy",
+      "Must be on public method",
+      "Keep transactions short"
+    ],
+    "followUps": [
+      "When would you use REQUIRES_NEW?",
+      "How do you handle distributed transactions?"
+    ],
+    "redFlags": [
+      "Puts @Transactional on private methods",
+      "Calls long external HTTP inside a tx"
+    ],
+    "references": [
+      { "title": "Spring transactions", "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction.html" }
+    ],
+    "tags": ["spring", "jpa", "transactions"],
+    "estimatedTimeMin": 6
+  },
+  {
+    "id": "p2-spring-008",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "REST best practices",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "What does a well-designed Spring REST controller look like? Discuss DTOs, validation, and exception handling.",
+    "answer": "```java\n@RestController\n@RequestMapping(\"/api/orders\")\n@Validated\npublic class OrderController {\n    private final OrderService service;\n\n    @PostMapping\n    public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest req) {\n        var order = service.create(req);\n        return ResponseEntity.created(URI.create(\"/api/orders/\" + order.id()))\n                             .body(OrderResponse.from(order));\n    }\n}\n```\n\n**Principles:**\n- Never expose JPA entities directly — use DTOs (`record` is perfect).\n- `@Valid` triggers Bean Validation (Jakarta `@NotBlank`, `@Email`, ...).\n- Return correct HTTP codes: 201 + `Location`, 400 for validation, 404 for missing, 409 for conflicts.\n- Centralize errors with `@RestControllerAdvice`:\n\n```java\n@RestControllerAdvice\npublic class GlobalExceptionHandler {\n    @ExceptionHandler(MethodArgumentNotValidException.class)\n    public ProblemDetail badRequest(MethodArgumentNotValidException ex) {\n        var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);\n        pd.setDetail(ex.getBindingResult().getFieldErrors().stream()\n            .map(f -> f.getField() + \": \" + f.getDefaultMessage())\n            .collect(Collectors.joining(\"; \")));\n        return pd;\n    }\n}\n```\n\nUse RFC 7807 `ProblemDetail` for consistent error bodies.",
+    "keyPoints": [
+      "DTOs in/out — never entities",
+      "@Valid + Bean Validation",
+      "ProblemDetail for RFC-7807 errors",
+      "Use proper HTTP status codes"
+    ],
+    "followUps": [
+      "How do you version a REST API in Spring?",
+      "What's wrong with returning entities directly?"
+    ],
+    "redFlags": [
+      "Returns JPA entity (lazy-loading exceptions, leaks schema)",
+      "Catches Exception and returns 200"
+    ],
+    "references": [
+      { "title": "Spring Web MVC", "url": "https://docs.spring.io/spring-framework/reference/web/webmvc.html" }
+    ],
+    "tags": ["spring", "rest", "validation"],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p2-spring-009",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Spring Security",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "conceptual",
+    "prompt": "Configure Spring Security to validate JWTs issued by Microsoft Entra ID. What does the filter chain look like?",
+    "answer": "```java\n@Configuration\n@EnableMethodSecurity\npublic class SecurityConfig {\n    @Bean\n    SecurityFilterChain api(HttpSecurity http) throws Exception {\n        return http\n            .csrf(c -> c.disable())\n            .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))\n            .authorizeHttpRequests(a -> a\n                .requestMatchers(\"/actuator/health\").permitAll()\n                .anyRequest().authenticated())\n            .oauth2ResourceServer(o -> o.jwt(j -> j\n                .jwtAuthenticationConverter(rolesConverter())))\n            .build();\n    }\n}\n```\n\n```yaml\nspring:\n  security:\n    oauth2:\n      resourceserver:\n        jwt:\n          issuer-uri: https://login.microsoftonline.com/<tenant-id>/v2.0\n          audiences: api://<api-app-id>\n```\n\n**What happens per request:**\n1. `BearerTokenAuthenticationFilter` extracts the JWT from `Authorization: Bearer …`.\n2. Public keys are fetched from the Entra OIDC discovery doc (cached).\n3. Signature, `iss`, `exp`, `aud` are validated.\n4. Claims become a `JwtAuthenticationToken`; you map `roles`/`scp` to `GrantedAuthority` via a converter.\n5. `@PreAuthorize(\"hasAuthority('SCOPE_orders.write')\")` enforces method-level rules.\n\nFront with APIM for rate-limit, CORS, IP filter; let Spring do final auth.",
+    "keyPoints": [
+      "Stateless, JWT bearer at resource server",
+      "issuer-uri + audiences = automatic JWKS validation",
+      "Converter maps Entra roles/scopes → GrantedAuthority",
+      "APIM front-line; Spring final word"
+    ],
+    "followUps": [
+      "How do you support multiple tenants (multi-tenant Entra)?",
+      "What happens when the token expires mid-request?"
+    ],
+    "redFlags": [
+      "Disables JWT signature validation",
+      "Hardcodes signing key"
+    ],
+    "references": [
+      { "title": "Spring OAuth2 Resource Server", "url": "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html" }
+    ],
+    "tags": ["spring", "security", "entra"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-010",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Caching",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "scenario",
+    "prompt": "A Spring service is slow due to repeated DB calls. Walk through adding caching with Spring Cache + Azure Cache for Redis. Pitfalls?",
+    "answer": "```java\n@EnableCaching\n@SpringBootApplication\nclass App {}\n\n@Service\nclass CatalogService {\n    @Cacheable(cacheNames = \"products\", key = \"#sku\")\n    public Product byId(String sku) { return repo.findBySku(sku); }\n\n    @CacheEvict(cacheNames = \"products\", key = \"#p.sku\")\n    public Product save(Product p) { return repo.save(p); }\n}\n```\n\n```yaml\nspring:\n  cache:\n    type: redis\n  data:\n    redis:\n      host: <name>.redis.cache.windows.net\n      port: 6380\n      ssl:\n        enabled: true\n```\n\nUse Microsoft Entra auth (no SAS keys) and a `RedisCacheConfiguration` with TTL + JSON serializer.\n\n**Pitfalls:**\n- **Stampede** on cold cache → use `@Cacheable(sync = true)` or external lock.\n- **Stale data** → set sensible TTL + invalidate on writes (`@CacheEvict`).\n- **Cache penetration** (lookup for non-existent keys) → cache negative results briefly.\n- **Big-key / hot-key** → don't cache 1MB blobs; partition.\n- **Serialization** — JDK serializer breaks across versions; use JSON (`Jackson2JsonRedisSerializer`).\n- **Test isolation** — caches survive across tests; use `@DirtiesContext` or clear in `@AfterEach`.",
+    "keyPoints": [
+      "Spring Cache abstraction; Redis as provider",
+      "TTL + invalidation strategy is mandatory",
+      "Avoid stampede with sync = true or distributed lock",
+      "Use JSON serializer, not JDK",
+      "Auth via Entra, TLS only"
+    ],
+    "followUps": [
+      "How would you cache results of a paginated query?",
+      "How do you measure cache hit ratio?"
+    ],
+    "redFlags": [
+      "Uses default JDK serializer in Redis",
+      "Caches per-user data with shared key"
+    ],
+    "references": [
+      { "title": "Spring Cache", "url": "https://docs.spring.io/spring-framework/reference/integration/cache.html" },
+      { "title": "Azure Cache for Redis", "url": "https://learn.microsoft.com/azure/azure-cache-for-redis/" }
+    ],
+    "tags": ["spring", "cache", "redis", "azure"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-011",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Observability",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "conceptual",
+    "prompt": "How do you instrument a Spring Boot 3 app with metrics, logs, and traces sent to Azure Monitor / Application Insights?",
+    "answer": "Spring Boot 3 = **Micrometer** for metrics + tracing, **SLF4J/Logback** for logs.\n\n```xml\n<dependency>\n  <groupId>com.azure.monitor</groupId>\n  <artifactId>applicationinsights-runtime-attach</artifactId>\n</dependency>\n```\n\nOr (preferred for AKS / VM): attach the **Application Insights Java agent** as `-javaagent:applicationinsights-agent-3.x.jar`. The agent auto-instruments Spring MVC, JDBC, Kafka, HTTP clients, and Logback — zero code changes.\n\nApp settings:\n```yaml\nmanagement:\n  endpoints:\n    web:\n      exposure:\n        include: health,info,prometheus,metrics\n  metrics:\n    tags: { app: orders, env: ${ENV} }\n  tracing:\n    sampling:\n      probability: 1.0   # tune in prod\n```\n\n**Three pillars:**\n- **Metrics** → Micrometer → Azure Monitor (also Prometheus scrape from `/actuator/prometheus`).\n- **Logs** → Logback JSON layout → captured by AI agent → Log Analytics. Always include `traceId`/`spanId` in MDC.\n- **Traces** → Micrometer Tracing (Brave or OTel) → AI exporter; enables end-to-end across APIM → Spring → DB.\n\nDefine **SLOs** and dashboards on RED/USE metrics; alert on burn rate, not raw thresholds.",
+    "keyPoints": [
+      "AI Java agent = drop-in instrumentation",
+      "Micrometer for metrics + tracing",
+      "Always correlate logs to traceId/spanId",
+      "Dashboards on RED/USE; alert on SLO burn"
+    ],
+    "followUps": [
+      "How do you sample without losing rare-error traces?",
+      "How do you correlate a request from APIM through Spring to SQL?"
+    ],
+    "redFlags": [
+      "Logs as plain text, no correlation",
+      "Doesn't sample in prod and gets billed"
+    ],
+    "references": [
+      { "title": "App Insights Java agent", "url": "https://learn.microsoft.com/azure/azure-monitor/app/java-in-process-agent" },
+      { "title": "Spring Boot observability", "url": "https://docs.spring.io/spring-boot/reference/actuator/observability.html" }
+    ],
+    "tags": ["spring", "observability", "azure-monitor"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-012",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Resilience4j",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "scenario",
+    "prompt": "How would you protect a Spring service that calls a flaky downstream API? Implement retry, circuit breaker, and bulkhead with Resilience4j.",
+    "answer": "```yaml\nresilience4j:\n  retry:\n    instances:\n      pricing:\n        max-attempts: 3\n        wait-duration: 200ms\n        exponential-backoff-multiplier: 2\n        retry-exceptions: [java.io.IOException]\n  circuitbreaker:\n    instances:\n      pricing:\n        failure-rate-threshold: 50\n        sliding-window-size: 20\n        wait-duration-in-open-state: 30s\n  bulkhead:\n    instances:\n      pricing:\n        max-concurrent-calls: 10\n```\n\n```java\n@Retry(name = \"pricing\")\n@CircuitBreaker(name = \"pricing\", fallbackMethod = \"fallback\")\n@Bulkhead(name = \"pricing\")\npublic Money getPrice(String sku) { return client.fetch(sku); }\n\nMoney fallback(String sku, Throwable ex) {\n    return cache.lastKnown(sku).orElse(Money.unavailable());\n}\n```\n\n**Order matters:** retry → circuit breaker → bulkhead → time limiter. Use idempotent retries only (`POST` usually not).\n\n**Operationalize:** export Resilience4j metrics to Micrometer, dashboard the open/half-open transitions, alert on sustained `OPEN` state. Don't retry inside a circuit-breaker fallback (loops).",
+    "keyPoints": [
+      "Retry only idempotent calls",
+      "Circuit breaker stops cascading failures",
+      "Bulkhead caps concurrency",
+      "Always provide a fallback",
+      "Export metrics — observe state transitions"
+    ],
+    "followUps": [
+      "When would you NOT retry?",
+      "How does this differ from retry at the gateway (APIM)?"
+    ],
+    "redFlags": [
+      "Retries non-idempotent POSTs blindly",
+      "No timeouts on the underlying call"
+    ],
+    "references": [
+      { "title": "Resilience4j Spring Boot 3", "url": "https://resilience4j.readme.io/docs/getting-started-3" }
+    ],
+    "tags": ["spring", "resilience", "patterns"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-013",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Kafka / messaging",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "conceptual",
+    "prompt": "Compare Spring Cloud Stream with Kafka vs Azure Service Bus. When would you pick each, and what code changes?",
+    "answer": "Spring Cloud Stream gives a binder abstraction so the *handler* code stays the same; only properties change.\n\n```java\n@Bean\npublic Consumer<OrderPlaced> orderConsumer() {\n    return evt -> service.handle(evt);\n}\n```\n\nKafka properties:\n```yaml\nspring.cloud.stream.bindings.orderConsumer-in-0.destination: orders\nspring.cloud.stream.kafka.binder.brokers: <eventhubs-namespace>.servicebus.windows.net:9093\n```\n\nService Bus properties:\n```yaml\nspring.cloud.stream.bindings.orderConsumer-in-0.destination: orders\nspring.cloud.azure.servicebus.namespace: <ns>\n```\n\n**Pick Kafka / Event Hubs** for: high throughput, replay (offset), stream processing, log compaction, ordering per partition.\n\n**Pick Service Bus** for: enterprise messaging, topics + filters, dead-letter, sessions (FIFO per session), scheduled messages, transactions across queue + DB, low-volume reliability.\n\n**Concerns to address either way:** at-least-once delivery, idempotency, poison-message handling (DLQ), backpressure (prefetch tuning), schema evolution (Avro/JSON Schema registry).",
+    "keyPoints": [
+      "Spring Cloud Stream = binder abstraction",
+      "Event Hubs speaks Kafka protocol",
+      "Service Bus = enterprise features (sessions, DLQ, scheduling)",
+      "Idempotency + DLQ are mandatory regardless"
+    ],
+    "followUps": [
+      "How do you achieve exactly-once with Service Bus?",
+      "How do you upgrade an event schema safely?"
+    ],
+    "redFlags": [
+      "Assumes 'at least once' = 'exactly once'",
+      "No DLQ strategy"
+    ],
+    "references": [
+      { "title": "Spring Cloud Stream", "url": "https://docs.spring.io/spring-cloud-stream/reference/index.html" },
+      { "title": "Service Bus vs Event Hubs", "url": "https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services" }
+    ],
+    "tags": ["spring", "messaging", "kafka", "service-bus"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-014",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Native image / GraalVM",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "conceptual",
+    "prompt": "Why would you compile a Spring Boot app to a GraalVM native image? What constraints does it impose?",
+    "answer": "**Why:** sub-100ms startup, ~50–80% smaller memory, perfect for Azure Functions / Container Apps / serverless where cold starts matter.\n\n**How:** `spring-boot-starter-parent` 3.x + native build tools.\n\n```bash\n./mvnw -Pnative native:compile\n```\n\n**Constraints:**\n- **Closed-world assumption** — no dynamic class loading at runtime. Reflection, dynamic proxies, JNI must be **registered at build time** via hints (Spring AOT does most of this for you).\n- **No live class redefinition** (Spring DevTools doesn't apply).\n- **Build is slow** (minutes) and memory-hungry; use a CI runner with enough RAM.\n- **Some libraries lack hints** — test extensively; use `RuntimeHintsRegistrar` to add your own.\n\n**Trade-off:** giving up runtime flexibility (reflection-heavy frameworks like older Hibernate, scripting) for startup + memory wins. Not every app benefits — long-running monoliths see little gain.\n\nAlternative when AOT is too painful: **CRaC (Coordinated Restore at Checkpoint)** — checkpoint a warm JVM and restore in <100ms.",
+    "keyPoints": [
+      "Sub-100ms start, ~50% less memory",
+      "Closed world: reflection requires hints",
+      "Best for serverless/short-lived workloads",
+      "CRaC is an alternative if AOT is too restrictive"
+    ],
+    "followUps": [
+      "How do you debug a missing reflection hint?",
+      "When would CRaC beat native image?"
+    ],
+    "redFlags": [
+      "Tries to AOT-compile a heavily reflection-based codebase without testing",
+      "Doesn't measure cold-start gains"
+    ],
+    "references": [
+      { "title": "Spring Boot native", "url": "https://docs.spring.io/spring-boot/reference/packaging/native-image/index.html" }
+    ],
+    "tags": ["spring", "graalvm", "native"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p2-spring-015",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Performance tuning",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "scenario",
+    "prompt": "A Spring Boot REST API has p99 latency of 800ms. Walk through your investigation and tuning approach.",
+    "answer": "**1. Reproduce + measure.** Define what 'slow' means. Enable APM (App Insights agent). Capture RED metrics: rate, errors, duration. Find the slowest endpoint(s) and the slowest dependencies.\n\n**2. Form hypotheses.** Common offenders, in order of likelihood:\n\n| Layer | Symptom | Tool |\n|---|---|---|\n| DB | High `db.duration` per request | App Insights dependencies, slow query log |\n| HTTP downstream | External call > 200ms | dependency telemetry, Wireshark |\n| GC | Pause spikes | JFR, `-Xlog:gc*` |\n| Thread pool | Tomcat queue grows, p99 climbs | metrics `tomcat.threads.busy` |\n| Serialization | Big payloads, Jackson hot | flame graph |\n| N+1 | DB calls per request explodes | Hibernate stats, SQL log |\n\n**3. Profile.** Use **async-profiler** (CPU + alloc flame graphs) or **JFR** in production. AKS sidecar or `jcmd JFR.start` is cheap (<2% overhead).\n\n**4. Fix in priority order.**\n- Add missing DB indexes; rewrite N+1 with `@EntityGraph` or projections.\n- Connection pool: HikariCP `maximum-pool-size` ≈ `(cores * 2)` per replica, not 100.\n- HTTP client: pool, timeouts, gzip.\n- Cache hot reads in Redis with sane TTL.\n- Async non-critical work (event-driven via Service Bus).\n- Tune Tomcat / Undertow worker threads.\n- Choose G1 / ZGC; size heap = 50–70% of container memory; set `-XX:+UseContainerSupport`.\n\n**5. Re-measure** — close the loop. p99 isn't fixed until you can prove it with a load test that mirrors prod.\n\n**6. Prevent regression** — add SLO + alert; add a perf gate in CI (e.g., k6 smoke).",
+    "keyPoints": [
+      "Measure first; never tune blind",
+      "Most p99 issues are DB or downstream, not JVM",
+      "async-profiler / JFR in prod is safe",
+      "Right-size pools — don't max them",
+      "Add SLO + perf gate to prevent regression"
+    ],
+    "followUps": [
+      "How do you tune connection pool size?",
+      "Why is p99 a better SLI than average?",
+      "How do you do load tests representative of prod?"
+    ],
+    "redFlags": [
+      "Increases thread pool size as first action",
+      "Tunes JVM flags without profiling",
+      "Has no idea what RED/USE metrics are"
+    ],
+    "references": [
+      { "title": "Spring Boot performance", "url": "https://spring.io/blog/2018/12/12/how-fast-is-spring" },
+      { "title": "async-profiler", "url": "https://github.com/async-profiler/async-profiler" }
+    ],
+    "tags": ["spring", "performance", "jvm"],
+    "estimatedTimeMin": 20
+  },
+  {
+    "id": "p2-spring-016",
+    "podIds": ["pod2"],
+    "topic": "Spring Boot",
+    "subTopic": "Reactive concurrency",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "conceptual",
+    "prompt": "In Project Reactor, what's the difference between `subscribeOn`, `publishOn`, and `boundedElastic` vs `parallel` schedulers?",
+    "answer": "- `subscribeOn(scheduler)` — controls **where the source emits** (the upstream). Affects subscription side-effect (e.g., the blocking call that produces the data).\n- `publishOn(scheduler)` — controls **where downstream operators run** from that point on. You can switch threads multiple times.\n\n```java\nflux.subscribeOn(Schedulers.boundedElastic())  // source runs on elastic\n    .map(this::cpuWork)\n    .publishOn(Schedulers.parallel())          // map onward = parallel\n    .doOnNext(this::nonBlockingIo);\n```\n\n**Schedulers:**\n\n| Scheduler | Purpose |\n|---|---|\n| `parallel()` | CPU-bound, fixed pool = #cores |\n| `boundedElastic()` | Wraps blocking I/O (JDBC, file, legacy clients); bounded queue |\n| `single()` | Single shared thread |\n| `immediate()` | Run on the calling thread |\n\n**Rule of thumb:** never block on `parallel()` — you'll starve all reactor threads. Wrap blocking calls with `subscribeOn(boundedElastic())`. Better: use a non-blocking driver (R2DBC, reactive HTTP).",
+    "keyPoints": [
+      "subscribeOn = upstream; publishOn = downstream",
+      "Never block on parallel scheduler",
+      "boundedElastic for unavoidable blocking I/O",
+      "Prefer non-blocking drivers"
+    ],
+    "followUps": [
+      "How does Virtual Threads (Project Loom) change this?",
+      "How do you debug a reactor pipeline?"
+    ],
+    "redFlags": [
+      "Blocks inside .map() on parallel",
+      "Uses Schedulers.elastic() (deprecated, unbounded)"
+    ],
+    "references": [
+      { "title": "Reactor schedulers", "url": "https://projectreactor.io/docs/core/release/reference/coreFeatures/schedulers.html" }
+    ],
+    "tags": ["spring", "reactor", "concurrency"],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p2-arch-002",
+    "podIds": ["pod2"],
+    "topic": "Architecture",
+    "subTopic": "Strangler Fig migration",
+    "difficulty": "expert",
+    "experienceBands": ["senior", "lead"],
+    "type": "system-design",
+    "prompt": "You're modernizing a monolithic Java EE app on WebLogic to Spring Boot microservices on AKS. Walk through the strangler-fig approach over 18 months.",
+    "answer": "**Goal:** decompose without a 'big bang' rewrite. Replace functionality piece by piece while the monolith keeps serving.\n\n**Phase 0 — Land safely**\n- Lift-and-shift WebLogic to Azure VM or AKS as-is. Add observability + automated build/deploy. *No business logic changes.* This proves the platform.\n\n**Phase 1 — Edge gateway**\n- Put **APIM** in front of the monolith. All clients now talk to APIM. APIM routes everything to monolith initially.\n- This is the strangler's facade — the only place we'll re-route from.\n\n**Phase 2 — Identify a seam**\n- Pick a bounded context with high change frequency or pain (e.g., *Pricing*). Document its inputs/outputs. Build a contract test against the monolith.\n\n**Phase 3 — Build the replacement**\n- New Spring Boot service on AKS, Postgres for its own data. Reuses identity (Entra ID), observability stack.\n- For data, pick a strategy:\n  - **Shared DB during transition** (read-only views into legacy schema) — fast but coupled.\n  - **CDC (Debezium → Event Hubs)** — replicate legacy tables into new service's store; preferred long-term.\n\n**Phase 4 — Route slice of traffic**\n- APIM rewrites `/api/pricing/**` to new service for **5%** of traffic via a header / claim. Compare responses (shadow mode); reconcile diffs.\n- Increase to 25% → 100%. Monolith pricing code becomes dead.\n\n**Phase 5 — Sever**\n- Delete monolith pricing module. Repeat phases 2–5 for the next bounded context.\n\n**Cross-cutting concerns:**\n- **Sessions:** push to stateless JWT early so monolith and new services share auth.\n- **Transactions across both:** outbox pattern + idempotent consumers; avoid distributed XA.\n- **Reporting:** stand up a separate analytics store (Synapse / Fabric) fed by CDC; don't ad-hoc query the legacy DB.\n- **Risk control:** every slice has a feature-flag rollback at APIM. Track Mean Time To Roll-Back.\n\n**Anti-patterns to avoid:** rewrite everything at once; sharing the legacy DB long-term; new services that still depend on EJB calls into the monolith.",
+    "keyPoints": [
+      "Strangler facade = APIM",
+      "Decompose by bounded context, not by table",
+      "Data via CDC, not shared schema long-term",
+      "Shadow → canary → cutover per slice",
+      "Stateless auth (JWT) early so both stacks coexist"
+    ],
+    "followUps": [
+      "How do you handle a transaction that spans monolith + new service?",
+      "How do you test a slice in shadow mode without side effects?",
+      "When would you pick rewrite over strangler?"
+    ],
+    "redFlags": [
+      "Plans 'big bang' rewrite",
+      "Lets new services call EJBs in the monolith",
+      "Skips observability"
+    ],
+    "references": [
+      { "title": "Strangler Fig pattern", "url": "https://learn.microsoft.com/azure/architecture/patterns/strangler-fig" },
+      { "title": "Spring Boot on AKS reference", "url": "https://learn.microsoft.com/azure/developer/java/spring-framework/" }
+    ],
+    "tags": ["architecture", "modernization", "spring", "aks"],
+    "estimatedTimeMin": 30
+  },
+  {
+    "id": "p2-arch-003",
+    "podIds": ["pod2"],
+    "topic": "Architecture",
+    "subTopic": "Outbox pattern",
+    "difficulty": "expert",
+    "experienceBands": ["senior", "lead"],
+    "type": "system-design",
+    "prompt": "Design an event-driven order service that publishes `OrderPlaced` reliably without dual-write inconsistency. Use the transactional outbox pattern.",
+    "answer": "**Problem:** writing to DB *and* publishing to Service Bus in the same handler is a dual write — either can succeed independently → lost or duplicate events.\n\n**Solution: outbox.** Persist the event into an `outbox` table in the **same DB transaction** as the business change. A separate relay reads new outbox rows and publishes to the broker.\n\n```sql\nCREATE TABLE outbox (\n  id UUID PRIMARY KEY,\n  aggregate_id UUID NOT NULL,\n  type VARCHAR(100) NOT NULL,\n  payload JSONB NOT NULL,\n  occurred_at TIMESTAMPTZ NOT NULL,\n  published_at TIMESTAMPTZ\n);\nCREATE INDEX ix_outbox_unpublished ON outbox (occurred_at) WHERE published_at IS NULL;\n```\n\n```java\n@Transactional\npublic Order place(CreateOrder cmd) {\n    var order = repo.save(Order.from(cmd));\n    outboxRepo.save(new OutboxEvent(\n        UUID.randomUUID(), order.id(),\n        \"OrderPlaced\", json(order), Instant.now()));\n    return order;\n}\n```\n\n**Relay options:**\n1. **Polling worker** — `SELECT … FOR UPDATE SKIP LOCKED LIMIT 100` every N ms; publish; mark `published_at`. Simple, portable.\n2. **CDC (Debezium → Event Hubs)** — read DB log, no app code in the path; lower latency, more infra.\n\n**Consumer side — idempotency.**\n- Include `event.id` (UUID) in the message.\n- Consumer keeps a `processed_events` table or distributed cache; insert-or-skip ensures at-most-once business effect even if the broker re-delivers.\n\n**Ordering** — partition by `aggregate_id` (Service Bus session id, Event Hubs partition key) to keep per-aggregate FIFO.\n\n**Failure modes:**\n- Relay crash → next run picks up unpublished rows.\n- Broker outage → outbox grows; alert on `unpublished` lag.\n- Consumer poison message → DLQ + replay.\n\n**Cleanup** — TTL job deletes published rows older than N days.",
+    "keyPoints": [
+      "Eliminates dual-write by writing event in same DB tx",
+      "Relay (polling or CDC) publishes to broker",
+      "Consumer must be idempotent (event.id dedup)",
+      "Partition by aggregate id for ordering",
+      "Alert on outbox lag"
+    ],
+    "followUps": [
+      "When would you choose CDC over polling?",
+      "How do you handle a broker that re-delivers after consumer succeeded but before ack?",
+      "Outbox vs inbox vs sagas?"
+    ],
+    "redFlags": [
+      "Publishes inside @Transactional via raw SDK call",
+      "No event.id dedup on consumer",
+      "Uses XA transactions across DB + broker"
+    ],
+    "references": [
+      { "title": "Outbox pattern", "url": "https://microservices.io/patterns/data/transactional-outbox.html" },
+      { "title": "Service Bus sessions", "url": "https://learn.microsoft.com/azure/service-bus-messaging/message-sessions" }
+    ],
+    "tags": ["architecture", "messaging", "patterns", "spring"],
+    "estimatedTimeMin": 25
+  }
+]

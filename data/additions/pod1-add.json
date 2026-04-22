@@ -1,0 +1,359 @@
+[
+  {
+    "id": "p1-cs-011",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Collections",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "When would you pick `List<T>` vs `Dictionary<TKey,TValue>` vs `HashSet<T>`? What are the Big-O characteristics?",
+    "answer": "**Pick by access pattern:**\n\n| Collection | Lookup | Insert | Order | Use when |\n|---|---|---|---|---|\n| `List<T>` | O(n) | O(1) amortized at end | Insertion order | Iterating, indexed access, small sets |\n| `Dictionary<K,V>` | O(1) avg | O(1) avg | Unordered | Key→value lookup |\n| `HashSet<T>` | O(1) avg | O(1) avg | Unordered | Membership tests, dedup |\n\n```csharp\nvar byId = users.ToDictionary(u => u.Id);   // O(1) lookups by Id\nvar seen  = new HashSet<string>();           // dedup\nif (seen.Add(email)) { /* first time */ }\n```\n\n**Pitfalls:** mutating a `List<T>` while enumerating throws; using a custom key type in a `Dictionary` requires correct `GetHashCode`/`Equals`.",
+    "keyPoints": [
+      "List = ordered, indexed; Dictionary/HashSet = hashed",
+      "Custom key types must override Equals + GetHashCode",
+      "ToDictionary / ToHashSet are common conversions"
+    ],
+    "followUps": [
+      "What if you need ordered key lookups? (SortedDictionary, SortedSet, ImmutableSortedDictionary)",
+      "When would you use ConcurrentDictionary?"
+    ],
+    "redFlags": [
+      "Says lookup is O(1) for List<T>",
+      "Doesn't mention hash code requirement"
+    ],
+    "references": [
+      { "title": "Collections (System.Collections.Generic)", "url": "https://learn.microsoft.com/dotnet/standard/collections/" }
+    ],
+    "tags": ["c#", "collections", "fundamentals"],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-012",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Exception handling",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "What's the difference between `throw` and `throw ex`? When should you wrap an exception?",
+    "answer": "- `throw;` **rethrows** the original exception preserving the stack trace.\n- `throw ex;` **resets** the stack trace to the rethrow point — you lose the original call site.\n- Wrap (throw a *new* exception with `innerException`) when you want to translate a low-level error into a domain-meaningful one.\n\n```csharp\ntry { return await _db.Orders.FindAsync(id); }\ncatch (SqlException ex)\n{\n    // good: preserve original via inner\n    throw new OrderRepositoryException($\"Failed to load order {id}\", ex);\n}\n```\n\n**Use `catch when` (filters)** to avoid catching what you can't handle:\n\n```csharp\ncatch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)\n```",
+    "keyPoints": [
+      "`throw;` preserves stack; `throw ex;` does not",
+      "Use exception filters (`catch when`) to be selective",
+      "Wrap low-level errors as domain exceptions with InnerException"
+    ],
+    "followUps": [
+      "When should you NOT catch an exception?",
+      "How do you log exceptions without leaking PII?"
+    ],
+    "redFlags": [
+      "Uses `throw ex` everywhere",
+      "Catches base Exception silently"
+    ],
+    "references": [
+      { "title": "Exception handling (C#)", "url": "https://learn.microsoft.com/dotnet/csharp/fundamentals/exceptions/" }
+    ],
+    "tags": ["c#", "exceptions"],
+    "estimatedTimeMin": 4
+  },
+  {
+    "id": "p1-cs-013",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Generics & constraints",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid"],
+    "type": "conceptual",
+    "prompt": "Explain generic constraints. Give an example using `where T : class, new()`.",
+    "answer": "Constraints tell the compiler what `T` is allowed to be, enabling extra operations.\n\n| Constraint | Means |\n|---|---|\n| `where T : class` | Reference type |\n| `where T : struct` | Value type (non-nullable) |\n| `where T : new()` | Has parameterless ctor |\n| `where T : IFoo` | Implements interface |\n| `where T : SomeBase` | Inherits from base |\n| `where T : notnull` | Non-nullable |\n| `where T : unmanaged` | Blittable, no refs |\n\n```csharp\npublic T CreateAndInit<T>(Action<T> setup)\n    where T : class, new()\n{\n    var instance = new T();\n    setup(instance);\n    return instance;\n}\n```\n\nWithout `new()`, `new T()` won't compile.",
+    "keyPoints": [
+      "Constraints unlock operations on T",
+      "Multiple constraints separated by commas",
+      "`unmanaged` enables low-level scenarios (Span<T>, P/Invoke)"
+    ],
+    "followUps": [
+      "What is variance (in/out) on generic interfaces?",
+      "Why isn't `List<Derived>` assignable to `List<Base>`?"
+    ],
+    "redFlags": [
+      "Confuses generics with reflection",
+      "Doesn't know `new()` constraint"
+    ],
+    "references": [
+      { "title": "Constraints on type parameters", "url": "https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters" }
+    ],
+    "tags": ["c#", "generics"],
+    "estimatedTimeMin": 4
+  },
+  {
+    "id": "p1-cs-014",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Nullable reference types",
+    "difficulty": "easy",
+    "experienceBands": ["junior", "mid", "senior"],
+    "type": "conceptual",
+    "prompt": "What are nullable reference types (NRTs)? How do `?`, `!`, and `[NotNull]`/`[MaybeNull]` differ?",
+    "answer": "NRTs (enabled with `<Nullable>enable</Nullable>`) make the compiler track whether a reference can be null.\n\n```csharp\nstring name;        // non-nullable; compiler warns if assigned null\nstring? nickname;   // nullable; must check before deref\n\nvar len = nickname!.Length; // ! = null-forgiving; tells compiler 'trust me'\n```\n\nAttributes for richer flow analysis:\n\n- `[NotNull]` — parameter/return is never null after the call.\n- `[MaybeNull]` — value may be null even if type isn't `T?`.\n- `[NotNullWhen(true)]` — output is non-null when method returns true (e.g. `TryGetValue`).\n\n**Best practice:** treat warnings as errors; avoid `!` except at well-understood boundaries.",
+    "keyPoints": [
+      "`?` declares nullable; `!` suppresses warning",
+      "Attributes encode preconditions/postconditions for nullability",
+      "Enable in csproj; treat NRT warnings as errors"
+    ],
+    "followUps": [
+      "How do you migrate a large solution to NRTs incrementally?",
+      "What does `Nullable=annotations` vs `Nullable=enable` do?"
+    ],
+    "redFlags": [
+      "Sprinkles `!` everywhere",
+      "Disables NRTs because of warnings"
+    ],
+    "references": [
+      { "title": "Nullable reference types", "url": "https://learn.microsoft.com/dotnet/csharp/nullable-references" }
+    ],
+    "tags": ["c#", "nullable", "quality"],
+    "estimatedTimeMin": 5
+  },
+  {
+    "id": "p1-cs-015",
+    "podIds": ["pod1"],
+    "topic": "ASP.NET Core",
+    "subTopic": "Configuration & Options",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "conceptual",
+    "prompt": "Walk through the Options pattern. When do you use `IOptions<T>` vs `IOptionsSnapshot<T>` vs `IOptionsMonitor<T>`?",
+    "answer": "Bind config sections to a strongly-typed POCO and inject it.\n\n```csharp\n// appsettings.json\n// { \"Smtp\": { \"Host\": \"...\", \"Port\": 587 } }\n\nbuilder.Services\n    .AddOptions<SmtpOptions>()\n    .Bind(builder.Configuration.GetSection(\"Smtp\"))\n    .ValidateDataAnnotations()\n    .ValidateOnStart();\n```\n\n| Interface | Lifetime | Reload? |\n|---|---|---|\n| `IOptions<T>` | Singleton | No |\n| `IOptionsSnapshot<T>` | Scoped | Per-request |\n| `IOptionsMonitor<T>` | Singleton | Yes; subscribe to `OnChange` |\n\nUse `IOptionsMonitor` in singletons (background services) that need fresh config; use `IOptionsSnapshot` in request-scoped services; use `IOptions` for static, app-startup config.",
+    "keyPoints": [
+      "Bind once, validate, fail fast with ValidateOnStart",
+      "Snapshot = per-request reload; Monitor = push-based reload",
+      "Avoid `IConfiguration` directly in business code"
+    ],
+    "followUps": [
+      "How do you load secrets without putting them in appsettings?",
+      "How does Azure App Configuration / Key Vault provider integrate?"
+    ],
+    "redFlags": [
+      "Reads from IConfiguration in random places",
+      "Uses IOptions and complains it doesn't reload"
+    ],
+    "references": [
+      { "title": "Options pattern", "url": "https://learn.microsoft.com/aspnet/core/fundamentals/configuration/options" }
+    ],
+    "tags": ["aspnetcore", "configuration", "options"],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-016",
+    "podIds": ["pod1"],
+    "topic": "ASP.NET Core",
+    "subTopic": "CQRS / MediatR",
+    "difficulty": "medium",
+    "experienceBands": ["mid", "senior"],
+    "type": "scenario",
+    "prompt": "Your team uses MediatR with CQRS. Why split commands and queries? Where do cross-cutting concerns (logging, validation) live?",
+    "answer": "**Why split:** commands change state and return minimal data; queries are side-effect-free and can be optimized independently (read models, projections, caching). Different scaling, security, and persistence strategies become possible.\n\n```csharp\npublic record CreateOrder(Guid CustomerId, List<OrderLine> Lines) : IRequest<Guid>;\n\npublic class CreateOrderHandler : IRequestHandler<CreateOrder, Guid>\n{\n    public async Task<Guid> Handle(CreateOrder cmd, CancellationToken ct) { /* ... */ }\n}\n```\n\n**Cross-cutting via pipeline behaviors:**\n\n```csharp\npublic class ValidationBehavior<TReq, TRes> : IPipelineBehavior<TReq, TRes>\n{\n    public async Task<TRes> Handle(TReq r, RequestHandlerDelegate<TRes> next, CancellationToken ct)\n    {\n        await _validator.ValidateAndThrowAsync(r, ct);\n        return await next();\n    }\n}\n```\n\nRegister behaviors in order: logging → validation → transaction → handler.",
+    "keyPoints": [
+      "CQRS = separate read/write models, not necessarily separate DBs",
+      "Behaviors give clean cross-cutting (logging, validation, retry, tx)",
+      "Avoid CQRS if your domain is CRUD — it's overkill"
+    ],
+    "followUps": [
+      "When would you NOT use MediatR?",
+      "How do you keep read models eventually consistent?"
+    ],
+    "redFlags": [
+      "Treats CQRS as 'separate databases mandatory'",
+      "Puts validation inside every handler"
+    ],
+    "references": [
+      { "title": "MediatR", "url": "https://github.com/jbogard/MediatR" }
+    ],
+    "tags": ["aspnetcore", "cqrs", "mediatr", "architecture"],
+    "estimatedTimeMin": 10
+  },
+  {
+    "id": "p1-cs-017",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Async streams",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "coding",
+    "prompt": "Implement an async paged reader of an external API as `IAsyncEnumerable<Order>` with cancellation support.",
+    "answer": "```csharp\npublic async IAsyncEnumerable<Order> ReadOrdersAsync(\n    [EnumeratorCancellation] CancellationToken ct = default)\n{\n    string? cursor = null;\n    do\n    {\n        ct.ThrowIfCancellationRequested();\n        var page = await _http.GetFromJsonAsync<Page<Order>>(\n            $\"/orders?cursor={cursor}\", ct)\n            ?? throw new InvalidOperationException(\"null page\");\n\n        foreach (var o in page.Items)\n            yield return o;\n\n        cursor = page.NextCursor;\n    } while (cursor is not null);\n}\n\n// consumer\nawait foreach (var order in repo.ReadOrdersAsync(ct).WithCancellation(ct))\n{\n    await ProcessAsync(order, ct);\n}\n```\n\n**Why this works:**\n- `[EnumeratorCancellation]` flows the consumer's token into the iterator.\n- `await foreach` pulls one page at a time — bounded memory.\n- Backpressure is natural: the producer waits for the consumer.\n\n**Pitfalls:** wrap network calls with retry/Polly; don't materialize with `.ToListAsync()` on huge streams; close resources via `await using`.",
+    "keyPoints": [
+      "Use [EnumeratorCancellation] to flow tokens into iterators",
+      "yield return inside async iterator — no Task.FromResult needed",
+      "Bounded memory; natural backpressure"
+    ],
+    "followUps": [
+      "How would you parallelize consumption with Channels?",
+      "How do you add retries without breaking streaming?"
+    ],
+    "redFlags": [
+      "Buffers entire result before yielding",
+      "Ignores cancellation token"
+    ],
+    "references": [
+      { "title": "IAsyncEnumerable", "url": "https://learn.microsoft.com/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream" }
+    ],
+    "tags": ["c#", "async", "streaming"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-cs-018",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Channels",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "coding",
+    "prompt": "Build a producer/consumer pipeline using `System.Threading.Channels` with bounded capacity and N consumers.",
+    "answer": "```csharp\nvar channel = Channel.CreateBounded<WorkItem>(new BoundedChannelOptions(100)\n{\n    FullMode = BoundedChannelFullMode.Wait,\n    SingleReader = false,\n    SingleWriter = true\n});\n\n// producer\n_ = Task.Run(async () =>\n{\n    foreach (var item in source)\n        await channel.Writer.WriteAsync(item, ct);\n    channel.Writer.Complete();\n});\n\n// N consumers\nvar consumers = Enumerable.Range(0, 8).Select(_ => Task.Run(async () =>\n{\n    await foreach (var item in channel.Reader.ReadAllAsync(ct))\n        await HandleAsync(item, ct);\n}));\n\nawait Task.WhenAll(consumers);\n```\n\n**Why Channels over BlockingCollection / ConcurrentQueue:**\n- Async-first (no blocking threads)\n- Built-in backpressure via `BoundedChannelFullMode.Wait`\n- Clean completion signaling via `Writer.Complete()`\n\nUse for in-process pipelines; use Service Bus / Event Hubs for cross-process.",
+    "keyPoints": [
+      "Bounded channel = backpressure, fixed memory",
+      "Always call Writer.Complete() so readers exit",
+      "Channels are in-process only — not durable"
+    ],
+    "followUps": [
+      "How do you handle a slow consumer without dropping items?",
+      "When would you choose Dataflow (TPL) over Channels?"
+    ],
+    "redFlags": [
+      "Uses unbounded channel for unbounded input",
+      "Forgets Writer.Complete and consumers hang"
+    ],
+    "references": [
+      { "title": "System.Threading.Channels", "url": "https://learn.microsoft.com/dotnet/core/extensions/channels" }
+    ],
+    "tags": ["c#", "concurrency", "channels"],
+    "estimatedTimeMin": 12
+  },
+  {
+    "id": "p1-cs-019",
+    "podIds": ["pod1"],
+    "topic": "ASP.NET Core",
+    "subTopic": "gRPC",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "conceptual",
+    "prompt": "When would you choose gRPC over REST? What are the four call types and how do they map to scenarios?",
+    "answer": "gRPC = HTTP/2 + Protobuf. Strongly-typed contracts, binary, multiplexed, streaming.\n\n**Pick gRPC when:** internal service-to-service, high throughput / low latency, streaming, polyglot teams sharing a `.proto`. Pick REST/JSON for browser-facing APIs and public partner APIs.\n\n| Call type | Pattern | Example |\n|---|---|---|\n| Unary | req → res | `GetOrder` |\n| Server streaming | req → stream res | Live ticker, log tail |\n| Client streaming | stream req → res | Bulk upload |\n| Bidirectional | stream ↔ stream | Chat, telemetry |\n\n```proto\nservice Orders {\n  rpc GetOrder (OrderId) returns (Order);\n  rpc Watch (OrderId) returns (stream OrderEvent);\n}\n```\n\n**Caveats:** browser support requires gRPC-Web; debugging binary needs tooling (grpcurl, Postman). APIM supports gRPC pass-through but most policies expect HTTP/JSON — often fronted as REST at the edge.",
+    "keyPoints": [
+      "Contract-first via .proto; codegen for clients",
+      "Streaming is first-class",
+      "Use gRPC-Web for browsers; pair with REST gateway for public APIs"
+    ],
+    "followUps": [
+      "How do you do auth / interceptors in gRPC?",
+      "How does gRPC compare with GraphQL?"
+    ],
+    "redFlags": [
+      "Wants gRPC for browser-facing public API",
+      "Doesn't know HTTP/2 requirement"
+    ],
+    "references": [
+      { "title": "gRPC for .NET", "url": "https://learn.microsoft.com/aspnet/core/grpc/" }
+    ],
+    "tags": ["aspnetcore", "grpc"],
+    "estimatedTimeMin": 8
+  },
+  {
+    "id": "p1-cs-020",
+    "podIds": ["pod1", "pod2", "pod3"],
+    "topic": "Architecture",
+    "subTopic": "Multi-tenant SaaS",
+    "difficulty": "expert",
+    "experienceBands": ["senior", "lead"],
+    "type": "system-design",
+    "prompt": "Design tenancy for a SaaS app: tenant isolation strategy, identity, data, noisy-neighbor protection, and onboarding/offboarding.",
+    "answer": "**1. Isolation choices** (continuum):\n\n| Model | Isolation | Cost | Use when |\n|---|---|---|---|\n| Pool (shared everything + tenantId) | Logical | Lowest | Many small tenants |\n| Bridge (shared compute, DB-per-tenant) | DB level | Mid | Compliance/data residency |\n| Silo (compute + data per tenant) | Strong | Highest | Enterprise, regulated |\n\nMost SaaS = **pool by default, silo for premium**.\n\n**2. Identity** — Entra External ID (CIAM) or B2C; one tenant = one Entra group/role; emit `tid` claim, validate in middleware:\n\n```csharp\napp.Use(async (ctx, next) =>\n{\n    var tid = ctx.User.FindFirst(\"tid\")?.Value\n        ?? throw new UnauthorizedAccessException();\n    ctx.Items[\"TenantId\"] = tid;\n    await next();\n});\n```\n\n**3. Data** — global filter on every query (`HasQueryFilter(o => o.TenantId == _ctx.Tid)`), defense-in-depth with Row-Level Security in SQL.\n\n**4. Noisy-neighbor** — per-tenant rate limits at APIM (`rate-limit-by-key` on `tid`), Cosmos partition key = tenant, separate Service Bus queues for high-volume tenants.\n\n**5. Onboarding** — IaC pipeline provisions tenant resources (DB schema, blob container, secrets in Key Vault) idempotently; offboarding triggers retention timer + cryptographic shred (delete CMK).\n\n**6. Observability** — every log/metric/trace tagged with `tenant.id` for per-tenant SLIs and chargeback.",
+    "keyPoints": [
+      "Choose isolation per tier, not per company",
+      "Tenant claim → ambient context → automatic data filter + RLS",
+      "Per-tenant quotas at the gateway",
+      "Provisioning via IaC pipeline; offboarding includes crypto shred",
+      "Tag all telemetry with tenantId"
+    ],
+    "followUps": [
+      "How would you migrate a noisy tenant from pool → silo?",
+      "How do you handle a tenant in the EU when most are in the US?",
+      "How do you safely run schema migrations across N tenant DBs?"
+    ],
+    "redFlags": [
+      "Filters by tenantId only in queries, no defense in depth",
+      "Manual onboarding via runbook",
+      "No per-tenant rate limiting"
+    ],
+    "references": [
+      { "title": "SaaS architecture (Azure)", "url": "https://learn.microsoft.com/azure/architecture/guide/saas/" },
+      { "title": "Multitenancy patterns", "url": "https://learn.microsoft.com/azure/architecture/guide/multitenant/overview" }
+    ],
+    "tags": ["architecture", "saas", "multi-tenant"],
+    "estimatedTimeMin": 30
+  },
+  {
+    "id": "p1-cs-021",
+    "podIds": ["pod1"],
+    "topic": "ASP.NET Core",
+    "subTopic": "Zero-downtime deploys",
+    "difficulty": "expert",
+    "experienceBands": ["senior", "lead"],
+    "type": "scenario",
+    "prompt": "Walk through a zero-downtime deployment of an API + breaking DB migration on Azure.",
+    "answer": "**Goal:** ship breaking schema change with no errors and no maintenance window.\n\n**Pattern: expand–migrate–contract**\n\n1. **Expand (V1.1)** — additive only. Add new column nullable, new table, or new index `WITH ONLINE = ON`. Code still reads/writes old shape but starts dual-writing.\n2. **Backfill** — background job (Function or hosted service) populates new column for existing rows in batches with throttling.\n3. **Switch reads (V1.2)** — feature flag flips read path to new column; old path remains as fallback.\n4. **Contract (V2.0)** — once monitored stable for N days, drop old column / old code path.\n\n**Deployment plumbing:**\n- App Service / Container Apps **slot or revision** with traffic split: 0% → 5% → 25% → 100%.\n- Health probes that fail on missing migration so a bad slot never gets traffic.\n- Migrations run **before** swap by a separate idempotent job (`dotnet ef database update` or `DbUp`), not at app startup.\n- Connection draining: `Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature` + graceful shutdown timeout > longest in-flight request.\n\n**Rollback:** since each step is additive and feature-flagged, rollback = flip flag back; never `DROP COLUMN` until contract step.\n\n**Observability:** golden signals dashboard during rollout; auto-rollback on error-rate / latency SLO breach via deployment gate.",
+    "keyPoints": [
+      "Expand → migrate → contract; no breaking change in any single deploy",
+      "Migrations run as a job, not at app startup",
+      "Slot/revision traffic split + health probes + auto-rollback gate",
+      "Feature flags switch behavior independently of deploy"
+    ],
+    "followUps": [
+      "What if the backfill job runs for days and a row is updated mid-flight?",
+      "How do you do this on a multi-region active-active setup?",
+      "How do you handle a failed expand on a 100M-row table?"
+    ],
+    "redFlags": [
+      "Runs migrations in app startup",
+      "Single deploy with breaking schema change",
+      "No traffic-split / canary"
+    ],
+    "references": [
+      { "title": "App Service deployment slots", "url": "https://learn.microsoft.com/azure/app-service/deploy-staging-slots" },
+      { "title": "Container Apps revisions", "url": "https://learn.microsoft.com/azure/container-apps/revisions" }
+    ],
+    "tags": ["aspnetcore", "deployment", "ef-core", "operations"],
+    "estimatedTimeMin": 25
+  },
+  {
+    "id": "p1-cs-022",
+    "podIds": ["pod1"],
+    "topic": "C# Language",
+    "subTopic": "Source generators",
+    "difficulty": "hard",
+    "experienceBands": ["senior", "lead"],
+    "type": "conceptual",
+    "prompt": "What problems do Roslyn source generators solve? Give a real example (e.g. System.Text.Json, LoggerMessage, Regex).",
+    "answer": "Source generators run **at compile time**, inspecting the syntax tree and emitting additional C# code into the compilation. No runtime reflection, no startup cost, AOT-friendly.\n\n**Real wins:**\n\n- **`[JsonSerializable]` (System.Text.Json)** — generates serializers per type; eliminates reflection, ~2× faster, works with Native AOT.\n- **`[LoggerMessage]`** — generates allocation-free, structured logging methods:\n\n```csharp\npublic static partial class Log\n{\n    [LoggerMessage(EventId = 1001, Level = LogLevel.Warning,\n        Message = \"Order {OrderId} failed after {Attempts} attempts\")]\n    public static partial void OrderFailed(ILogger logger, Guid orderId, int attempts);\n}\n```\n\n- **`[GeneratedRegex]`** — compiled regex without `RegexOptions.Compiled` startup cost.\n\n**Trade-offs:** harder to debug (use `EmitCompilerGeneratedFiles`), longer build times if abused, IDE tooling can lag.",
+    "keyPoints": [
+      "Compile-time codegen — no reflection, AOT-safe",
+      "JsonSerializable, LoggerMessage, GeneratedRegex are first-party examples",
+      "Inspect generated files via EmitCompilerGeneratedFiles"
+    ],
+    "followUps": [
+      "What's the difference between an analyzer and a source generator?",
+      "When would you write your own source generator?"
+    ],
+    "redFlags": [
+      "Confuses with T4 or Fody",
+      "Doesn't know AOT implications"
+    ],
+    "references": [
+      { "title": "Source generators overview", "url": "https://learn.microsoft.com/dotnet/csharp/roslyn-sdk/source-generators-overview" }
+    ],
+    "tags": ["c#", "performance", "aot"],
+    "estimatedTimeMin": 8
+  }
+]

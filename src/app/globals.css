@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "highlight.js/styles/github-dark.css";
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html.dark,
+html.dark body {
+  background: #020617;
+  color: #f1f5f9;
+}
+
+.prose-answer pre {
+  background: #0d1117;
+  color: #e6edf3;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0.75rem 0;
+  border: 1px solid #1f2937;
+}
+
+.prose-answer pre code {
+  background: transparent !important;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  display: block;
+  white-space: pre;
+}
+
+.prose-answer code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.prose-answer p code,
+.prose-answer li code,
+.prose-answer td code {
+  background: #e2e8f0;
+  color: #0f172a;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+html.dark .prose-answer p code,
+html.dark .prose-answer li code,
+html.dark .prose-answer td code {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.prose-answer pre .hljs {
+  background: transparent;
+  padding: 0;
+}
+
+.prose-answer h1,
+.prose-answer h2,
+.prose-answer h3 {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-answer h2 {
+  font-size: 1.1rem;
+}
+
+.prose-answer h3 {
+  font-size: 1rem;
+}
+
+.prose-answer ul,
+.prose-answer ol {
+  list-style: revert;
+  margin-left: 1.25rem;
+}
+
+.prose-answer table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+  margin: 0.75rem 0;
+}
+
+.prose-answer th,
+.prose-answer td {
+  border: 1px solid #cbd5e1;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+.prose-answer th {
+  background: #f1f5f9;
+}
+
+html.dark .prose-answer th,
+html.dark .prose-answer td {
+  border-color: #334155;
+}
+
+html.dark .prose-answer th {
+  background: #1e293b;
+}
+
+.prose-answer p {
+  margin: 0.5rem 0;
+}
