@@ -1,24 +1,45 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { QuestionCard } from "./QuestionCard";
-import { applyFilters, EMPTY_FILTERS, uniqueTopics } from "@/lib/filters";
+import { applyFilters, EMPTY_FILTERS, uniqueTopics, type Filters } from "@/lib/filters";
 import {
   DIFFICULTY_LABEL,
   EXPERIENCE_LABEL,
   TYPE_LABEL,
+  type Category,
+  type CategoryId,
   type Difficulty,
   type ExperienceBand,
-  type Pod,
-  type PodId,
   type Question,
   type QuestionType,
 } from "@/lib/types";
+import {
+  STATUS_DOT,
+  STATUS_LABEL,
+  useProgress,
+  type Status,
+  type StatusFilter,
+} from "@/lib/progress";
+
+const SHORTCUT_STATUS: Record<string, Status> = {
+  "1": "known",
+  "2": "review",
+  "3": "unknown",
+};
+
+function isTypingTarget(el: EventTarget | null): boolean {
+  if (!(el instanceof HTMLElement)) return false;
+  const tag = el.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
+}
 
 interface Props {
-  pods: Pod[];
+  categories: Category[];
   questions: Question[];
-  initialPod?: PodId;
+  initialCategory?: CategoryId;
+  initialCategories?: CategoryId[];
 }
 
 function toggle<T>(arr: T[], v: T): T[] {
@@ -35,12 +56,70 @@ const TYPES: QuestionType[] = [
   "debugging",
 ];
 
-export function BrowseClient({ pods, questions, initialPod }: Props) {
-  const [filters, setFilters] = useState({
-    ...EMPTY_FILTERS,
-    pods: initialPod ? [initialPod] : [],
-  });
+export function BrowseClient({
+  categories,
+  questions,
+  initialCategory,
+  initialCategories,
+}: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialBaseCategories =
+    initialCategories ?? (initialCategory ? [initialCategory] : []);
+  const validCategoryIds = useMemo(
+    () => new Set(categories.map((c) => c.id)),
+    [categories],
+  );
+  const validTopics = useMemo(() => new Set(uniqueTopics(questions)), [questions]);
+
+  const initialFilters = useMemo<Filters>(() => {
+    const csv = (key: string) =>
+      (searchParams.get(key) ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    const cats = csv("cat").filter((c) => validCategoryIds.has(c as CategoryId)) as CategoryId[];
+    return {
+      categories: cats.length ? cats : initialBaseCategories,
+      topics: csv("topic").filter((t) => validTopics.has(t)),
+      difficulties: csv("diff").filter((d) => (DIFFS as string[]).includes(d)) as Difficulty[],
+      experienceBands: csv("band").filter((b) => (BANDS as string[]).includes(b)) as ExperienceBand[],
+      types: csv("type").filter((t) => (TYPES as string[]).includes(t)) as QuestionType[],
+      search: searchParams.get("q") ?? "",
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const initialStatus = (() => {
+    const s = searchParams.get("status");
+    if (s === "unseen" || s === "known" || s === "review" || s === "unknown") return s as StatusFilter;
+    return "all" as StatusFilter;
+  })();
+
+  const [filters, setFilters] = useState<Filters>(initialFilters);
   const [topicQuery, setTopicQuery] = useState("");
+  const [revealAll, setRevealAll] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const { map: progressMap, setStatus, clearAll } = useProgress();
+
+  // Sync filters → URL (replace, no history spam)
+  const firstSync = useRef(true);
+  useEffect(() => {
+    if (firstSync.current) {
+      firstSync.current = false;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (filters.categories.length) params.set("cat", filters.categories.join(","));
+    if (filters.topics.length) params.set("topic", filters.topics.join(","));
+    if (filters.difficulties.length) params.set("diff", filters.difficulties.join(","));
+    if (filters.experienceBands.length) params.set("band", filters.experienceBands.join(","));
+    if (filters.types.length) params.set("type", filters.types.join(","));
+    if (filters.search.trim()) params.set("q", filters.search.trim());
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [filters, statusFilter, pathname, router]);
 
   const topics = useMemo(() => uniqueTopics(questions), [questions]);
   const visibleTopics = useMemo(() => {
@@ -52,6 +131,79 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
     () => applyFilters(questions, filters),
     [questions, filters],
   );
+
+  const visibleQuestions = useMemo(() => {
+    if (statusFilter === "all") return filtered;
+    if (statusFilter === "unseen") return filtered.filter((q) => !progressMap[q.id]);
+    return filtered.filter((q) => progressMap[q.id] === statusFilter);
+  }, [filtered, statusFilter, progressMap]);
+
+  const progressCounts = useMemo(() => {
+    const ids = filtered.map((q) => q.id);
+    let known = 0,
+      review = 0,
+      unknown = 0;
+    for (const id of ids) {
+      const s = progressMap[id];
+      if (s === "known") known++;
+      else if (s === "review") review++;
+      else if (s === "unknown") unknown++;
+    }
+    return { known, review, unknown, unseen: filtered.length - known - review - unknown };
+  }, [filtered, progressMap]);
+
+  // Reset focus when the visible list changes
+  useEffect(() => {
+    if (focusedIndex >= visibleQuestions.length) {
+      setFocusedIndex(visibleQuestions.length > 0 ? 0 : 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleQuestions.length]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+      const total = visibleQuestions.length;
+      if (total === 0) return;
+
+      const key = e.key.toLowerCase();
+      if (key === "j") {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.min(total - 1, i + 1));
+      } else if (key === "k") {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.max(0, i - 1));
+      } else if (key === "r") {
+        e.preventDefault();
+        const id = visibleQuestions[focusedIndex]?.id;
+        if (id) setRevealedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+      } else if (key === "?") {
+        e.preventDefault();
+        alert(
+          "Keyboard shortcuts:\n  J / K — next / previous question\n  R — reveal / hide answer\n  1 — mark Got it\n  2 — mark Review later\n  3 — mark Didn't know\n  ? — show this help",
+        );
+      } else if (SHORTCUT_STATUS[e.key]) {
+        e.preventDefault();
+        const q = visibleQuestions[focusedIndex];
+        if (q) {
+          const next = SHORTCUT_STATUS[e.key];
+          setStatus(q.id, progressMap[q.id] === next ? null : next);
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [visibleQuestions, focusedIndex, setStatus, progressMap]);
+
+  // Scroll focused card into view
+  useEffect(() => {
+    const el = cardRefs.current[focusedIndex];
+    if (el) {
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [focusedIndex]);
 
   return (
     <div className="grid md:grid-cols-[260px_1fr] gap-6 md:h-[calc(100vh-9rem)]">
@@ -68,14 +220,52 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
           />
         </div>
 
-        <FilterGroup label="POD">
-          {pods.map((p) => (
+        <FilterGroup label="Status">
+          {([
+            ["all", "All"],
+            ["unseen", "Unseen"],
+            ["known", STATUS_LABEL.known],
+            ["review", STATUS_LABEL.review],
+            ["unknown", STATUS_LABEL.unknown],
+          ] as [StatusFilter, string][]).map(([value, label]) => (
+            <label key={value} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="status-filter"
+                checked={statusFilter === value}
+                onChange={() => setStatusFilter(value)}
+                className="h-3.5 w-3.5"
+              />
+              <span className="flex items-center gap-1.5">
+                {value === "known" || value === "review" || value === "unknown" ? (
+                  <span className={`inline-block w-2 h-2 rounded-full ${STATUS_DOT[value as Status]}`} />
+                ) : null}
+                {label}
+              </span>
+            </label>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm("Clear progress on all questions? This cannot be undone.")) clearAll();
+            }}
+            className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 underline"
+          >
+            Clear my progress
+          </button>
+        </FilterGroup>
+
+        <FilterGroup label="Category">
+          {categories.map((c) => (
             <Check
-              key={p.id}
-              label={p.shortName}
-              checked={filters.pods.includes(p.id)}
+              key={c.id}
+              label={c.shortName}
+              checked={filters.categories.includes(c.id)}
               onChange={() =>
-                setFilters({ ...filters, pods: toggle(filters.pods, p.id) })
+                setFilters({
+                  ...filters,
+                  categories: toggle(filters.categories, c.id),
+                })
               }
             />
           ))}
@@ -201,16 +391,66 @@ export function BrowseClient({ pods, questions, initialPod }: Props) {
       </aside>
 
       <section className="md:h-full md:overflow-y-auto md:pr-2 space-y-3">
-        <div className="text-xs text-slate-500 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-950 py-1 z-[1]">
-          Showing <strong>{filtered.length}</strong> of {questions.length}{" "}
-          questions
+        <div className="sticky top-0 bg-slate-50 dark:bg-slate-950 py-1 z-[1] flex items-center justify-between gap-3">
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap">
+            <span>
+              Showing <strong>{visibleQuestions.length}</strong> of {filtered.length}{" "}
+              filtered ({questions.length} total)
+            </span>
+            <span className="inline-flex items-center gap-1" title={`${progressCounts.known} got it`}>
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT.known}`} />
+              {progressCounts.known}
+            </span>
+            <span className="inline-flex items-center gap-1" title={`${progressCounts.review} to review`}>
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT.review}`} />
+              {progressCounts.review}
+            </span>
+            <span className="inline-flex items-center gap-1" title={`${progressCounts.unknown} didn't know`}>
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT.unknown}`} />
+              {progressCounts.unknown}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                alert(
+                  "Keyboard shortcuts:\n  J / K — next / previous question\n  R — reveal / hide answer\n  1 — mark Got it\n  2 — mark Review later\n  3 — mark Didn't know\n  ? — show this help",
+                )
+              }
+              className="text-[11px] px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
+              title="Keyboard shortcuts"
+              aria-label="Keyboard shortcuts"
+            >
+              ?
+            </button>
+            <button
+              type="button"
+              onClick={() => setRevealAll((r) => !r)}
+              className="text-xs px-2.5 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              title={revealAll ? "Hide all answers (self-test mode)" : "Reveal all answers"}
+            >
+              {revealAll ? "Hide all answers" : "Reveal all answers"}
+            </button>
+          </div>
         </div>
-        {filtered.length === 0 ? (
+        {visibleQuestions.length === 0 ? (
           <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-6 text-center">
             No questions match these filters.
           </div>
         ) : (
-          filtered.map((q) => <QuestionCard key={q.id} q={q} />)
+          visibleQuestions.map((q, i) => (
+            <QuestionCard
+              key={q.id}
+              q={q}
+              categories={categories}
+              defaultOpen={revealAll || !!revealedIds[q.id]}
+              isFocused={i === focusedIndex}
+              cardRef={(el) => {
+                cardRefs.current[i] = el;
+              }}
+            />
+          ))
         )}
       </section>
     </div>

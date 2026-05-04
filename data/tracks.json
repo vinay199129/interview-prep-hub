@@ -1,0 +1,80 @@
+[
+  {
+    "id": "ai-engineer-core",
+    "name": "AI Engineer Core",
+    "shortName": "AI Core",
+    "description": "Core preparation for engineers building LLM-powered applications: LLM fundamentals, prompting, RAG, retrieval, evaluation, safety, and operations.",
+    "categoryIds": [
+      "llm-fundamentals",
+      "prompt-engineering",
+      "rag",
+      "vector-search",
+      "evaluation",
+      "safety",
+      "mlops"
+    ],
+    "targetQuestionCount": 80,
+    "order": 1
+  },
+  {
+    "id": "rag-azure-ai-specialist",
+    "name": "RAG & Azure AI Specialist",
+    "shortName": "RAG + Azure AI",
+    "description": "Focused preparation for building grounded AI systems with Azure AI Search, Document Intelligence, embeddings, citations, and production RAG patterns.",
+    "categoryIds": ["rag", "azure-ai", "vector-search", "evaluation", "safety"],
+    "targetQuestionCount": 55,
+    "order": 2
+  },
+  {
+    "id": "agentic-ai-engineer",
+    "name": "Agentic AI Engineer",
+    "shortName": "Agents",
+    "description": "Preparation for tool-using agents, agent frameworks, orchestration, planning, memory, evaluation, and operational safeguards.",
+    "categoryIds": [
+      "agents",
+      "agent-frameworks",
+      "prompt-engineering",
+      "evaluation",
+      "safety",
+      "mlops"
+    ],
+    "targetQuestionCount": 55,
+    "order": 3
+  },
+  {
+    "id": "azure-integration-engineer",
+    "name": "Azure Integration Engineer",
+    "shortName": "Azure Integration",
+    "description": "Preparation for Azure API Management, Functions, Logic Apps, messaging, observability, security, migration, and service integration.",
+    "categoryIds": ["azure-platform", "system-design", "migration", "mlops", "safety"],
+    "targetQuestionCount": 65,
+    "order": 4
+  },
+  {
+    "id": "dotnet-cloud-engineer",
+    "name": ".NET Cloud Engineer",
+    "shortName": ".NET Cloud",
+    "description": "Preparation for C#, ASP.NET Core, cloud-native .NET services, integration, architecture, resilience, and Azure platform patterns.",
+    "categoryIds": ["dotnet", "azure-platform", "system-design", "mlops"],
+    "targetQuestionCount": 60,
+    "order": 5
+  },
+  {
+    "id": "java-cloud-engineer",
+    "name": "Java Cloud Engineer",
+    "shortName": "Java Cloud",
+    "description": "Preparation for Java, Spring Boot, cloud-native backend services, migration, integration, architecture, and Azure platform patterns.",
+    "categoryIds": ["java", "azure-platform", "system-design", "migration", "mlops"],
+    "targetQuestionCount": 60,
+    "order": 6
+  },
+  {
+    "id": "python-ai-application-engineer",
+    "name": "Python AI Application Engineer",
+    "shortName": "Python AI Apps",
+    "description": "Preparation for Python, FastAPI, async services, Azure Functions, RAG applications, Azure AI integration, and production AI app patterns.",
+    "categoryIds": ["python", "azure-ai", "rag", "azure-platform", "mlops"],
+    "targetQuestionCount": 65,
+    "order": 7
+  }
+]

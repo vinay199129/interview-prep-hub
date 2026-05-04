@@ -24,6 +24,34 @@ html.dark body {
   color: #f1f5f9;
 }
 
+/* Smooth theme switch — only color/background, not transforms. */
+html,
+body,
+header,
+footer,
+article,
+section {
+  transition: background-color 200ms ease, border-color 200ms ease,
+    color 200ms ease;
+}
+
+/* Visible keyboard focus ring everywhere. */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+html.dark :focus-visible {
+  outline-color: #86b5ff;
+}
+
+/* Don't double-ring elements that already render a ring (Tailwind ring-*). */
+.ring-2:focus-visible,
+.ring:focus-visible {
+  outline: none;
+}
+
 .prose-answer pre {
   background: #0d1117;
   color: #e6edf3;
@@ -123,4 +151,60 @@ html.dark .prose-answer th {
 
 .prose-answer p {
   margin: 0.5rem 0;
+}
+
+.prose-answer a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.prose-answer a:hover {
+  color: #1e40af;
+}
+
+html.dark .prose-answer a {
+  color: #86b5ff;
+}
+
+html.dark .prose-answer a:hover {
+  color: #b5d3ff;
+}
+
+.prose-answer blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding: 0.25rem 0 0.25rem 0.85rem;
+  color: #475569;
+  margin: 0.75rem 0;
+  font-style: italic;
+}
+
+html.dark .prose-answer blockquote {
+  border-left-color: #475569;
+  color: #cbd5e1;
+}
+
+.prose-answer hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 1rem 0;
+}
+
+html.dark .prose-answer hr {
+  border-top-color: #1e293b;
+}
+
+.prose-answer ul li,
+.prose-answer ol li {
+  margin: 0.2rem 0;
+}
+
+.prose-answer strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+html.dark .prose-answer strong {
+  color: #f8fafc;
 }

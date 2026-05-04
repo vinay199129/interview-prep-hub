@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllQuestions, getQuestionById } from "@/lib/data";
+import { getAllQuestions, getCategories, getQuestionById } from "@/lib/data";
 import { QuestionCard } from "@/components/QuestionCard";
 
 export function generateStaticParams() {
@@ -15,6 +15,7 @@ export default async function QuestionPage({
   const { id } = await params;
   const q = getQuestionById(id);
   if (!q) notFound();
+  const categories = getCategories();
   return (
     <div className="space-y-4">
       <Link
@@ -23,7 +24,7 @@ export default async function QuestionPage({
       >
         ← Back to browse
       </Link>
-      <QuestionCard q={q} defaultOpen />
+      <QuestionCard q={q} categories={categories} defaultOpen />
     </div>
   );
 }

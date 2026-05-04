@@ -1,6 +1,25 @@
 import { z } from "zod";
 
-export const PodIdSchema = z.enum(["pod1", "pod2", "pod3"]);
+export const CategoryIdSchema = z.enum([
+  "llm-fundamentals",
+  "prompt-engineering",
+  "rag",
+  "agents",
+  "agent-frameworks",
+  "evaluation",
+  "vector-search",
+  "mlops",
+  "safety",
+  "foundations",
+  "python",
+  "azure-ai",
+  "system-design",
+  "dotnet",
+  "java",
+  "azure-platform",
+  "frontend",
+  "migration",
+]);
 export const DifficultySchema = z.enum(["easy", "medium", "hard", "expert"]);
 export const ExperienceBandSchema = z.enum(["junior", "mid", "senior", "lead"]);
 export const QuestionTypeSchema = z.enum([
@@ -16,19 +35,28 @@ export const ReferenceSchema = z.object({
   url: z.string().url(),
 });
 
-export const PodSchema = z.object({
-  id: PodIdSchema,
+export const CategorySchema = z.object({
+  id: CategoryIdSchema,
   name: z.string().min(1),
   shortName: z.string().min(1),
   description: z.string().min(1),
-  mustHave: z.array(z.string().min(1)).min(1),
-  goodToHave: z.array(z.string().min(1)),
   accent: z.string().min(1),
+  order: z.number().int().nonnegative(),
+});
+
+export const TrackSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  shortName: z.string().min(1),
+  description: z.string().min(1),
+  categoryIds: z.array(CategoryIdSchema).min(1),
+  targetQuestionCount: z.number().int().positive().optional(),
+  order: z.number().int().nonnegative(),
 });
 
 export const QuestionSchema = z.object({
   id: z.string().min(1),
-  podIds: z.array(PodIdSchema).min(1),
+  categoryIds: z.array(CategoryIdSchema).min(1),
   topic: z.string().min(1),
   subTopic: z.string().optional(),
   difficulty: DifficultySchema,
@@ -50,6 +78,18 @@ export const EvaluationCriterionSchema = z.object({
   description: z.string().min(1),
 });
 
-export const PodsFileSchema = z.array(PodSchema);
+export const GlossaryTermSchema = z.object({
+  id: z.string().min(1),
+  term: z.string().min(1),
+  categoryIds: z.array(CategoryIdSchema).min(1),
+  definition: z.string().min(1),
+  aliases: z.array(z.string().min(1)).optional(),
+  related: z.array(z.string().min(1)).optional(),
+  references: z.array(ReferenceSchema).optional(),
+});
+
+export const CategoriesFileSchema = z.array(CategorySchema);
+export const TracksFileSchema = z.array(TrackSchema);
 export const QuestionsFileSchema = z.array(QuestionSchema);
 export const CriteriaFileSchema = z.array(EvaluationCriterionSchema);
+export const GlossaryFileSchema = z.array(GlossaryTermSchema);

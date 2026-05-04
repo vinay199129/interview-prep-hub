@@ -4,14 +4,18 @@ export default function CriteriaPage() {
   const criteria = getCriteria();
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Candidate evaluation criteria</h1>
+      <h1 className="text-2xl font-semibold">Evaluation criteria</h1>
       <p className="text-slate-600 dark:text-slate-300">
-        Use these nine criteria when scoring an interview. The technical-skills
-        match (criterion 1) is mandatory:{" "}
-        <strong>at least 80% match on the POD&apos;s Must-Have skills</strong>.
-        For each criterion, give detailed feedback on what was good, what was
-        weak, and where the candidate could grow — and clearly call out a
-        Hire / No-Hire recommendation.
+        A generic rubric you can use as a starting point when scoring an
+        interview, or as a self-check while preparing. The dimensions below
+        try to capture what most engineering interviews actually look for, but
+        every role and team weights them differently &mdash; treat this as a
+        prompt for your own judgement, not a fixed grading scheme.
+      </p>
+      <p className="text-slate-600 dark:text-slate-300">
+        Interviewer Mode lets you rate each criterion 1&ndash;5, leave
+        per-criterion comments, and finish with an overall recommendation
+        that reflects how the role and team weight these dimensions.
       </p>
       <ol className="space-y-3">
         {criteria.map((c) => (

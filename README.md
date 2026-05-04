@@ -1,20 +1,39 @@
-# Interview Hub
+# Interview Prep Hub
 
-A curated, filterable interview question bank for our three Azure delivery PODs:
+A curated, filterable interview preparation hub organized by skill categories and career tracks:
 
-- **POD 1** — .NET / C# + Azure (APIM, Functions, Logic Apps, Angular/React, GHCP, AKS, Greengrass→IoT migration)
-- **POD 2** — Java + Azure (APIM, Functions, Logic Apps, Angular/React, GHCP, AWS→Azure migration)
-- **POD 3** — Python + Azure AI (APIM, Functions, AI Search, Document Intelligence, RAG)
+- **AI Engineer Core** — LLM fundamentals, prompting, RAG, vector search, evaluation, safety, and operations.
+- **Azure Integration Engineer** — API Management, Functions, Logic Apps, migration, observability, and system design.
+- **Cloud Application Engineer** — .NET, Java, Python, Azure platform services, and production engineering patterns.
 
 Used for both **interviewer prep / question selection** and **candidate self-study**.
 
 ## Run locally
 
+Prerequisites: Node.js 20+ (see [.nvmrc](.nvmrc)) and npm.
+
 ```pwsh
 npm install
+copy .env.local.example .env.local   # optional, all vars are optional
 npm run dev
 # open http://localhost:3000
 ```
+
+Other useful scripts:
+
+```pwsh
+npm run build      # production build (static export to ./out)
+npm run start      # serve the production build
+npm run lint       # eslint
+npm run validate-data
+```
+
+### VS Code
+
+Recommended extensions are listed in [.vscode/extensions.json](.vscode/extensions.json). The workspace ships with:
+
+- **Run and Debug** configs (`F5`): *Next.js: dev (server)*, *Next.js: debug client (Chrome)*, *validate-data*, and a *Next.js: full stack* compound.
+- **Tasks** (`Ctrl+Shift+B`): `dev`, `build`, `start`, `lint`, `validate-data`.
 
 ## Validate the question bank
 
@@ -22,16 +41,16 @@ npm run dev
 npm run validate-data
 ```
 
-This runs the zod schemas over `data/pods.json`, `data/evaluation-criteria.json`, and `data/questions/*.json`, plus cross-checks (unknown POD references, duplicate IDs).
+This runs the zod schemas over `data/categories.json`, `data/tracks.json`, `data/evaluation-criteria.json`, and `data/questions.migrated.json`, plus cross-checks for unknown category references, unknown track references, duplicate IDs, and track coverage gaps.
 
 ## Add or edit questions
 
-Each question lives in `data/questions/podN.json` and conforms to the schema in `src/lib/schema.ts`. Required shape:
+Runtime questions live in `data/questions.migrated.json` and conform to the schema in `src/lib/schema.ts`. Required shape:
 
 ```json
 {
-  "id": "p1-cs-099",
-  "podIds": ["pod1"],
+  "id": "ai-rag-099",
+  "categoryIds": ["rag", "azure-ai"],
   "topic": "C# Language",
   "subTopic": "optional",
   "difficulty": "easy | medium | hard | expert",
@@ -48,24 +67,29 @@ Each question lives in `data/questions/podN.json` and conforms to the schema in 
 }
 ```
 
-A question can apply to multiple PODs (set multiple values in `podIds`) — common cross-cutting topics like APIM, Functions, GitHub Copilot, observability, and secrets management are shared across PODs.
+A question can apply to multiple skill categories through `categoryIds`. Career tracks in `data/tracks.json` group categories into realistic preparation paths.
 
 After editing, run `npm run validate-data` and `npm run build`.
 
 ## Project layout
 
 ```
-data/                       JSON content (pods, criteria, questions)
+data/                       JSON content (categories, tracks, criteria, questions)
 src/
   app/                      Next.js App Router pages
   components/               UI components
   lib/                      types, zod schema, data loader, filter logic
 scripts/validate-data.ts    Schema + cross-check validator
+docs/AUTHORING.md           Question authoring guide (template, rules, LLM prompt)
 ```
+
+## Authoring new questions
+
+See [docs/AUTHORING.md](docs/AUTHORING.md) for the answer template, length bands, required field counts, and a copy-pasteable LLM drafting prompt. Run `npm run validate-data` before committing.
 
 ## Roadmap (Phase 2)
 
 - **Self-prep mode** — hide answers by default, mark Known/Review/Unknown, persisted in `localStorage`.
-- **Evaluator mode** — pick POD + candidate + experience, score the 9 criteria, export Markdown/JSON evaluation.
+- **Evaluator mode** — pick career track + candidate + experience, score the 9 criteria, export Markdown/JSON evaluation.
 - **Authoring UI** — in-app editor for non-developer authors.
 - **Static export + Azure Static Web Apps deploy**.

@@ -1,0 +1,15 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "files.eol": "\n",
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/out": true
+  }
+}

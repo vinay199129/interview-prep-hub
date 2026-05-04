@@ -1,14 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   DIFFICULTY_LABEL,
   EXPERIENCE_LABEL,
   TYPE_LABEL,
+  type Category,
   type Question,
 } from "@/lib/types";
 import { MarkdownAnswer } from "./MarkdownAnswer";
+import {
+  STATUS_BUTTON,
+  STATUS_BUTTON_ACTIVE,
+  STATUS_DOT,
+  STATUS_LABEL,
+  useProgress,
+  type Status,
+} from "@/lib/progress";
 
 const difficultyColors: Record<string, string> = {
   easy: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800",
@@ -19,37 +28,65 @@ const difficultyColors: Record<string, string> = {
     "bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-800",
 };
 
-const podColors: Record<string, string> = {
-  pod1: "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800",
-  pod2: "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800",
-  pod3: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800",
-};
+const categoryBadge =
+  "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700";
 
 export function QuestionCard({
   q,
+  categories = [],
   defaultOpen = false,
+  isFocused = false,
+  cardRef,
 }: {
   q: Question;
+  categories?: Category[];
   defaultOpen?: boolean;
+  isFocused?: boolean;
+  cardRef?: (el: HTMLDivElement | null) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  useEffect(() => {
+    setOpen(defaultOpen);
+  }, [defaultOpen]);
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const { map: progressMap, setStatus } = useProgress();
+  const status = progressMap[q.id];
+
+  const mark = (next: Status) => {
+    setStatus(q.id, status === next ? null : next);
+    if (next === "known" || next === "unknown") {
+      setOpen(false);
+    }
+  };
 
   return (
     <article
       id={q.id}
-      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden"
+      ref={cardRef}
+      className={`bg-white dark:bg-slate-900 border rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow ${
+        isFocused
+          ? "border-brand-500 dark:border-brand-300 ring-2 ring-brand-500/40 dark:ring-brand-300/40"
+          : "border-slate-200 dark:border-slate-800"
+      }`}
     >
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex flex-col gap-2"
       >
-        <div className="flex flex-wrap gap-1.5 text-[11px]">
-          {q.podIds.map((p) => (
+        <div className="flex flex-wrap gap-1.5 text-[11px] items-center">
+          {status ? (
             <span
-              key={p}
-              className={`px-2 py-0.5 border rounded ${podColors[p] ?? ""}`}
+              className={`inline-block w-2 h-2 rounded-full ${STATUS_DOT[status]}`}
+              title={STATUS_LABEL[status]}
+              aria-label={`Status: ${STATUS_LABEL[status]}`}
+            />
+          ) : null}
+          {q.categoryIds.map((c) => (
+            <span
+              key={c}
+              className={`px-2 py-0.5 border rounded ${categoryBadge}`}
             >
-              {p.toUpperCase()}
+              {categoryById.get(c)?.shortName ?? c}
             </span>
           ))}
           <span
@@ -64,8 +101,11 @@ export function QuestionCard({
             {q.topic}
             {q.subTopic ? ` · ${q.subTopic}` : ""}
           </span>
-          <span className="px-2 py-0.5 text-slate-500 dark:text-slate-400">
-            ~{q.estimatedTimeMin} min
+          <span className="px-2 py-0.5 text-slate-500 dark:text-slate-400" title="Estimated discussion time">
+            ~{q.estimatedTimeMin} min discuss
+          </span>
+          <span className="px-2 py-0.5 text-slate-500 dark:text-slate-400" title="Estimated answer reading time">
+            ~{Math.max(1, Math.round(q.answer.trim().split(/\s+/).filter(Boolean).length / 200))} min read
           </span>
         </div>
         <div className="font-medium text-slate-900 dark:text-slate-100">{q.prompt}</div>
@@ -166,6 +206,36 @@ export function QuestionCard({
             >
               Permalink to this question
             </Link>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <span className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400 mr-1">
+              How well do you know this?
+            </span>
+            {(['known', 'review', 'unknown'] as Status[]).map((s) => {
+              const active = status === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => mark(s)}
+                  className={`text-xs px-2.5 py-1 rounded border transition ${
+                    active ? STATUS_BUTTON_ACTIVE[s] : `bg-white dark:bg-slate-900 ${STATUS_BUTTON[s]}`
+                  }`}
+                >
+                  {STATUS_LABEL[s]}
+                </button>
+              );
+            })}
+            {status ? (
+              <button
+                type="button"
+                onClick={() => setStatus(q.id, null)}
+                className="text-[11px] text-slate-500 dark:text-slate-400 hover:underline ml-1"
+              >
+                clear
+              </button>
+            ) : null}
           </div>
         </div>
       ) : null}

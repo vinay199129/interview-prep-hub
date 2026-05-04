@@ -5,5 +5,9 @@ dist
 .env*.local
 .DS_Store
 *.log
+tsconfig.tsbuildinfo
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json

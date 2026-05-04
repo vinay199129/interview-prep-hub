@@ -2,12 +2,12 @@ import type {
   Question,
   Difficulty,
   ExperienceBand,
-  PodId,
+  CategoryId,
   QuestionType,
 } from "./types";
 
 export interface Filters {
-  pods: PodId[];
+  categories: CategoryId[];
   topics: string[];
   difficulties: Difficulty[];
   experienceBands: ExperienceBand[];
@@ -16,7 +16,7 @@ export interface Filters {
 }
 
 export const EMPTY_FILTERS: Filters = {
-  pods: [],
+  categories: [],
   topics: [],
   difficulties: [],
   experienceBands: [],
@@ -27,7 +27,11 @@ export const EMPTY_FILTERS: Filters = {
 export function applyFilters(questions: Question[], f: Filters): Question[] {
   const term = f.search.trim().toLowerCase();
   return questions.filter((q) => {
-    if (f.pods.length && !q.podIds.some((p) => f.pods.includes(p))) return false;
+    if (
+      f.categories.length &&
+      !q.categoryIds.some((c) => f.categories.includes(c))
+    )
+      return false;
     if (f.topics.length && !f.topics.includes(q.topic)) return false;
     if (f.difficulties.length && !f.difficulties.includes(q.difficulty)) return false;
     if (

@@ -1,0 +1,146 @@
+[
+  {
+    "id": "llm-fundamentals",
+    "name": "LLM Fundamentals",
+    "shortName": "LLMs",
+    "description": "How transformer LLMs work: tokenization, attention, decoding strategies, context windows, model selection, latency/cost trade-offs.",
+    "accent": "indigo",
+    "order": 1
+  },
+  {
+    "id": "prompt-engineering",
+    "name": "Prompt Engineering",
+    "shortName": "Prompting",
+    "description": "Prompt patterns, few-shot vs zero-shot, chain-of-thought, structured output, function calling, prompt injection mitigation.",
+    "accent": "violet",
+    "order": 2
+  },
+  {
+    "id": "rag",
+    "name": "Retrieval-Augmented Generation",
+    "shortName": "RAG",
+    "description": "Chunking, retrieval, reranking, grounding, citations, query rewriting, evaluation, and production hardening of RAG systems.",
+    "accent": "emerald",
+    "order": 3
+  },
+  {
+    "id": "agents",
+    "name": "AI Agents",
+    "shortName": "Agents",
+    "description": "Tool-using agents: planning, ReAct, reflection, multi-agent patterns, memory, error handling, human-in-the-loop, evaluation.",
+    "accent": "orange",
+    "order": 4
+  },
+  {
+    "id": "agent-frameworks",
+    "name": "Agent Frameworks",
+    "shortName": "Frameworks",
+    "description": "LangChain, LangGraph, AutoGen, Semantic Kernel, CrewAI, OpenAI Assistants, MCP — when to use each, trade-offs, and pitfalls.",
+    "accent": "amber",
+    "order": 5
+  },
+  {
+    "id": "vector-search",
+    "name": "Vector Search & Embeddings",
+    "shortName": "Vectors",
+    "description": "Embedding models, similarity, ANN indexes (HNSW/IVF), hybrid search, reranking, dimension trade-offs.",
+    "accent": "cyan",
+    "order": 6
+  },
+  {
+    "id": "evaluation",
+    "name": "LLM Evaluation",
+    "shortName": "Eval",
+    "description": "Offline vs online eval, golden sets, LLM-as-judge, RAG metrics (faithfulness, relevance), agent trajectory evaluation, A/B testing.",
+    "accent": "teal",
+    "order": 7
+  },
+  {
+    "id": "mlops",
+    "name": "MLOps & LLMOps",
+    "shortName": "LLMOps",
+    "description": "Deployment, observability, tracing, evaluation pipelines, prompt versioning, cost monitoring, drift, model lifecycle.",
+    "accent": "sky",
+    "order": 8
+  },
+  {
+    "id": "safety",
+    "name": "Safety & Responsible AI",
+    "shortName": "Safety",
+    "description": "Prompt injection, jailbreaks, PII handling, content filters, bias, hallucination mitigation, red-teaming, governance.",
+    "accent": "rose",
+    "order": 9
+  },
+  {
+    "id": "foundations",
+    "name": "ML / DL Foundations",
+    "shortName": "Foundations",
+    "description": "Core ML/DL concepts every AI engineer should hold: gradient descent, regularization, overfitting, transformers, fine-tuning vs RAG.",
+    "accent": "slate",
+    "order": 10
+  },
+  {
+    "id": "python",
+    "name": "Python for AI",
+    "shortName": "Python",
+    "description": "Python language essentials and AI-stack libraries: asyncio, typing, FastAPI, pydantic, pytest — focused on AI engineering.",
+    "accent": "yellow",
+    "order": 11
+  },
+  {
+    "id": "azure-ai",
+    "name": "Azure AI Stack",
+    "shortName": "Azure AI",
+    "description": "Azure OpenAI, AI Search, AI Foundry, Document Intelligence, Content Safety, and how they compose into AI applications.",
+    "accent": "blue",
+    "order": 12
+  },
+  {
+    "id": "system-design",
+    "name": "AI System Design",
+    "shortName": "Design",
+    "description": "End-to-end designs for AI features: scaling, observability, cost, multi-tenancy, resilience, data flow, deployment.",
+    "accent": "fuchsia",
+    "order": 13
+  },
+  {
+    "id": "dotnet",
+    "name": ".NET / C#",
+    "shortName": ".NET",
+    "description": "C# language fundamentals, async/await, LINQ, EF Core, ASP.NET Core, dependency injection, and the broader .NET ecosystem.",
+    "accent": "blue",
+    "order": 14
+  },
+  {
+    "id": "java",
+    "name": "Java & Spring",
+    "shortName": "Java",
+    "description": "Core Java, concurrency, JVM, Spring Boot / Spring Framework, and idiomatic backend patterns.",
+    "accent": "amber",
+    "order": 15
+  },
+  {
+    "id": "azure-platform",
+    "name": "Azure Platform",
+    "shortName": "Azure",
+    "description": "Azure compute and integration services: API Management, Functions, Logic Apps, AKS, Key Vault, IoT, App Service.",
+    "accent": "sky",
+    "order": 16
+  },
+  {
+    "id": "frontend",
+    "name": "Frontend (SPA)",
+    "shortName": "Frontend",
+    "description": "Modern single-page apps with Angular and React: state, rendering, performance, accessibility, and integration patterns.",
+    "accent": "rose",
+    "order": 17
+  },
+  {
+    "id": "migration",
+    "name": "Cloud & Platform Migration",
+    "shortName": "Migration",
+    "description": "Strategies for moving workloads to Azure: AWS→Azure, on-prem→cloud, Strangler Fig, IoT Edge / Greengrass migrations.",
+    "accent": "teal",
+    "order": 18
+  }
+]

@@ -1,4 +1,23 @@
-export type PodId = "pod1" | "pod2" | "pod3";
+export type CategoryId =
+  | "llm-fundamentals"
+  | "prompt-engineering"
+  | "rag"
+  | "agents"
+  | "agent-frameworks"
+  | "evaluation"
+  | "vector-search"
+  | "mlops"
+  | "safety"
+  | "foundations"
+  | "python"
+  | "azure-ai"
+  | "system-design"
+  | "dotnet"
+  | "java"
+  | "azure-platform"
+  | "frontend"
+  | "migration";
+
 export type Difficulty = "easy" | "medium" | "hard" | "expert";
 export type ExperienceBand = "junior" | "mid" | "senior" | "lead";
 export type QuestionType =
@@ -13,19 +32,28 @@ export interface Reference {
   url: string;
 }
 
-export interface Pod {
-  id: PodId;
+export interface Category {
+  id: CategoryId;
   name: string;
   shortName: string;
   description: string;
-  mustHave: string[];
-  goodToHave: string[];
   accent: string; // tailwind color hint
+  order: number;
+}
+
+export interface Track {
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+  categoryIds: CategoryId[];
+  targetQuestionCount?: number;
+  order: number;
 }
 
 export interface Question {
   id: string;
-  podIds: PodId[];
+  categoryIds: CategoryId[];
   topic: string;
   subTopic?: string;
   difficulty: Difficulty;
@@ -45,6 +73,16 @@ export interface EvaluationCriterion {
   id: number;
   title: string;
   description: string;
+}
+
+export interface GlossaryTerm {
+  id: string;
+  term: string;
+  categoryIds: CategoryId[];
+  definition: string;
+  aliases?: string[];
+  related?: string[];
+  references?: Reference[];
 }
 
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
