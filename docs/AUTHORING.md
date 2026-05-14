@@ -40,10 +40,10 @@ Avoid stacking too many `expert` questions — aim ~50% medium, ~25% hard, ~15% 
 
 ## Answer template
 
-Every answer should follow this Markdown structure. Sections are optional only when truly N/A.
+Every answer should follow this Markdown structure. Sections are optional only when truly N/A. Open with **one or two sentences of summary as plain text** — no `TL;DR` label; the lead sentence stands on its own.
 
 ```markdown
-**TL;DR.** One or two sentences. The interviewer should be able to read just this and grade a junior answer.
+One or two sentences of summary. The interviewer should be able to read just this and grade a junior answer.
 
 ## Strong answer
 The full explanation in 3–6 short paragraphs. Use concrete nouns. Avoid filler ("basically", "essentially").
@@ -139,9 +139,9 @@ Return a single JSON object that matches this TypeScript shape:
   estimatedTimeMin: number    // realistic discussion time
 }
 
-Answer Markdown template (sections in this order):
+Answer Markdown template (sections in this order; open with a plain-text summary — no `TL;DR` label):
 
-**TL;DR.** <one or two sentences>
+<one or two sentences of summary, plain text>
 
 ## Strong answer
 <3-6 short paragraphs>
