@@ -16,7 +16,10 @@ export type CategoryId =
   | "java"
   | "azure-platform"
   | "frontend"
-  | "migration";
+  | "migration"
+  | "leadership"
+  | "behavioral"
+  | "staff-plus";
 
 export type Difficulty = "easy" | "medium" | "hard" | "expert";
 export type ExperienceBand = "junior" | "mid" | "senior" | "lead";

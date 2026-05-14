@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getAllQuestions, getCategories, getTracks } from "@/lib/data";
 import { ProgressStats } from "@/components/ProgressStats";
+
+export const metadata: Metadata = {
+  title: "Career tracks · Interview Prep Hub",
+  description:
+    "Skill-set aligned preparation paths: AI Engineer Core, RAG & Azure AI, Agentic AI, Azure Integration, .NET / Java / Python Cloud, plus Engineering Manager and Staff+ IC tracks.",
+};
 
 export default function TracksPage() {
   const tracks = getTracks();

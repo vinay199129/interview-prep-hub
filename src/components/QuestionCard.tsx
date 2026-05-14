@@ -71,6 +71,8 @@ export function QuestionCard({
     >
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={`answer-${q.id}`}
         className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex flex-col gap-2"
       >
         <div className="flex flex-wrap gap-1.5 text-[11px] items-center">
@@ -119,7 +121,10 @@ export function QuestionCard({
       </button>
 
       {open ? (
-        <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-4 space-y-4 bg-slate-50/50 dark:bg-slate-900/40">
+        <div
+          id={`answer-${q.id}`}
+          className="border-t border-slate-200 dark:border-slate-800 px-4 py-4 space-y-4 bg-slate-50/50 dark:bg-slate-900/40"
+        >
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
               Answer

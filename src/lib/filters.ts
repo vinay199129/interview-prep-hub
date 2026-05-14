@@ -12,6 +12,7 @@ export interface Filters {
   difficulties: Difficulty[];
   experienceBands: ExperienceBand[];
   types: QuestionType[];
+  tags: string[];
   search: string;
 }
 
@@ -21,6 +22,7 @@ export const EMPTY_FILTERS: Filters = {
   difficulties: [],
   experienceBands: [],
   types: [],
+  tags: [],
   search: "",
 };
 
@@ -40,6 +42,7 @@ export function applyFilters(questions: Question[], f: Filters): Question[] {
     )
       return false;
     if (f.types.length && !f.types.includes(q.type)) return false;
+    if (f.tags.length && !f.tags.every((t) => q.tags.includes(t))) return false;
     if (term) {
       const hay = [
         q.prompt,

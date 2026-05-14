@@ -11,6 +11,7 @@ import {
   type Question,
 } from "@/lib/types";
 import { MarkdownAnswer } from "./MarkdownAnswer";
+import { ConfirmButton } from "./ConfirmButton";
 import {
   GRADE_BUTTON,
   GRADE_LABEL,
@@ -280,15 +281,12 @@ export function PracticeClient({
         >
           Start session
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (confirm("Reset all SRS progress? This cannot be undone.")) clearAll();
-          }}
-          className="text-xs px-2 py-1 border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40"
-        >
-          Reset all SRS data
-        </button>
+        <ConfirmButton
+          onConfirm={clearAll}
+          label="Reset all SRS data"
+          confirmingLabel="Click again to reset all SRS data"
+          destructive
+        />
       </div>
     </div>
   );

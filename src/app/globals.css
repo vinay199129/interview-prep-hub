@@ -18,21 +18,28 @@ body {
   color: #0f172a;
 }
 
+/* Offset in-page anchor navigation so the sticky header doesn't cover the target. */
+html {
+  scroll-padding-top: 6rem;
+}
+
 html.dark,
 html.dark body {
   background: #020617;
   color: #f1f5f9;
 }
 
-/* Smooth theme switch — only color/background, not transforms. */
-html,
-body,
-header,
-footer,
-article,
-section {
-  transition: background-color 200ms ease, border-color 200ms ease,
-    color 200ms ease;
+/* Smooth theme switch — only color/background, not transforms. Respects reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html,
+  body,
+  header,
+  footer,
+  article,
+  section {
+    transition: background-color 200ms ease, border-color 200ms ease,
+      color 200ms ease;
+  }
 }
 
 /* Visible keyboard focus ring everywhere. */

@@ -22,6 +22,17 @@ import {
   type Status,
   type StatusFilter,
 } from "@/lib/progress";
+import { ShortcutsHelp } from "./ShortcutsHelp";
+import { ConfirmButton } from "./ConfirmButton";
+
+const BROWSE_SHORTCUTS = [
+  { keys: "J / K", action: "Next / previous question" },
+  { keys: "R", action: "Reveal / hide answer" },
+  { keys: "1", action: "Mark Got it" },
+  { keys: "2", action: "Mark Review later" },
+  { keys: "3", action: "Mark Didn't know" },
+  { keys: "?", action: "Show this help" },
+];
 
 const SHORTCUT_STATUS: Record<string, Status> = {
   "1": "known",
@@ -76,13 +87,16 @@ export function BrowseClient({
   const initialFilters = useMemo<Filters>(() => {
     const csv = (key: string) =>
       (searchParams.get(key) ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-    const cats = csv("cat").filter((c) => validCategoryIds.has(c as CategoryId)) as CategoryId[];
+    // accept ?cat= (canonical) or ?cats= (legacy alias used by some shortcut links)
+    const catRaw = csv("cat").length ? csv("cat") : csv("cats");
+    const cats = catRaw.filter((c) => validCategoryIds.has(c as CategoryId)) as CategoryId[];
     return {
       categories: cats.length ? cats : initialBaseCategories,
       topics: csv("topic").filter((t) => validTopics.has(t)),
       difficulties: csv("diff").filter((d) => (DIFFS as string[]).includes(d)) as Difficulty[],
       experienceBands: csv("band").filter((b) => (BANDS as string[]).includes(b)) as ExperienceBand[],
       types: csv("type").filter((t) => (TYPES as string[]).includes(t)) as QuestionType[],
+      tags: csv("tag"),
       search: searchParams.get("q") ?? "",
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,6 +113,7 @@ export function BrowseClient({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { map: progressMap, setStatus, clearAll } = useProgress();
 
@@ -115,6 +130,7 @@ export function BrowseClient({
     if (filters.difficulties.length) params.set("diff", filters.difficulties.join(","));
     if (filters.experienceBands.length) params.set("band", filters.experienceBands.join(","));
     if (filters.types.length) params.set("type", filters.types.join(","));
+    if (filters.tags.length) params.set("tag", filters.tags.join(","));
     if (filters.search.trim()) params.set("q", filters.search.trim());
     if (statusFilter !== "all") params.set("status", statusFilter);
     const qs = params.toString();
@@ -181,9 +197,7 @@ export function BrowseClient({
         if (id) setRevealedIds((prev) => ({ ...prev, [id]: !prev[id] }));
       } else if (key === "?") {
         e.preventDefault();
-        alert(
-          "Keyboard shortcuts:\n  J / K — next / previous question\n  R — reveal / hide answer\n  1 — mark Got it\n  2 — mark Review later\n  3 — mark Didn't know\n  ? — show this help",
-        );
+        setShowShortcuts(true);
       } else if (SHORTCUT_STATUS[e.key]) {
         e.preventDefault();
         const q = visibleQuestions[focusedIndex];
@@ -244,18 +258,16 @@ export function BrowseClient({
               </span>
             </label>
           ))}
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm("Clear progress on all questions? This cannot be undone.")) clearAll();
-            }}
-            className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 underline"
-          >
-            Clear my progress
-          </button>
+          <ConfirmButton
+            onConfirm={clearAll}
+            label="Clear my progress"
+            confirmingLabel="Click again to clear"
+            destructive
+            className="mt-2 self-start"
+          />
         </FilterGroup>
 
-        <FilterGroup label="Category">
+        <FilterGroup label="Category" defaultOpen={filters.categories.length > 0} count={filters.categories.length}>
           {categories.map((c) => (
             <Check
               key={c.id}
@@ -271,7 +283,7 @@ export function BrowseClient({
           ))}
         </FilterGroup>
 
-        <FilterGroup label="Experience band">
+        <FilterGroup label="Experience band" count={filters.experienceBands.length}>
           {BANDS.map((b) => (
             <Check
               key={b}
@@ -287,7 +299,7 @@ export function BrowseClient({
           ))}
         </FilterGroup>
 
-        <FilterGroup label="Difficulty">
+        <FilterGroup label="Difficulty" count={filters.difficulties.length}>
           {DIFFS.map((d) => (
             <Check
               key={d}
@@ -303,7 +315,7 @@ export function BrowseClient({
           ))}
         </FilterGroup>
 
-        <FilterGroup label="Question type">
+        <FilterGroup label="Question type" count={filters.types.length}>
           {TYPES.map((t) => (
             <Check
               key={t}
@@ -316,7 +328,7 @@ export function BrowseClient({
           ))}
         </FilterGroup>
 
-        <FilterGroup label="Topic">
+        <FilterGroup label="Topic" defaultOpen={filters.topics.length > 0} count={filters.topics.length}>
           <div className="space-y-2">
             <div className="relative">
               <input
@@ -391,6 +403,25 @@ export function BrowseClient({
       </aside>
 
       <section className="md:h-full md:overflow-y-auto md:pr-2 space-y-3">
+        {filters.tags.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-slate-500 dark:text-slate-400">Filtered by tag:</span>
+            {filters.tags.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() =>
+                  setFilters((f) => ({ ...f, tags: f.tags.filter((x) => x !== t) }))
+                }
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-brand-300 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/30 text-brand-800 dark:text-brand-100 hover:bg-brand-100 dark:hover:bg-brand-900/50"
+                aria-label={`Remove tag filter: ${t}`}
+              >
+                {t}
+                <span aria-hidden="true">×</span>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="sticky top-0 bg-slate-50 dark:bg-slate-950 py-1 z-[1] flex items-center justify-between gap-3">
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap">
             <span>
@@ -413,11 +444,7 @@ export function BrowseClient({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() =>
-                alert(
-                  "Keyboard shortcuts:\n  J / K — next / previous question\n  R — reveal / hide answer\n  1 — mark Got it\n  2 — mark Review later\n  3 — mark Didn't know\n  ? — show this help",
-                )
-              }
+              onClick={() => setShowShortcuts(true)}
               className="text-[11px] px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
               title="Keyboard shortcuts"
               aria-label="Keyboard shortcuts"
@@ -453,6 +480,11 @@ export function BrowseClient({
           ))
         )}
       </section>
+      <ShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+        shortcuts={BROWSE_SHORTCUTS}
+      />
     </div>
   );
 }
@@ -460,17 +492,31 @@ export function BrowseClient({
 function FilterGroup({
   label,
   children,
+  defaultOpen = true,
+  count,
 }: {
   label: string;
   children: React.ReactNode;
+  defaultOpen?: boolean;
+  count?: number;
 }) {
   return (
-    <fieldset>
-      <legend className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
-        {label}
-      </legend>
-      <div className="space-y-1">{children}</div>
-    </fieldset>
+    <details open={defaultOpen} className="group">
+      <summary className="cursor-pointer list-none flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1 select-none">
+        <span className="inline-flex items-center gap-1">
+          <span className="transition-transform group-open:rotate-90" aria-hidden="true">
+            ▸
+          </span>
+          {label}
+          {typeof count === "number" && count > 0 ? (
+            <span className="ml-1 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-100 text-[10px]">
+              {count}
+            </span>
+          ) : null}
+        </span>
+      </summary>
+      <div className="space-y-1 pt-1">{children}</div>
+    </details>
   );
 }
 

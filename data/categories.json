@@ -142,5 +142,29 @@
     "description": "Strategies for moving workloads to Azure: AWS→Azure, on-prem→cloud, Strangler Fig, IoT Edge / Greengrass migrations.",
     "accent": "teal",
     "order": 18
+  },
+  {
+    "id": "behavioral",
+    "name": "Behavioral & STAR",
+    "shortName": "Behavioral",
+    "description": "STAR-format stories interviewers actually ask: ownership, ambiguity, failure, cross-functional partnership, disagreement, working backwards from customer.",
+    "accent": "purple",
+    "order": 19
+  },
+  {
+    "id": "leadership",
+    "name": "Engineering Leadership",
+    "shortName": "Leadership",
+    "description": "People management loop: hiring, performance, growth, conflict, prioritization, org design, IC→manager transition, partnership with PM/design/data.",
+    "accent": "indigo",
+    "order": 20
+  },
+  {
+    "id": "staff-plus",
+    "name": "Staff+ IC Track",
+    "shortName": "Staff+",
+    "description": "Staff/Principal/Distinguished IC signal: technical strategy, scope, influence-without-authority, architecture review, multiplier effect, RFC/ADR culture.",
+    "accent": "fuchsia",
+    "order": 21
   }
 ]

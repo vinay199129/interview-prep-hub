@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { getCriteria } from "@/lib/data";
+
+export const metadata: Metadata = {
+  title: "Evaluation criteria · Interview Prep Hub",
+  description:
+    "A nine-dimension rubric for scoring engineering interviews — paired with Interviewer Mode for end-to-end candidate evaluation.",
+};
 
 export default function CriteriaPage() {
   const criteria = getCriteria();

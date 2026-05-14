@@ -132,7 +132,8 @@ export function useSrs() {
   const resetCard = useCallback((id: string) => {
     const current = read();
     if (!(id in current)) return;
-    const { [id]: _, ...rest } = current;
+    const { [id]: _removed, ...rest } = current;
+    void _removed;
     write(rest);
     setMap(rest);
     window.dispatchEvent(new Event(EVENT));

@@ -76,5 +76,23 @@
     "categoryIds": ["python", "azure-ai", "rag", "azure-platform", "mlops"],
     "targetQuestionCount": 65,
     "order": 7
+  },
+  {
+    "id": "engineering-manager",
+    "name": "Engineering Manager (AI/Cloud)",
+    "shortName": "Eng Manager",
+    "description": "IC→manager and seasoned-manager prep: people, hiring, performance, conflict, prioritization, org design, and behavioral/STAR for AI/cloud teams.",
+    "categoryIds": ["leadership", "behavioral", "system-design", "safety", "mlops"],
+    "targetQuestionCount": 40,
+    "order": 8
+  },
+  {
+    "id": "staff-plus-ic",
+    "name": "Staff+ IC (Principal / Architect)",
+    "shortName": "Staff+ IC",
+    "description": "Staff, Principal, Distinguished IC and Architect prep: technical strategy, scope, influence-without-authority, architecture review, AI org strategy.",
+    "categoryIds": ["staff-plus", "system-design", "behavioral", "azure-platform", "rag", "agents"],
+    "targetQuestionCount": 40,
+    "order": 9
   }
 ]

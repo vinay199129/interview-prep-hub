@@ -1,11 +1,24 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getAllQuestions, getCategoryById, getCategories } from "@/lib/data";
 import { BrowseClient } from "@/components/BrowseClient";
 import type { CategoryId } from "@/lib/types";
 
 export function generateStaticParams() {
   return getCategories().map((c) => ({ id: c.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const c = getCategoryById(id as CategoryId);
+  if (!c) return { title: "Category not found" };
+  const title = `${c.name} · Interview Prep Hub`;
+  return { title, description: c.description, openGraph: { title, description: c.description } };
 }
 
 export default async function CategoryPage({

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PROFILE_ROLES,
   setProfile,
@@ -10,6 +10,7 @@ import {
   type ProfileRole,
 } from "@/lib/profile";
 import type { ExperienceBand } from "@/lib/types";
+import { useFocusTrap } from "./useFocusTrap";
 
 const BANDS: { id: ExperienceBand; label: string }[] = [
   { id: "junior", label: "Junior (0–2 yrs)" },
@@ -24,6 +25,8 @@ export function WelcomeModal() {
   const [name, setName] = useState("");
   const [role, setRole] = useState<ProfileRole | "">("");
   const [band, setBand] = useState<ExperienceBand | "">("");
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open, () => setOpen(false));
 
   useEffect(() => {
     if (!ready) return;
@@ -59,7 +62,7 @@ export function WelcomeModal() {
       aria-labelledby="welcome-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-card-hover border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+      <div ref={panelRef} className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-card-hover border border-slate-200 dark:border-slate-700 p-6 space-y-4">
         <div>
           <h2
             id="welcome-modal-title"

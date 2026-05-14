@@ -19,6 +19,9 @@ export const CategoryIdSchema = z.enum([
   "azure-platform",
   "frontend",
   "migration",
+  "leadership",
+  "behavioral",
+  "staff-plus",
 ]);
 export const DifficultySchema = z.enum(["easy", "medium", "hard", "expert"]);
 export const ExperienceBandSchema = z.enum(["junior", "mid", "senior", "lead"]);

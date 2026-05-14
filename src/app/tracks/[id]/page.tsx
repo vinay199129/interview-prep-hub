@@ -1,11 +1,24 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { BrowseClient } from "@/components/BrowseClient";
 import { ProgressStats } from "@/components/ProgressStats";
 import { getAllQuestions, getCategories, getTrackById, getTracks } from "@/lib/data";
 
 export function generateStaticParams() {
   return getTracks().map((track) => ({ id: track.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const t = getTrackById(id);
+  if (!t) return { title: "Track not found" };
+  const title = `${t.name} · Interview Prep Hub`;
+  return { title, description: t.description, openGraph: { title, description: t.description } };
 }
 
 export default async function TrackPage({
