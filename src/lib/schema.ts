@@ -85,6 +85,7 @@ export const GlossaryTermSchema = z.object({
   id: z.string().min(1),
   term: z.string().min(1),
   categoryIds: z.array(CategoryIdSchema).min(1),
+  plainEnglish: z.string().min(1).optional(),
   definition: z.string().min(1),
   aliases: z.array(z.string().min(1)).optional(),
   related: z.array(z.string().min(1)).optional(),

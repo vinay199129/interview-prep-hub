@@ -3,93 +3,124 @@
     "id": "llm",
     "term": "Large Language Model (LLM)",
     "categoryIds": ["llm-fundamentals", "foundations"],
-    "definition": "A transformer-based model trained on large text corpora to predict the next token. Modern LLMs (GPT-4o, Claude, Gemini, Llama) generalize to chat, reasoning, code, and tool use via instruction tuning and RLHF.",
+    "plainEnglish": "A very large auto-complete: it's a neural network that has read most of the public internet and learned to predict the next word, so well that it can chat, code, and reason. Think 'ChatGPT, Claude, Gemini' under the hood.",
+    "definition": "A transformer-based neural network with billions of parameters, pre-trained on large text corpora to predict the next token, then aligned to follow instructions via supervised fine-tuning and RLHF. Modern LLMs (GPT-4o, Claude 3.5, Gemini, Llama 3) generalize to chat, reasoning, code, and tool use.",
     "aliases": ["LLM"],
-    "related": ["token", "context-window", "embedding"]
+    "related": ["token", "context-window", "embedding", "transformer"]
+  },
+  {
+    "id": "transformer",
+    "term": "Transformer",
+    "categoryIds": ["llm-fundamentals", "foundations"],
+    "plainEnglish": "The math recipe behind almost every modern AI model. It lets the model look at every word in the input at once and figure out which words matter most to each other.",
+    "definition": "Neural network architecture (Vaswani et al., 2017) built around self-attention, which computes pairwise relevance between all tokens in parallel. Replaced RNNs/LSTMs because it scales better on GPUs and captures long-range dependencies without recurrence.",
+    "related": ["llm", "token", "embedding"]
   },
   {
     "id": "token",
     "term": "Token",
     "categoryIds": ["llm-fundamentals", "foundations"],
-    "definition": "The atomic unit a language model reads and emits. Roughly 0.75 words for English; pricing, context windows, and rate limits are all token-denominated, not word-denominated.",
-    "related": ["context-window"]
+    "plainEnglish": "The unit a model sees. Roughly a syllable or short word — 'unbelievable' might be 3 tokens. You're billed per token, not per word.",
+    "definition": "The atomic unit a language model reads and emits, produced by a tokenizer (BPE, SentencePiece, tiktoken). Roughly 0.75 words for English; pricing, context windows, and rate limits are all token-denominated.",
+    "related": ["context-window", "tokenizer"]
+  },
+  {
+    "id": "tokenizer",
+    "term": "Tokenizer",
+    "categoryIds": ["llm-fundamentals"],
+    "plainEnglish": "The little program that chops your text into the chunks the model actually understands. Different models use different tokenizers, which is why token counts vary by provider.",
+    "definition": "A deterministic algorithm (Byte-Pair Encoding, SentencePiece, Tiktoken, Unigram) that maps strings ↔ integer token IDs. Choice of tokenizer affects vocabulary size, compression, multilingual handling, and the model's character-level behavior.",
+    "related": ["token"]
   },
   {
     "id": "context-window",
     "term": "Context Window",
     "categoryIds": ["llm-fundamentals", "foundations"],
-    "definition": "The maximum number of tokens (input + output) the model can attend to in one request. Hitting the limit forces truncation, summarization, or retrieval. Larger windows trade cost and latency for memory.",
+    "plainEnglish": "How much text the model can read at one time. If your conversation + documents exceed it, older content falls off the back like a sliding window.",
+    "definition": "The maximum number of tokens (input + output) the model can attend to in one request. Hitting the limit forces truncation, summarization, or retrieval. Larger windows trade cost and latency for memory — attention is O(n²) in sequence length without optimizations.",
     "related": ["token", "rag"]
   },
   {
     "id": "embedding",
     "term": "Embedding",
     "categoryIds": ["llm-fundamentals", "vector-search", "rag"],
-    "definition": "A fixed-length numeric vector that represents the semantic meaning of text (or images, code). Similar inputs map to nearby vectors, which is what enables vector search and RAG.",
+    "plainEnglish": "A numeric fingerprint of a piece of text (or an image). Two texts about the same idea get fingerprints that are close together — which is how AI can 'search by meaning' instead of by keyword.",
+    "definition": "A fixed-length dense numeric vector (typically 384–3072 dimensions) that represents the semantic meaning of text, images, or code. Similar inputs map to geometrically nearby vectors, enabling vector search, RAG, clustering, and classification.",
     "related": ["vector-database", "cosine-similarity", "rag"]
   },
   {
     "id": "temperature",
     "term": "Temperature",
     "categoryIds": ["llm-fundamentals", "prompt-engineering"],
-    "definition": "A sampling parameter that controls randomness. 0 = greedy/deterministic, 1 = standard creativity, >1 = more diverse. Use low for extraction/classification, higher for brainstorming.",
+    "plainEnglish": "A 'creativity knob' from 0 to 1+. Crank it down for boring, repeatable answers (extraction, classification). Crank it up for brainstorming and variety.",
+    "definition": "A sampling hyperparameter that scales the logits before softmax: T=0 = greedy/deterministic argmax, T=1 = standard sampling, T>1 = flatter distribution / more diverse. Tune low for extraction/classification, higher for ideation. Often paired with top-p.",
     "related": ["top-p"]
   },
   {
     "id": "top-p",
     "term": "Top-p (Nucleus Sampling)",
     "categoryIds": ["llm-fundamentals"],
-    "definition": "Sample only from the smallest set of tokens whose cumulative probability ≥ p. Often tuned together with temperature; lowering top-p constrains the model more than lowering temperature alone.",
+    "plainEnglish": "Another way to limit the model's word choices. Instead of saying 'pick from the top 50 words', you say 'pick from however many words add up to 90% likelihood'. Often combined with temperature.",
+    "definition": "Sampling strategy that draws only from the smallest set of tokens whose cumulative probability ≥ p. Adapts the candidate set per-step (unlike fixed top-k). Lowering top-p constrains the model more sharply than lowering temperature alone.",
     "related": ["temperature"]
   },
   {
     "id": "rlhf",
-    "term": "RLHF",
+    "term": "Reinforcement Learning from Human Feedback (RLHF)",
     "categoryIds": ["llm-fundamentals", "foundations"],
-    "definition": "Reinforcement Learning from Human Feedback. A fine-tuning step where the base model is aligned to human preferences via a reward model. Modern variants include DPO (Direct Preference Optimization) and Constitutional AI."
+    "plainEnglish": "How a raw LLM gets manners. Humans rate which of two answers is better, those ratings train a 'scorer', and the model is then nudged toward higher-scoring answers. It's why ChatGPT is polite and helpful instead of just rambling.",
+    "definition": "Alignment technique where humans rank model outputs, those rankings train a reward model, and the base LLM is fine-tuned (typically with PPO) to maximize that reward. Newer variants — DPO (Direct Preference Optimization), IPO, KTO, Constitutional AI — skip the explicit reward model.",
+    "aliases": ["RLHF"],
+    "related": ["fine-tuning"]
   },
   {
     "id": "fine-tuning",
     "term": "Fine-tuning",
     "categoryIds": ["llm-fundamentals", "mlops"],
-    "definition": "Continuing training on a smaller, task-specific dataset. Use when prompting + RAG hit a ceiling on tone, format, or domain knowledge. PEFT methods like LoRA make this cheap by training adapter weights instead of the full model.",
-    "aliases": ["LoRA", "PEFT"],
-    "related": ["distillation"]
+    "plainEnglish": "Teaching a general-purpose model your specific style, format, or domain by training it some more on your own examples. Reach for it only after prompting and retrieval have hit a wall.",
+    "definition": "Continuing gradient-based training on a smaller, task-specific dataset. Use when prompting + RAG hit a ceiling on tone, format, or domain knowledge. Parameter-Efficient Fine-Tuning (PEFT) methods like LoRA/QLoRA train tiny adapter weights instead of the full model, cutting cost ~100×.",
+    "aliases": ["LoRA", "QLoRA", "PEFT"],
+    "related": ["distillation", "rlhf"]
   },
   {
     "id": "distillation",
     "term": "Distillation",
     "categoryIds": ["llm-fundamentals", "mlops"],
-    "definition": "Training a smaller, cheaper student model to mimic a larger teacher. Used to compress a stack-of-prompts pipeline into a single fine-tuned small model for production.",
+    "plainEnglish": "Training a small, cheap model to copy a big, expensive one. You get most of the quality at a fraction of the cost — handy when latency or budget is tight.",
+    "definition": "Training a smaller 'student' model to mimic the output distribution (or behavior) of a larger 'teacher'. Used to compress a multi-step prompt pipeline into a single fine-tuned small model for production latency and cost.",
     "related": ["fine-tuning"]
   },
   {
     "id": "structured-output",
     "term": "Structured Output",
     "categoryIds": ["prompt-engineering", "llm-fundamentals"],
-    "definition": "Constraining the model to emit valid JSON / JSON Schema / typed function arguments at decode time, not just by instruction. Eliminates an entire class of parser failures.",
-    "aliases": ["JSON mode", "function calling"],
+    "plainEnglish": "Forcing the model to answer in a specific shape — usually valid JSON that matches your schema — so your code can actually use it without parsing free text.",
+    "definition": "Constraining the decoder to emit text that conforms to a JSON schema, regex, or typed function signature at sampling time (constrained decoding), not just by instruction. Eliminates an entire class of parser failures and is the foundation of reliable tool use.",
+    "aliases": ["JSON mode", "function calling", "constrained decoding"],
     "related": ["tool-use"]
   },
   {
     "id": "few-shot",
     "term": "Few-shot Prompting",
     "categoryIds": ["prompt-engineering"],
-    "definition": "Including 2–8 input/output examples in the prompt to condition format and behavior. Best for shape-of-output (JSON, labels, tone). Diversify the shots — homogeneous examples cause mode collapse.",
+    "plainEnglish": "Show the model 2–8 worked examples before your real question, so it copies the pattern. Great for getting consistent format, tone, or labels.",
+    "definition": "In-context learning technique that includes a handful of input/output exemplars in the prompt to condition format and behavior. Best for shape-of-output tasks (JSON, labels, tone). Diversify the shots — homogeneous examples cause mode collapse and bias toward the shown labels.",
     "related": ["zero-shot", "chain-of-thought"]
   },
   {
     "id": "zero-shot",
     "term": "Zero-shot Prompting",
     "categoryIds": ["prompt-engineering"],
-    "definition": "Just the instruction, no examples. Cheapest and works when the task is well-represented in pretraining (summarize, translate, extract).",
+    "plainEnglish": "Just ask, no examples. Works for tasks the model has seen a million times in training (summarize, translate, label).",
+    "definition": "Prompting with only an instruction and no in-context exemplars. Cheapest and works well when the task is well-represented in pretraining (summarization, translation, extraction). Falls over on novel formats — switch to few-shot.",
     "related": ["few-shot"]
   },
   {
     "id": "chain-of-thought",
     "term": "Chain-of-Thought (CoT)",
     "categoryIds": ["prompt-engineering", "llm-fundamentals"],
-    "definition": "Prompting the model to reason step by step before answering. Lifts accuracy on math and multi-hop tasks. Modern reasoning models do CoT internally, making explicit CoT prompts often redundant.",
+    "plainEnglish": "Tell the model to 'think step by step' before answering. The intermediate steps boost accuracy on math, logic, and multi-step problems. Newer 'reasoning' models do this on their own.",
+    "definition": "Prompting technique that asks the model to verbalize intermediate reasoning steps before the final answer. Lifts accuracy on math, multi-hop QA, and code. Modern reasoning models (o1/o3, DeepSeek-R1, Claude with thinking) do extended CoT internally, making explicit CoT prompts often redundant or counterproductive.",
     "aliases": ["CoT"],
     "related": ["few-shot"]
   },
@@ -97,93 +128,115 @@
     "id": "system-prompt",
     "term": "System Prompt",
     "categoryIds": ["prompt-engineering"],
-    "definition": "The high-priority instruction layer that defines persona, allowed topics, refusal style, and output format. Treated by the model as more authoritative than the user message.",
+    "plainEnglish": "The hidden 'rules of the game' you set before the user ever types. It defines the persona, what topics are off-limits, and the output format.",
+    "definition": "The high-priority instruction role (`system` or `developer`) that defines persona, allowed topics, refusal style, and output format. The model treats it as more authoritative than user turns, though it is not immune to prompt injection.",
     "related": ["prompt-injection"]
   },
   {
     "id": "rag",
     "term": "Retrieval-Augmented Generation (RAG)",
     "categoryIds": ["rag", "vector-search"],
-    "definition": "Fetching relevant context from an external store (vector DB, search index, database) and prepending it to the LLM prompt. Reduces hallucination and lets the model use private/up-to-date data without retraining.",
+    "plainEnglish": "Before answering, the system looks up relevant docs (from your wiki, support tickets, PDFs…) and pastes them into the prompt. That's how an LLM can reliably answer questions about your private or up-to-the-minute data.",
+    "definition": "Architecture pattern that fetches relevant context from an external store (vector index, BM25 search, SQL/graph DB) and prepends it to the LLM prompt. Reduces hallucination and lets the model use private or post-training-cutoff data without retraining. Core building blocks: chunking → embedding → retrieval → (rerank) → generation.",
     "aliases": ["RAG"],
-    "related": ["embedding", "vector-database", "reranker", "hybrid-search"]
+    "related": ["embedding", "vector-database", "reranker", "hybrid-search", "grounding"]
   },
   {
     "id": "vector-database",
     "term": "Vector Database",
     "categoryIds": ["vector-search", "rag"],
-    "definition": "A store optimized for nearest-neighbor search over high-dimensional vectors. Implementations: Azure AI Search (vector index), Postgres + pgvector, Pinecone, Qdrant, Weaviate.",
+    "plainEnglish": "A specialized store for those numeric fingerprints (embeddings). It can answer 'find me the 10 most similar items' really fast, even across millions of records.",
+    "definition": "A datastore optimized for nearest-neighbor search over high-dimensional vectors using ANN indexes. Implementations: Azure AI Search (vector index), Postgres + pgvector, Pinecone, Qdrant, Weaviate, Milvus, Chroma, Redis Vector.",
     "related": ["embedding", "ann", "hybrid-search"]
   },
   {
     "id": "ann",
     "term": "Approximate Nearest Neighbor (ANN)",
     "categoryIds": ["vector-search"],
-    "definition": "Algorithms (HNSW, IVF, ScaNN) that trade exact recall for sub-linear query time on millions+ of vectors. The recall/latency knob is the main thing to tune.",
-    "aliases": ["HNSW", "IVF"]
+    "plainEnglish": "A clever shortcut for 'find me the closest match' that doesn't compare against every record. Gives up a tiny bit of accuracy for huge speedups — essential at scale.",
+    "definition": "Family of algorithms (HNSW, IVF, ScaNN, DiskANN, PQ) that trade exact recall for sub-linear query time on millions–billions of vectors. The recall-vs-latency knob (ef_search, nprobe) is the main thing to tune, plus index build parameters that trade index size and build time.",
+    "aliases": ["HNSW", "IVF", "DiskANN", "ScaNN"]
   },
   {
     "id": "cosine-similarity",
     "term": "Cosine Similarity",
     "categoryIds": ["vector-search"],
-    "definition": "Similarity metric that compares the angle between two vectors (1 = identical direction, 0 = orthogonal). The default for most embedding models; some prefer dot product or Euclidean.",
+    "plainEnglish": "A 0-to-1 score for 'how similar are these two embeddings in direction', ignoring how long the vectors are. 1.0 = same meaning, 0.0 = unrelated.",
+    "definition": "Similarity metric defined as the dot product of two L2-normalized vectors — equivalently the cosine of the angle between them. Scale-invariant in magnitude. The default for most embedding models; some models recommend dot product or Euclidean — always check the model card.",
     "related": ["embedding"]
+  },
+  {
+    "id": "bm25",
+    "term": "BM25 (Best Match 25)",
+    "categoryIds": ["vector-search", "rag"],
+    "plainEnglish": "The classic 'keyword search' scoring formula behind tools like Elasticsearch. Great at finding exact words and rare terms — which is exactly where vector search struggles.",
+    "definition": "A probabilistic bag-of-words ranking function from the BM family, dominant in lexical search engines (Lucene/Elasticsearch/OpenSearch, Azure AI Search keyword mode). Scores docs by TF–IDF-style term weights with length normalization. Complements vector search in hybrid retrieval.",
+    "aliases": ["BM25"],
+    "related": ["hybrid-search"]
   },
   {
     "id": "hybrid-search",
     "term": "Hybrid Search",
     "categoryIds": ["vector-search", "rag"],
-    "definition": "Combining BM25 / keyword search with vector search and merging results (RRF or learned). Beats either signal alone — keywords nail exact terms, vectors handle paraphrase.",
-    "related": ["vector-database", "reranker"]
+    "plainEnglish": "Use keyword search and vector search at the same time, then merge their results. Keywords nail exact terms and codes; vectors handle paraphrase. Together they beat either alone.",
+    "definition": "Retrieval that combines BM25/keyword scoring with vector similarity, fused via Reciprocal Rank Fusion (RRF) or a learned aggregator. Robust to both lexical-heavy queries (product codes, names) and semantic queries (paraphrase, synonym).",
+    "related": ["vector-database", "bm25", "reranker"]
   },
   {
     "id": "reranker",
     "term": "Reranker",
     "categoryIds": ["rag", "vector-search"],
-    "definition": "A second-stage cross-encoder that re-scores the top-k retrieved chunks given the query. Usually lifts answer quality more than swapping the base embedding model.",
+    "plainEnglish": "A second-pass model that re-orders your top-20 search results by reading each one carefully against the query. Slower per document but usually the single biggest quality win in RAG.",
+    "definition": "A cross-encoder model (e.g., Cohere Rerank, BGE-reranker, ms-marco-MiniLM) that re-scores the top-k retrieved chunks given the query, attending to both jointly. Typically lifts answer quality more than swapping the base embedding model, at the cost of an extra inference call per candidate.",
     "related": ["rag", "embedding"]
   },
   {
     "id": "chunking",
     "term": "Chunking",
     "categoryIds": ["rag"],
-    "definition": "Splitting source documents into retrieval units. Strategy (fixed token / sentence / semantic / structural) materially affects retrieval quality. Overlap reduces boundary loss.",
+    "plainEnglish": "Cutting long documents into bite-sized pieces before indexing them. How you cut (by sentence, paragraph, heading, fixed token count) makes or breaks retrieval quality.",
+    "definition": "The pre-indexing step that splits source documents into retrieval units. Strategy — fixed token, recursive character, sentence-aware, semantic, or structural (headings, tables) — materially affects retrieval quality. Overlap between chunks reduces boundary loss; metadata (source, section, page) enables filtering and citations.",
     "related": ["rag", "embedding"]
   },
   {
     "id": "grounding",
     "term": "Grounding",
     "categoryIds": ["rag", "safety"],
-    "definition": "Anchoring an LLM response in retrieved or tool-provided context, ideally with citations. The primary mitigation for hallucination.",
-    "related": ["rag", "hallucination"]
+    "plainEnglish": "Making the model's answer point back to real sources you provided, ideally with citations. The #1 trick to stop it making things up.",
+    "definition": "Anchoring an LLM response in retrieved or tool-provided context, ideally with inline citations to source spans. The primary mitigation for hallucination and a prerequisite for auditability in regulated domains.",
+    "related": ["rag", "hallucination", "faithfulness"]
   },
   {
     "id": "hallucination",
     "term": "Hallucination",
     "categoryIds": ["safety", "evaluation", "llm-fundamentals"],
-    "definition": "Confidently stated output that is not supported by the input or by reality. Caused by missing context, stale parametric knowledge, or format pressure that forces invention.",
+    "plainEnglish": "When the model confidently invents stuff — fake citations, made-up APIs, wrong dates. It happens because it's optimized to keep talking, not to say 'I don't know'.",
+    "definition": "Confidently stated output that is not supported by the input context or by reality. Causes: missing context, stale parametric knowledge, decoder pressure to produce fluent continuations, and rewards for confident answers during training. Mitigations: grounding, abstention prompting, faithfulness checks, output verification.",
     "related": ["grounding", "faithfulness"]
   },
   {
     "id": "agent",
     "term": "Agent",
     "categoryIds": ["agents", "agent-frameworks"],
-    "definition": "An LLM-driven loop that observes state, decides on an action (often a tool call), executes it, and feeds the result back into the next step. Adds non-determinism and cost vs a single prompt — use only when needed.",
+    "plainEnglish": "An LLM that doesn't just answer — it can call tools (search, run code, hit your APIs), see the result, and decide what to do next, in a loop. More powerful, but slower and pricier than a single prompt.",
+    "definition": "An LLM-driven control loop that observes state, decides on an action (typically a tool call with structured arguments), executes it, and feeds the result back into the next step until a stop condition. Introduces non-determinism, latency, and cost amplification — adopt only when a single prompt can't do the job.",
     "related": ["tool-use", "agent-framework", "react"]
   },
   {
     "id": "tool-use",
-    "term": "Tool Use",
+    "term": "Tool Use (Function Calling)",
     "categoryIds": ["agents", "agent-frameworks"],
-    "definition": "Letting the model call typed functions (search, code-exec, DB queries, APIs) with structured arguments. The 'function calling' / 'tools' API on most providers is the production-grade interface.",
+    "plainEnglish": "Giving the model a menu of functions it can call (search the web, query the DB, send email) with strict argument shapes. Modern providers expose this as a first-class API.",
+    "definition": "Letting the model invoke typed functions (search, code-exec, DB queries, HTTP APIs) with structured arguments validated against a schema. The provider-native 'tools' / 'function calling' API is the production-grade interface, layered on top of constrained decoding.",
     "aliases": ["function calling"],
     "related": ["agent", "structured-output"]
   },
   {
     "id": "react",
-    "term": "ReAct",
+    "term": "ReAct (Reason + Act)",
     "categoryIds": ["agents"],
-    "definition": "A prompting pattern that interleaves Reason and Act steps so the model verbalizes its plan before each tool call. Easy to debug; can be replaced by graph-based orchestration in production.",
+    "plainEnglish": "An agent style where the model writes its reasoning out loud — 'I think I need to search for X' — then takes an action, sees the result, and repeats. Easy to debug because you can read the trace.",
+    "definition": "A prompting pattern (Yao et al., 2022) that interleaves Reason (thought) and Act (tool call) steps so the model verbalizes its plan before each tool call and reflects on observations after. Easy to debug; often replaced by graph-based orchestration (LangGraph, MAF workflows) for production reliability.",
     "aliases": ["Reason+Act"],
     "related": ["agent", "tool-use"]
   },
@@ -191,7 +244,8 @@
     "id": "agent-framework",
     "term": "Agent Framework",
     "categoryIds": ["agent-frameworks"],
-    "definition": "A library that takes care of agent plumbing: tool registration, state, retries, traces, multi-agent orchestration. Examples: Microsoft Agent Framework, LangGraph, Semantic Kernel, AutoGen.",
+    "plainEnglish": "A library that handles the boilerplate of running an agent — registering tools, retrying failed calls, tracking state across turns, talking to multiple agents — so you focus on logic, not plumbing.",
+    "definition": "A library that provides agent plumbing: tool registration, conversation state, retries, traces, multi-agent orchestration (handoffs, group chat, graphs). Examples: Microsoft Agent Framework (MAF), LangGraph, Semantic Kernel, AutoGen, CrewAI, Pydantic-AI, OpenAI Agents SDK.",
     "aliases": ["MAF", "LangGraph", "Semantic Kernel", "AutoGen"],
     "related": ["agent"]
   },
@@ -199,147 +253,169 @@
     "id": "mcp",
     "term": "Model Context Protocol (MCP)",
     "categoryIds": ["agents", "agent-frameworks"],
-    "definition": "An open protocol for exposing tools, resources, and prompts to an LLM client over a standard JSON-RPC transport. Lets one server be reused across many agent hosts (Claude, Copilot, custom).",
+    "plainEnglish": "A standard 'USB plug' for AI tools. Build a tool server once (e.g., 'query my GitHub') and any compliant AI host (Claude Desktop, VS Code Copilot, custom apps) can use it.",
+    "definition": "An open Anthropic-led protocol for exposing tools, resources, and prompts to an LLM client over a JSON-RPC transport (stdio, HTTP+SSE, streamable HTTP). Lets one MCP server be reused across many agent hosts (Claude Desktop, GitHub Copilot, ChatGPT, custom). Spec covers auth, sampling, and roots.",
     "aliases": ["MCP"]
   },
   {
     "id": "evaluation",
-    "term": "Evaluation",
+    "term": "Evaluation (Evals)",
     "categoryIds": ["evaluation"],
-    "definition": "Measuring LLM application quality on a fixed set of inputs with a defined rubric. Combines exact-match / regex (deterministic), LLM-as-judge (qualitative), and behavioral metrics (refusal, latency, cost).",
+    "plainEnglish": "Running your AI app against a fixed list of test inputs and scoring the answers, so you can tell whether a prompt change made things better or worse instead of guessing.",
+    "definition": "Measuring LLM application quality on a versioned set of inputs against a defined rubric. Combines deterministic checks (exact match, regex, schema validity), LLM-as-judge (qualitative rubrics), and behavioral metrics (refusal rate, latency, cost, safety category scores). Run in CI on a golden set to gate releases.",
+    "aliases": ["evals"],
     "related": ["llm-as-judge", "golden-set"]
   },
   {
     "id": "golden-set",
     "term": "Golden Set",
     "categoryIds": ["evaluation", "mlops"],
-    "definition": "A curated, version-controlled set of input/expected-output pairs used to gate prompt and model changes. Should cover happy paths, edge cases, and known regressions.",
+    "plainEnglish": "Your curated 'truth' dataset of inputs and the answers you expect. Every prompt or model change has to score well on this before it ships.",
+    "definition": "A curated, version-controlled set of input/expected-output pairs used to gate prompt and model changes in CI. Should cover happy paths, edge cases, known regressions, and adversarial inputs. Grows over time as production incidents are added as fixtures.",
     "related": ["evaluation"]
   },
   {
     "id": "llm-as-judge",
     "term": "LLM-as-Judge",
     "categoryIds": ["evaluation"],
-    "definition": "Using a (usually larger) LLM to score responses against a rubric (faithfulness, helpfulness, tone). Cheaper than human review at scale; needs calibration against humans periodically.",
+    "plainEnglish": "Use a (usually bigger) AI model to grade another model's answers against a rubric — cheaper than paying humans, but you still need humans to spot-check whether the judge is fair.",
+    "definition": "Using a (typically larger or specialized) LLM to score responses against a rubric (faithfulness, helpfulness, tone, safety). Cheaper than human review at scale but susceptible to position bias, verbosity bias, and self-preference; calibrate against human labels periodically and use pairwise rather than absolute scoring where possible.",
     "related": ["evaluation", "faithfulness"]
   },
   {
     "id": "faithfulness",
     "term": "Faithfulness",
     "categoryIds": ["evaluation", "rag", "safety"],
-    "definition": "How well an answer is supported by the provided context. Distinct from helpfulness — an answer can be helpful but unfaithful (or faithful but unhelpful).",
+    "plainEnglish": "Does the answer actually match the sources it cited? An answer can be helpful and still unfaithful (made up) — these are different problems.",
+    "definition": "The degree to which an answer is supported by the provided context. Distinct from helpfulness — an answer can be helpful but unfaithful, or faithful but unhelpful. Measured by NLI-style entailment checks or LLM-as-judge against retrieved spans.",
     "related": ["grounding", "hallucination"]
   },
   {
     "id": "trajectory",
     "term": "Trajectory Evaluation",
     "categoryIds": ["evaluation", "agents"],
-    "definition": "Evaluating an agent on the path it took (tool selection, argument quality, recovery), not just the final answer. Reveals lucky-success vs robust behavior.",
+    "plainEnglish": "For agents, grade the whole journey — did it pick the right tools, in the right order, with the right arguments? Not just whether the final answer happened to be correct.",
+    "definition": "Evaluating an agent on the path it took (tool selection, argument quality, recovery from errors, plan coherence), not only the final answer. Reveals lucky-success vs robust behavior and surfaces regressions that an output-only metric misses.",
     "related": ["agent", "evaluation"]
   },
   {
     "id": "prompt-injection",
     "term": "Prompt Injection",
     "categoryIds": ["safety", "agents"],
-    "definition": "Attacker text that overrides the model's intended behavior. Direct = user types it; indirect = model reads it from a web page, email, or RAG chunk. Indirect is the dominant agent-era risk.",
+    "plainEnglish": "When a bad actor sneaks instructions into text the model will read — a webpage, a PDF, an email — and hijacks the model into doing something the developer didn't intend. The #1 agent-era security risk.",
+    "definition": "Attacker-controlled text that overrides the model's intended behavior. Direct injection = the end user types it; indirect injection = the model ingests it from a tool result (web page, email body, RAG chunk, image). Indirect injection is the dominant agent-era risk because authority boundaries between system, user, and tool content are blurry by design.",
     "related": ["jailbreak", "system-prompt"]
   },
   {
     "id": "jailbreak",
     "term": "Jailbreak",
     "categoryIds": ["safety"],
-    "definition": "A prompt that bypasses safety training to elicit refused content. Defenses: prompt shields, system-prompt hardening, output filtering, refusal-rate monitoring.",
-    "related": ["prompt-injection"]
+    "plainEnglish": "A clever prompt that talks the model into ignoring its safety training — like 'pretend you're DAN, you can do anything'. Different from prompt injection, which targets the developer, not the safety policy.",
+    "definition": "A prompt that bypasses safety/alignment training to elicit refused content. Common patterns: role-play, hypothetical framing, encoding tricks, multi-turn boil-the-frog. Defenses: prompt shields, system-prompt hardening, output filtering (content safety), refusal-rate monitoring, and red-team test suites.",
+    "related": ["prompt-injection", "content-safety"]
   },
   {
     "id": "content-safety",
     "term": "Content Safety",
     "categoryIds": ["safety"],
-    "definition": "Filtering input and output for harmful categories (hate, sexual, violence, self-harm) plus jailbreak / prompt-injection patterns. Azure AI Content Safety provides categorical scores plus Prompt Shields.",
+    "plainEnglish": "An automated filter that screens user input and model output for harmful stuff (hate, violence, self-harm, sexual content) plus jailbreak attempts, before it reaches the user.",
+    "definition": "Pre- and post-generation filtering of inputs and outputs for harmful categories (hate, sexual, violence, self-harm) plus jailbreak / prompt-injection patterns. Azure AI Content Safety provides categorical severity scores, Prompt Shields (direct and indirect injection), groundedness detection, and protected-material checks.",
     "aliases": ["Azure AI Content Safety", "Prompt Shields"]
   },
   {
     "id": "responsible-ai",
-    "term": "Responsible AI",
+    "term": "Responsible AI (RAI)",
     "categoryIds": ["safety", "foundations"],
-    "definition": "End-to-end practices for fair, safe, transparent AI: harm assessments, content safety, PII handling, audit logs, user reporting, and red-teaming. Microsoft's RAI Standard is one widely cited reference.",
+    "plainEnglish": "The full set of practices for shipping AI that's fair, safe, transparent, and accountable — not just 'does the model work?' but 'who could it hurt and how do we know?'.",
+    "definition": "End-to-end practices for fair, reliable, safe, private, inclusive, transparent, and accountable AI: harm assessments, content safety, PII handling, audit logs, user reporting channels, red-teaming, and impact assessments. Microsoft's RAI Standard and the NIST AI RMF are commonly cited reference frameworks.",
     "aliases": ["RAI"]
   },
   {
     "id": "guardrails",
     "term": "Guardrails",
     "categoryIds": ["safety", "agents"],
-    "definition": "Runtime checks around an LLM that block, redact, or rewrite unsafe inputs/outputs and constrain tool use. Layered with model-side safety, not a substitute for it."
+    "plainEnglish": "Runtime checks wrapped around the model that block, redact, or rewrite anything dangerous before it goes out — like a bouncer for the LLM.",
+    "definition": "Runtime checks around an LLM that block, redact, or rewrite unsafe inputs/outputs and constrain tool use (allowed domains, max spend, PII scrubbing, schema validation). Layered with model-side safety training; both are required — neither replaces the other."
   },
   {
     "id": "telemetry",
     "term": "Telemetry",
     "categoryIds": ["mlops", "evaluation"],
-    "definition": "Per-call observability: prompt version, model, tokens in/out, latency, cost, outcome, user feedback. The foundation for diagnosing regressions and reporting on quality.",
+    "plainEnglish": "Logging every call — what prompt version ran, which model, how many tokens, how long it took, what it cost, whether the user thumbs-upped it. The raw material for debugging and improving the app.",
+    "definition": "Per-call observability: prompt version, model, tokens in/out, latency, cost, outcome, user feedback, traces of tool calls. Foundation for diagnosing regressions, A/B testing, and reporting on quality. Common stacks: OpenTelemetry GenAI semconv, Application Insights, Langfuse, Arize Phoenix.",
     "related": ["evaluation"]
   },
   {
     "id": "feature-flag",
     "term": "Feature Flag",
     "categoryIds": ["mlops"],
-    "definition": "A runtime switch that gates a code path (new prompt, new model, new tool) so it can be rolled out gradually and rolled back without a deploy.",
+    "plainEnglish": "A toggle in config (not in code) that turns a new feature on or off for some users. Lets you roll back a bad prompt or model swap without redeploying.",
+    "definition": "A runtime switch that gates a code path (new prompt, new model, new tool, new system message) so it can be rolled out gradually (% of users, specific cohorts) and rolled back without a deploy. Implementations: Azure App Configuration Feature Manager, LaunchDarkly, Unleash.",
     "related": ["canary"]
   },
   {
     "id": "canary",
     "term": "Canary Deployment",
     "categoryIds": ["mlops"],
-    "definition": "Routing a small slice (1–5%) of traffic to a new version, watching paired metrics, and ramping gradually. Reduces blast radius on prompt/model changes.",
+    "plainEnglish": "Send a tiny slice of traffic (1–5%) to the new version, watch the dashboards, and ramp up only if everything looks good. Limits the damage when something breaks.",
+    "definition": "Progressive delivery strategy that routes a small slice of traffic to a new version, monitors paired golden-signal metrics (latency, error rate, cost, quality), and ramps gradually behind automated rollback rules. Reduces blast radius on prompt/model changes.",
     "related": ["feature-flag"]
   },
   {
     "id": "promptops",
     "term": "PromptOps",
     "categoryIds": ["mlops", "prompt-engineering"],
-    "definition": "Treating prompts as production artifacts: versioned in git, evaluated in CI on a golden set, rolled out behind a flag, observed in production.",
+    "plainEnglish": "Treat prompts the way you treat code — versioned in git, reviewed in PRs, tested in CI, rolled out behind flags, monitored in production.",
+    "definition": "Operational discipline for treating prompts as production artifacts: versioned in git, evaluated in CI against a golden set, rolled out behind feature flags / canaries, observed via telemetry, and rolled back on metric regressions. Sister discipline to MLOps for parametric models.",
     "related": ["golden-set", "feature-flag"]
   },
   {
     "id": "managed-identity",
-    "term": "Managed Identity",
+    "term": "Managed Identity (MI)",
     "categoryIds": ["azure-platform", "azure-ai"],
-    "definition": "An Entra ID identity attached to an Azure resource so it can authenticate to other services without secrets. Pair with RBAC to grant least-privilege access (e.g., Storage Blob Data Reader).",
-    "aliases": ["MSI"]
+    "plainEnglish": "An identity Azure attaches to your resource (a VM, App Service, Function…) so it can log into other Azure services without you storing any passwords or keys. Pair it with RBAC and you've eliminated a whole class of leaked secrets.",
+    "definition": "An Entra ID service principal automatically managed by Azure and attached to a resource (system-assigned) or shared across resources (user-assigned). Grants tokens without stored secrets via IMDS. Pair with RBAC to grant least-privilege access (e.g., Storage Blob Data Reader, Cognitive Services OpenAI User).",
+    "aliases": ["MSI", "MI"]
   },
   {
     "id": "azure-openai",
-    "term": "Azure OpenAI Service",
+    "term": "Azure OpenAI Service (AOAI)",
     "categoryIds": ["azure-ai"],
-    "definition": "Azure-hosted OpenAI models (GPT, embeddings, Whisper, image) with VNet integration, content safety, customer-managed keys, and regional residency. Same API surface as OpenAI.",
-    "aliases": ["AOAI"]
+    "plainEnglish": "Microsoft's Azure-hosted version of OpenAI's models (GPT-4o, embeddings, Whisper, image generation). Same API as OpenAI, but with enterprise extras: your VNet, your region, your encryption keys.",
+    "definition": "Azure-hosted OpenAI models (GPT-4o/4.1, o-series reasoning, embeddings, Whisper, DALL·E, GPT-image) deployed under Microsoft's data-residency, VNet integration, customer-managed keys, content safety, and Entra-based auth. Same API surface as OpenAI's public endpoint, billed through Azure.",
+    "aliases": ["AOAI", "Azure OpenAI"]
   },
   {
     "id": "azure-ai-search",
     "term": "Azure AI Search",
     "categoryIds": ["azure-ai", "vector-search", "rag"],
-    "definition": "Managed search service with BM25 + vector + semantic ranking + integrated vectorization. The default RAG index for Azure-native solutions.",
+    "plainEnglish": "Microsoft's managed search service. Does keyword, vector, and 'semantic' (re-ranked) search out of the box, so it's the default index behind most Azure-native RAG apps.",
+    "definition": "Managed search service offering BM25 keyword search + vector search + semantic ranking (L2 re-ranker) + integrated vectorization (built-in skillsets that chunk and embed during indexing). The default RAG retrieval layer for Azure-native solutions; supports hybrid + RBAC + private endpoints.",
     "aliases": ["Azure Cognitive Search"],
     "related": ["rag", "hybrid-search"]
   },
   {
     "id": "foundry",
-    "term": "Microsoft Foundry",
+    "term": "Microsoft Foundry (Azure AI Foundry)",
     "categoryIds": ["azure-ai", "agent-frameworks"],
-    "definition": "Microsoft's unified platform for building, evaluating, and operating AI apps and agents — model catalog, projects, hosted agents, evaluation, tracing, content safety.",
-    "aliases": ["Azure AI Foundry"]
+    "plainEnglish": "Microsoft's one-stop platform for building and running AI apps and agents — picking models, hosting agents, evaluating them, watching them in production. It's the successor to Azure AI Studio.",
+    "definition": "Microsoft's unified platform for building, evaluating, and operating AI apps and agents — model catalog (OpenAI + open weights + partners), projects, hosted agents, evaluation, tracing, content safety, and the Agent Service. Replaces and extends Azure AI Studio.",
+    "aliases": ["Azure AI Foundry", "AI Foundry"]
   },
   {
     "id": "streaming",
     "term": "Streaming",
     "categoryIds": ["llm-fundamentals", "frontend"],
-    "definition": "Returning model output token-by-token over SSE or chunked HTTP so the user sees progress. Reduces perceived latency; requires care with proxy buffering and parser-tolerant rendering.",
+    "plainEnglish": "Showing words as the model produces them, instead of waiting for the full answer. The text-typing effect you see in ChatGPT. Makes apps feel ~3× faster even when total time is the same.",
+    "definition": "Returning model output token-by-token over Server-Sent Events or chunked HTTP so the user sees progress in real time. Reduces perceived latency dramatically; requires care with proxy buffering (disable Nagle / nginx buffering), partial-JSON parsing, and error handling mid-stream.",
     "related": ["server-sent-events"]
   },
   {
     "id": "server-sent-events",
     "term": "Server-Sent Events (SSE)",
     "categoryIds": ["frontend"],
-    "definition": "A one-way text/event-stream HTTP transport. The simplest production transport for streaming LLM responses to a browser. Disable proxy buffering or chunks queue up.",
+    "plainEnglish": "A simple one-way 'tap' from server to browser over plain HTTP. Easier than WebSockets and exactly what you need to stream LLM tokens to a web page.",
+    "definition": "A one-way `text/event-stream` HTTP transport with built-in reconnect and event IDs. The simplest production transport for streaming LLM responses to a browser. Disable proxy buffering (`X-Accel-Buffering: no`, `nginx proxy_buffering off`) or chunks queue up and defeat the point.",
     "aliases": ["SSE"],
     "related": ["streaming"]
   },
@@ -347,28 +423,32 @@
     "id": "idempotency",
     "term": "Idempotency",
     "categoryIds": ["azure-platform", "system-design"],
-    "definition": "Property where repeated requests produce the same effect as a single request. Critical for retries, queue consumers, and webhooks. Implement with an idempotency key + a dedupe store.",
+    "plainEnglish": "If you accidentally send the same request twice (network blip, retry), you still get the same result — no double-charges, no duplicate emails. Essential for any retried operation.",
+    "definition": "Property where repeated requests produce the same effect as a single request. Critical for retries, queue consumers, webhooks, and 'at-least-once' message delivery. Implementation: client-supplied idempotency key + a dedupe store with a TTL (Redis, Cosmos with TTL, table storage).",
     "related": ["dlq"]
   },
   {
     "id": "dlq",
     "term": "Dead-Letter Queue (DLQ)",
     "categoryIds": ["azure-platform", "system-design"],
-    "definition": "A side queue that captures messages that failed processing after their max delivery attempts. Inspect, fix, and replay; never silently drop.",
+    "plainEnglish": "A 'parking lot' queue for messages that keep failing. Instead of looping forever or silently dropping them, they land here for a human to inspect, fix, and replay.",
+    "definition": "A side queue/topic that captures messages that failed processing after their max delivery attempts. First-class on Service Bus, Event Grid, Storage Queues, SQS. Operational practice: alert on DLQ depth, inspect with a viewer, fix root cause, replay; never silently drop.",
     "aliases": ["DLQ"]
   },
   {
     "id": "well-architected",
     "term": "Well-Architected Framework (WAF)",
     "categoryIds": ["azure-platform", "system-design", "foundations"],
-    "definition": "Microsoft's five pillars for cloud workloads: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency. Use as a checklist when reviewing or designing.",
+    "plainEnglish": "Microsoft's checklist of best practices for cloud workloads, organized into five 'pillars' — reliability, security, cost, ops, performance. Useful as a review framework, not as a deployment tool.",
+    "definition": "Microsoft's five pillars for cloud workloads: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency. Used via the WAF Review tool, workload-specific guides (AI, mission-critical, SaaS), and AzQR assessments. Note: distinct from 'Web Application Firewall' (also WAF).",
     "aliases": ["WAF"]
   },
   {
     "id": "authn",
     "term": "Authentication (AuthN)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Proving who a principal is. Mechanisms: passwords + MFA, federated SSO (OIDC/SAML), client certs, mTLS, API keys. Outputs proof — a session, a JWT, or a TLS-verified identity.",
+    "plainEnglish": "Proving who you are — username + password, MFA, an SSO login, a client certificate. Answers the question 'who is this?'.",
+    "definition": "Proving the identity of a principal (user, service, device). Mechanisms: passwords + MFA, federated SSO (OIDC/SAML/WS-Fed), client certificates, mTLS, API keys. Outputs verified proof — a session, a JWT, or a TLS-verified peer identity — passed downstream to authorization.",
     "aliases": ["AuthN"],
     "related": ["authz", "oidc", "jwt"]
   },
@@ -376,22 +456,26 @@
     "id": "authz",
     "term": "Authorization (AuthZ)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Deciding what an authenticated principal is allowed to do on which resource. Models include RBAC (roles), ABAC (attributes/policy), and ReBAC (relationships). Always evaluated server-side, on the resource.",
+    "plainEnglish": "Once you know who someone is, deciding what they're allowed to do. 'Can Alice delete this file?' That's authz, not authn.",
+    "definition": "Deciding what an authenticated principal is allowed to do on which resource. Models: RBAC (roles), ABAC (attributes/policy, e.g., OPA/Cedar), ReBAC (relationships, e.g., Zanzibar/SpiceDB). Always evaluated server-side, on the resource owner, never trusting the client.",
     "aliases": ["AuthZ"],
     "related": ["authn", "rbac"]
   },
   {
     "id": "oauth",
-    "term": "OAuth 2.0",
+    "term": "OAuth 2.0 (Open Authorization)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Standard for delegated authorization — a third-party app obtains a scoped, expiring access token to call an API on a user's behalf, without ever seeing the user's password. Modern flows: Authorization Code + PKCE, Client Credentials, On-Behalf-Of, Device Code.",
+    "plainEnglish": "The standard 'Log in with Google / Microsoft / GitHub' protocol. It lets an app get a temporary, limited ticket to call APIs on your behalf — without ever seeing your password.",
+    "definition": "IETF standard for delegated authorization (RFC 6749 + RFC 9700 BCP). A third-party client obtains a scoped, expiring access token from an authorization server to call a resource server on the user's behalf. Modern flows: Authorization Code + PKCE, Client Credentials, On-Behalf-Of, Device Code, Refresh Token. Implicit and ROPC are deprecated.",
+    "aliases": ["OAuth2"],
     "related": ["oidc", "pkce", "obo", "access-token"]
   },
   {
     "id": "oidc",
     "term": "OpenID Connect (OIDC)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Authentication layer built on OAuth 2.0. Adds an ID token (JWT describing the user) and standard discovery (`.well-known/openid-configuration`) so apps can verify *who* signed in.",
+    "plainEnglish": "An identity layer on top of OAuth 2.0. OAuth says 'this app can call your APIs'; OIDC also tells the app 'and here's who the logged-in user is' via an ID token.",
+    "definition": "Authentication layer built on OAuth 2.0. Adds an ID token (JWT describing the authenticated user — `sub`, `name`, `email`, `aud`, `iss`, `nonce`), a UserInfo endpoint, and standardized discovery (`.well-known/openid-configuration` + JWKS) so apps can verify *who* signed in.",
     "aliases": ["OIDC"],
     "related": ["oauth", "id-token", "jwt"]
   },
@@ -399,7 +483,8 @@
     "id": "pkce",
     "term": "Proof Key for Code Exchange (PKCE)",
     "categoryIds": ["system-design", "frontend", "safety"],
-    "definition": "Extension to OAuth Authorization Code flow that prevents authorization-code interception. The client generates a code verifier + challenge; only the verifier can redeem the code. Mandatory for public clients (SPAs, mobile, native).",
+    "plainEnglish": "An extra check during 'Login with X' that prevents attackers from stealing the authorization code mid-flow. Mandatory for browser, mobile, and desktop apps that can't keep a secret.",
+    "definition": "RFC 7636 extension to the OAuth Authorization Code flow that prevents authorization-code interception. The client generates a high-entropy `code_verifier`, sends its SHA-256 hash (`code_challenge`) to the auth server, and presents the verifier when redeeming the code. Mandatory for public clients (SPAs, mobile, native); recommended for confidential clients too.",
     "aliases": ["PKCE"],
     "related": ["oauth"]
   },
@@ -407,7 +492,8 @@
     "id": "jwt",
     "term": "JSON Web Token (JWT)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "A signed, base64url-encoded `header.payload.signature` token used to convey identity and claims. Validation must check signature, algorithm (pinned), issuer, audience, and expiry — never trust the payload alone.",
+    "plainEnglish": "A digitally-signed token that looks like three base64 strings joined by dots. It carries claims like 'I'm Alice, expires at 12:30' that any service can verify without calling back to the login server.",
+    "definition": "A signed (and optionally encrypted) `header.payload.signature` token (RFC 7519) used to convey identity and claims. Validation MUST check signature, algorithm (pinned — reject `none` and unexpected algs), `iss`, `aud`, `exp`, `nbf`, and `kid` against the JWKS. Never trust the payload before validating.",
     "aliases": ["JWT"],
     "related": ["jwks", "access-token", "id-token", "oauth"]
   },
@@ -415,7 +501,8 @@
     "id": "jwks",
     "term": "JSON Web Key Set (JWKS)",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "A public endpoint published by an OIDC issuer (`/.well-known/jwks.json`) listing the public keys used to sign JWTs. Clients fetch and cache keys; the JWT's `kid` header selects the right one. Enables zero-downtime key rotation.",
+    "plainEnglish": "A list of public keys the login provider publishes at a well-known URL. Your service downloads them to verify JWT signatures, and the provider can swap keys without breaking anything.",
+    "definition": "A JSON document at a public endpoint (e.g., `/.well-known/jwks.json`) listing the public keys used to sign JWTs (RFC 7517). Clients fetch and cache keys with TTL; the JWT's `kid` header selects the right one. Enables zero-downtime signing-key rotation.",
     "aliases": ["JWKS"],
     "related": ["jwt", "oidc"]
   },
@@ -423,35 +510,40 @@
     "id": "access-token",
     "term": "Access Token",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "A short-lived credential (typically 60–90 min) presented to a resource server to prove the caller is authorized for a specific scope. Often a JWT in OIDC ecosystems; opaque per the OAuth spec.",
+    "plainEnglish": "The short-lived ticket your app sends to an API to prove 'I'm allowed to do this'. Usually expires in an hour; you get a new one with a refresh token.",
+    "definition": "A short-lived credential (typically 60–90 min) presented to a resource server in the `Authorization: Bearer …` header to prove the caller is authorized for specific scopes. Often a JWT in OIDC ecosystems, but the OAuth 2.0 spec defines it as opaque — resource servers should not introspect a token they did not issue.",
     "related": ["jwt", "oauth", "refresh-token", "bearer-token"]
   },
   {
     "id": "id-token",
     "term": "ID Token",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "OIDC-defined JWT that describes the authenticated user (`sub`, `name`, `email`). Consumed by the *client* to know who signed in — not used to call APIs (that's the access token).",
+    "plainEnglish": "An OIDC token that tells your app 'this user just logged in, and here's their name and email'. Different from an access token — never send an ID token to an API as proof of authorization.",
+    "definition": "OIDC-defined JWT (`token_type` not Bearer in usage) that describes the authenticated user — `sub`, `aud` (the client), `name`, `email`, `auth_time`, `nonce`. Consumed by the *client* to know who signed in; not used to call APIs (that's the access token's job).",
     "related": ["oidc", "jwt", "access-token"]
   },
   {
     "id": "refresh-token",
     "term": "Refresh Token",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Long-lived credential used to obtain new access tokens without re-prompting the user. Must be stored securely, rotated on every use, and revocation-checked. Refresh-token reuse detection should invalidate the entire token family.",
+    "plainEnglish": "A longer-lived credential the app trades for a fresh access token when the old one expires, so the user isn't prompted to log in every hour.",
+    "definition": "Long-lived credential issued alongside an access token, exchanged at the auth server for new access tokens without re-prompting the user. Must be stored securely (httpOnly cookie or secure storage), rotated on every use, and revocation-checked. Refresh-token reuse detection should invalidate the entire token family.",
     "related": ["access-token", "oauth"]
   },
   {
     "id": "bearer-token",
     "term": "Bearer Token",
     "categoryIds": ["system-design", "safety"],
-    "definition": "Any token whose mere possession authorizes the caller — `Authorization: Bearer <token>`. Whoever holds it can use it, so transport security (HTTPS), short lifetimes, and safe storage are non-negotiable.",
+    "plainEnglish": "Any token where 'whoever holds it, gets in' — like a movie ticket. That's why HTTPS, short lifetimes, and safe storage matter so much.",
+    "definition": "Any token whose mere possession authorizes the caller — presented as `Authorization: Bearer <token>` (RFC 6750). No additional cryptographic binding to the client by default (cf. mTLS-bound tokens, DPoP), so transport security (HTTPS), short lifetimes, and safe storage are non-negotiable.",
     "related": ["access-token", "jwt"]
   },
   {
     "id": "obo",
-    "term": "On-Behalf-Of (OBO) Flow",
+    "term": "On-Behalf-Of Flow (OBO)",
     "categoryIds": ["azure-platform", "azure-ai", "safety"],
-    "definition": "OAuth flow where a service that received a user's access token exchanges it for a new token to call a downstream API *as that user*. Preserves user identity and per-user permissions through service chains.",
+    "plainEnglish": "When your API has a user's token and needs to call another API as that same user, it 'trades up' for a new token in OBO. Preserves who the real user is through a chain of services.",
+    "definition": "OAuth 2.0 token-exchange flow where a service that received a user's access token exchanges it (with its own client credentials) for a new access token to call a downstream API *as that user*. Preserves user identity and per-user permissions through service chains; supported natively by Microsoft Entra ID.",
     "aliases": ["OBO"],
     "related": ["oauth", "access-token", "managed-identity"]
   },
@@ -459,50 +551,59 @@
     "id": "scope",
     "term": "OAuth Scope",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "Named permission requested by an OAuth client (`Mail.Read`, `https://cognitiveservices.azure.com/.default`). Granted via user or admin consent and embedded in the access token. Resource servers enforce scopes per operation.",
+    "plainEnglish": "A named permission the app asks for — 'Mail.Read', 'user.profile'. The user (or admin) consents, and that permission gets baked into the access token.",
+    "definition": "Named permission requested by an OAuth client (e.g., `Mail.Read`, `https://cognitiveservices.azure.com/.default`). Granted via user or admin consent and embedded in the access token's `scp`/`scope` claim (delegated) or `roles` claim (app-only). Resource servers enforce required scopes per operation.",
     "related": ["oauth", "claim"]
   },
   {
     "id": "claim",
     "term": "Claim",
     "categoryIds": ["system-design", "azure-platform", "safety"],
-    "definition": "A statement carried inside a token — `iss`, `aud`, `exp`, `sub`, `tid`, `roles`, custom app claims. Authorization decisions read claims; security depends on validating the token before trusting any claim.",
+    "plainEnglish": "A single fact carried inside a token — 'who issued it', 'who it's for', 'when it expires', 'what role the user has'. Authorization decisions read these.",
+    "definition": "A statement carried inside a token — standard (`iss`, `aud`, `exp`, `nbf`, `sub`, `tid`) or custom (`roles`, `groups`, app-specific). Authorization decisions read claims; security depends on validating the token's signature and standard claims before trusting any business claim.",
     "related": ["jwt", "scope"]
   },
   {
     "id": "rbac",
     "term": "Role-Based Access Control (RBAC)",
     "categoryIds": ["azure-platform", "system-design", "safety"],
-    "definition": "Authorization model that assigns permissions via roles (e.g., `Reader`, `Contributor`, `Cognitive Services OpenAI User`) at a scope (management group → subscription → resource group → resource). Inherits downward; assign at the narrowest scope.",
+    "plainEnglish": "Permissions handed out via roles like 'Reader' or 'Contributor', assigned at a scope (this resource, this resource group, this subscription). Inherits downward — assign at the narrowest scope you can.",
+    "definition": "Authorization model that grants permissions via role assignments (built-in like `Reader`, `Contributor`, `Cognitive Services OpenAI User`, or custom) at a scope (management group → subscription → resource group → resource). Assignments inherit downward; follow least privilege by assigning at the narrowest scope.",
     "aliases": ["RBAC"],
     "related": ["authz", "managed-identity"]
   },
   {
     "id": "workload-identity-federation",
-    "term": "Workload Identity Federation",
+    "term": "Workload Identity Federation (WIF)",
     "categoryIds": ["azure-platform", "safety"],
-    "definition": "Trust an external OIDC issuer (GitHub Actions, AWS, GitLab, AKS) so its short-lived tokens can be exchanged for Azure access tokens — eliminating stored client secrets in CI/CD and external workloads.",
+    "plainEnglish": "Lets external workloads (GitHub Actions, AWS roles, GitLab CI, an AKS pod, Google Cloud) log into Azure without storing a client secret. They present their own provider's token, Entra trusts it, and hands back an Azure token.",
+    "definition": "Trust configuration on an Entra app registration that accepts an external OIDC issuer (GitHub Actions, AWS STS, GitLab, AKS, GCP) so its short-lived tokens can be exchanged for Azure access tokens via OAuth 2.0 token exchange — eliminating stored client secrets in CI/CD and external workloads.",
+    "aliases": ["WIF"],
     "related": ["managed-identity", "oidc"]
   },
   {
     "id": "default-azure-credential",
     "term": "DefaultAzureCredential",
     "categoryIds": ["azure-platform", "azure-ai"],
-    "definition": "Azure SDK credential that walks an ordered chain (env vars → workload identity → managed identity → CLI/VS) until one returns a token. Convenient for local-dev-to-prod parity; pin to a specific credential in production for predictability.",
+    "plainEnglish": "An Azure SDK helper that 'just works' across environments. Locally it grabs your `az login` creds; in CI it uses env vars; in Azure it uses managed identity. Same code, no `if dev else prod`.",
+    "definition": "Azure Identity SDK credential that walks an ordered chain (environment vars → workload identity → managed identity → Azure CLI → VS / VS Code / Azure PowerShell) until one returns a token. Great for local-dev-to-prod parity; pin to a specific credential (e.g., `ManagedIdentityCredential`) in production for predictability and faster startup.",
     "related": ["managed-identity", "workload-identity-federation"]
   },
   {
     "id": "app-registration",
-    "term": "Entra App Registration",
+    "term": "Microsoft Entra App Registration",
     "categoryIds": ["azure-platform", "safety"],
-    "definition": "The global definition of an application in Entra ID — client id, redirect URIs, exposed scopes, requested API permissions, federated credentials. Distinct from the *enterprise application* (service principal), which is the per-tenant instance.",
+    "plainEnglish": "The 'definition' of an application in Entra ID (formerly Azure AD) — its client ID, what URLs it can redirect to after login, what permissions it requests. Distinct from the per-tenant 'enterprise app' (service principal) that actually represents it inside a tenant.",
+    "definition": "The global definition of an application in Microsoft Entra ID — client id, redirect URIs, exposed scopes / app roles, requested API permissions, certificates / client secrets, federated credentials. Distinct from the *enterprise application* (service principal), which is the per-tenant instance created when the app is consented to.",
+    "aliases": ["Entra App Registration", "Azure AD App"],
     "related": ["oauth", "oidc"]
   },
   {
     "id": "key-vault-reference",
     "term": "Key Vault Reference",
     "categoryIds": ["azure-platform", "safety"],
-    "definition": "App-setting syntax (`@Microsoft.KeyVault(SecretUri=...)`) that lets App Service / Functions / Container Apps read a secret from Key Vault at runtime via Managed Identity, instead of storing the raw value in config.",
+    "plainEnglish": "A magic placeholder you put in an App Service / Functions / Container Apps setting that says 'fetch this secret from Key Vault at runtime'. Keeps real secret values out of your config and git history.",
+    "definition": "App-setting syntax (`@Microsoft.KeyVault(SecretUri=https://…vault.azure.net/secrets/foo/version)`) that lets App Service, Functions, and Container Apps resolve a secret from Key Vault at runtime via the app's Managed Identity, instead of storing the raw value in config. Caches with TTL; rotation requires app restart or `versionless` reference.",
     "related": ["managed-identity", "rbac"]
   }
 ]

@@ -41,6 +41,7 @@ export function GlossaryClient({ terms, categories, questions }: Props) {
       if (!q) return true;
       const haystack = [
         t.term,
+        t.plainEnglish ?? "",
         t.definition,
         ...(t.aliases ?? []),
       ]
@@ -152,9 +153,26 @@ export function GlossaryClient({ terms, categories, questions }: Props) {
                     })}
                   </div>
                 </div>
-                <p className="text-sm text-slate-700 dark:text-slate-300 mt-2 leading-relaxed">
-                  {t.definition}
-                </p>
+                {t.plainEnglish && (
+                  <div className="mt-2 rounded-md border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900/40 px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-wide font-semibold text-brand-700 dark:text-brand-200">
+                      In plain English
+                    </p>
+                    <p className="text-sm text-slate-800 dark:text-slate-100 leading-relaxed mt-0.5">
+                      {t.plainEnglish}
+                    </p>
+                  </div>
+                )}
+                <div className="mt-2">
+                  {t.plainEnglish && (
+                    <p className="text-[10px] uppercase tracking-wide font-semibold text-slate-500 dark:text-slate-400">
+                      Technical
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
+                    {t.definition}
+                  </p>
+                </div>
                 {t.related && t.related.length > 0 && (
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                     Related:{" "}

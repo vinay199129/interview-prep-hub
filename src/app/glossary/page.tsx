@@ -23,9 +23,13 @@ export default function GlossaryPage() {
       <h1 className="text-2xl font-semibold">Glossary</h1>
       <p className="text-slate-600 dark:text-slate-300">
         A quick reference for the core terminology you&apos;ll see across
-        these questions. Use the search box or filter by category. Each
-        entry links back to the questions that touch the same topic so you
-        can drill from a term into practice prompts.
+        these questions. Every entry has two views: a{" "}
+        <strong>plain-English</strong> explanation aimed at beginners (and
+        anyone who just needs the gist), and a <strong>technical</strong>{" "}
+        definition with the precision an interviewer expects. Acronyms are
+        spelled out in the heading. Use the search box or category filters,
+        and follow the links at the bottom of each card into practice
+        questions on that topic.
       </p>
       <Suspense fallback={<ListSkeleton />}>
         <GlossaryClient

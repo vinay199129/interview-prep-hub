@@ -82,6 +82,7 @@ export interface GlossaryTerm {
   id: string;
   term: string;
   categoryIds: CategoryId[];
+  plainEnglish?: string;
   definition: string;
   aliases?: string[];
   related?: string[];
