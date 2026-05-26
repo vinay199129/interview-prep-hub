@@ -59,6 +59,7 @@ export default function RootLayout({
               <div className="flex-1 min-w-0 flex gap-4 overflow-x-auto whitespace-nowrap scrollbar-thin -mx-1 px-1 [mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]">
                 <NavLink href="/browse">Browse</NavLink>
                 <NavLink href="/tracks">Tracks</NavLink>
+                <NavLink href="/roles">Roles</NavLink>
                 <NavLink href="/leadership">Leadership</NavLink>
                 <NavLink href="/patterns">Patterns</NavLink>
                 <NavLink href="/interview">Interview</NavLink>

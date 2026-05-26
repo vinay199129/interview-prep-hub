@@ -110,3 +110,40 @@ export const TYPE_LABEL: Record<QuestionType, string> = {
   "system-design": "System Design",
   debugging: "Debugging",
 };
+
+export type RoleFocusLevel = "ic" | "senior-ic" | "staff" | "lead" | "manager";
+
+export interface RoleFocusLane {
+  id: string;
+  name: string;
+  timebox: string;
+  description: string;
+  questionIds: string[];
+}
+
+export interface RoleFocus {
+  id: string;
+  name: string;
+  company: string;
+  roleTitle: string;
+  level: RoleFocusLevel;
+  jdSummary: string; // markdown
+  mustHaveSkills: string[];
+  niceToHaveSkills: string[];
+  categoryIds: CategoryId[];
+  tagFilters: string[];
+  curatedQuestionIds: string[];
+  revisionLanes: RoleFocusLane[];
+  glossaryIds: string[];
+  behavioralStoryIds: string[];
+  references: Reference[];
+  order: number;
+}
+
+export const ROLE_FOCUS_LEVEL_LABEL: Record<RoleFocusLevel, string> = {
+  ic: "IC",
+  "senior-ic": "Senior IC",
+  staff: "Staff",
+  lead: "Lead / Principal",
+  manager: "Manager",
+};

@@ -3,6 +3,7 @@ import {
   getCategories,
   getCriteria,
   getGlossary,
+  getRoleFocuses,
   getTracks,
 } from "../src/lib/data";
 
@@ -29,6 +30,7 @@ function main() {
   const criteria = getCriteria();
   const questions = getAllQuestions();
   const glossary = getGlossary();
+  const roleFocuses = getRoleFocuses();
 
   const errors: Issue[] = [];
   const warnings: Issue[] = [];
@@ -146,12 +148,53 @@ function main() {
     }
   }
 
+  // Role focus checks
+  const questionIdSet = new Set(questions.map((q) => q.id));
+  for (const rf of roleFocuses) {
+    for (const cid of rf.categoryIds) {
+      if (!categoryIds.has(cid)) {
+        errors.push({ id: rf.id, message: `role focus references unknown category ${cid}` });
+      }
+    }
+    for (const qid of rf.curatedQuestionIds) {
+      if (!questionIdSet.has(qid)) {
+        errors.push({ id: rf.id, message: `role focus references unknown question ${qid}` });
+      }
+    }
+    for (const qid of rf.behavioralStoryIds) {
+      if (!questionIdSet.has(qid)) {
+        errors.push({ id: rf.id, message: `role focus behavioral story id missing: ${qid}` });
+      }
+    }
+    for (const gid of rf.glossaryIds) {
+      if (!glossaryIds.has(gid)) {
+        errors.push({ id: rf.id, message: `role focus glossary id missing: ${gid}` });
+      }
+    }
+    const laneIds = new Set<string>();
+    for (const lane of rf.revisionLanes) {
+      if (laneIds.has(lane.id)) {
+        errors.push({ id: rf.id, message: `duplicate revision lane id ${lane.id}` });
+      }
+      laneIds.add(lane.id);
+      for (const qid of lane.questionIds) {
+        if (!questionIdSet.has(qid)) {
+          errors.push({
+            id: rf.id,
+            message: `lane ${lane.id} references unknown question ${qid}`,
+          });
+        }
+      }
+    }
+  }
+
   // Output
   console.log(`✓ ${categories.length} categories`);
   console.log(`✓ ${tracks.length} career tracks`);
   console.log(`✓ ${criteria.length} evaluation criteria`);
   console.log(`✓ ${glossary.length} glossary terms`);
   console.log(`✓ ${questions.length} questions parsed`);
+  console.log(`✓ ${roleFocuses.length} role focuses`);
 
   for (const c of categories) {
     const count = questions.filter((q) => q.categoryIds.includes(c.id)).length;

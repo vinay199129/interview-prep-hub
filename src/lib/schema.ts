@@ -92,8 +92,36 @@ export const GlossaryTermSchema = z.object({
   references: z.array(ReferenceSchema).optional(),
 });
 
+export const RoleFocusLaneSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  timebox: z.string().min(1),
+  description: z.string().min(1),
+  questionIds: z.array(z.string().min(1)).min(1),
+});
+
+export const RoleFocusSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  company: z.string().min(1),
+  roleTitle: z.string().min(1),
+  level: z.enum(["ic", "senior-ic", "staff", "lead", "manager"]),
+  jdSummary: z.string().min(1),
+  mustHaveSkills: z.array(z.string().min(1)).min(1),
+  niceToHaveSkills: z.array(z.string().min(1)),
+  categoryIds: z.array(CategoryIdSchema).min(1),
+  tagFilters: z.array(z.string().min(1)),
+  curatedQuestionIds: z.array(z.string().min(1)).min(1),
+  revisionLanes: z.array(RoleFocusLaneSchema).min(1),
+  glossaryIds: z.array(z.string().min(1)),
+  behavioralStoryIds: z.array(z.string().min(1)),
+  references: z.array(ReferenceSchema),
+  order: z.number().int().nonnegative(),
+});
+
 export const CategoriesFileSchema = z.array(CategorySchema);
 export const TracksFileSchema = z.array(TrackSchema);
 export const QuestionsFileSchema = z.array(QuestionSchema);
 export const CriteriaFileSchema = z.array(EvaluationCriterionSchema);
 export const GlossaryFileSchema = z.array(GlossaryTermSchema);
+export const RoleFocusesFileSchema = z.array(RoleFocusSchema);

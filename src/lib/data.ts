@@ -6,12 +6,14 @@ import {
   QuestionsFileSchema,
   CriteriaFileSchema,
   GlossaryFileSchema,
+  RoleFocusesFileSchema,
 } from "./schema";
 import type {
   Category,
   Question,
   EvaluationCriterion,
   GlossaryTerm,
+  RoleFocus,
   Track,
 } from "./types";
 
@@ -69,4 +71,19 @@ export function getCategoryById(id: string): Category | undefined {
 
 export function getTrackById(id: string): Track | undefined {
   return getTracks().find((t) => t.id === id);
+}
+
+export function getRoleFocuses(): RoleFocus[] {
+  const data = readJson<unknown>("role-focuses.json");
+  const parsed = RoleFocusesFileSchema.parse(data);
+  const seen = new Set<string>();
+  for (const r of parsed) {
+    if (seen.has(r.id)) throw new Error(`Duplicate role focus id: ${r.id}`);
+    seen.add(r.id);
+  }
+  return [...parsed].sort((a, b) => a.order - b.order);
+}
+
+export function getRoleFocusById(id: string): RoleFocus | undefined {
+  return getRoleFocuses().find((r) => r.id === id);
 }
