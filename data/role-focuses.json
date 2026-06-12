@@ -486,5 +486,335 @@
       }
     ],
     "order": 2
+  },
+  {
+    "id": "dotnet-cloud-engineer-azure",
+    "name": "Senior .NET Cloud Engineer — Azure",
+    "company": "Generic — Azure / .NET stack",
+    "roleTitle": "Senior .NET Cloud Engineer",
+    "level": "senior-ic",
+    "jdSummary": "Senior backend IC building cloud-native services in C# / ASP.NET Core on Azure. Owns API design (APIM), event-driven and serverless workloads (Functions, Logic Apps, Service Bus), containerized services (AKS / Container Apps), identity (managed identity, OAuth/OIDC, Key Vault), and the resilience + observability story. Expected to debug production incidents (async deadlocks, connection-pool exhaustion, latency spikes), apply Well-Architected principles, and mentor on idiomatic async, LINQ, and DI. Strong on system design for regulated, high-availability workloads.",
+    "mustHaveSkills": [
+      "Idiomatic C#: async/await, LINQ, DI, IDisposable, value vs reference semantics",
+      "ASP.NET Core APIs + API Management (policies, versioning, throttling)",
+      "Event-driven + serverless: Azure Functions, Logic Apps, Service Bus, idempotency, DLQ",
+      "Containers: AKS / Container Apps, health probes, autoscaling",
+      "Identity: managed identity, OAuth 2.0 / OIDC, JWT validation, Key Vault references",
+      "Production debugging: deadlocks, thread-pool starvation, connection pools, GC pressure",
+      "System design for HA / multi-region with Well-Architected trade-offs"
+    ],
+    "niceToHaveSkills": [
+      "EF Core query tuning (deferred execution, N+1 avoidance)",
+      "OpenTelemetry tracing + Application Insights",
+      "Bicep / Terraform infra-as-code",
+      "Cost-aware design (consumption vs provisioned)"
+    ],
+    "categoryIds": [
+      "dotnet",
+      "azure-platform",
+      "system-design",
+      "mlops",
+      "behavioral",
+      "leadership",
+      "staff-plus"
+    ],
+    "tagFilters": [
+      "region-global",
+      "pattern-faang",
+      "pattern-bank-fintech",
+      "c#",
+      "async"
+    ],
+    "curatedQuestionIds": [
+      "p1-cs-001",
+      "p1-cs-009",
+      "dotnet-async-deadlock-027",
+      "dotnet-linq-deferred-028",
+      "p1-arch-001",
+      "p1-apim-001",
+      "p1-fn-001",
+      "p1-la-001",
+      "p1-aks-001",
+      "p4-auth-001",
+      "p4-az-001",
+      "debug-prod-001",
+      "expert-sysd-001",
+      "p1-arch-002",
+      "p2-arch-001",
+      "p4-auth-002",
+      "behav-001",
+      "staff-001",
+      "lead-em-001"
+    ],
+    "revisionLanes": [
+      {
+        "id": "cram-30min",
+        "name": "30-min cram",
+        "timebox": "~30 minutes",
+        "description": "The night before: the questions that define the role. Async deadlock, APIM, Functions, identity, a system-design anchor, and a production-debug story.",
+        "questionIds": [
+          "p1-cs-009",
+          "dotnet-async-deadlock-027",
+          "p1-apim-001",
+          "p1-fn-001",
+          "p4-auth-001",
+          "p1-arch-002",
+          "debug-prod-001",
+          "behav-001"
+        ]
+      },
+      {
+        "id": "deep-1day",
+        "name": "1-day deep prep",
+        "timebox": "~6–8 hours",
+        "description": "Full coverage of the JD must-haves: language depth, APIM/Functions/Logic Apps, AKS, identity, resilience, and a multi-region system-design round.",
+        "questionIds": [
+          "p1-cs-001",
+          "p1-cs-009",
+          "dotnet-async-deadlock-027",
+          "dotnet-linq-deferred-028",
+          "p1-arch-001",
+          "p1-apim-001",
+          "p1-fn-001",
+          "p1-la-001",
+          "p1-aks-001",
+          "p4-auth-001",
+          "p4-az-001",
+          "debug-prod-001",
+          "expert-sysd-001",
+          "p1-arch-002",
+          "p2-arch-001",
+          "p4-auth-002"
+        ]
+      },
+      {
+        "id": "mastery-3day",
+        "name": "3-day mastery",
+        "timebox": "~3 days",
+        "description": "On-site / system-design loop prep: the 1-day plan plus behavioral STAR, staff-plus signal, and leadership partnership questions.",
+        "questionIds": [
+          "p1-cs-001",
+          "p1-cs-009",
+          "dotnet-async-deadlock-027",
+          "dotnet-linq-deferred-028",
+          "p1-arch-001",
+          "p1-apim-001",
+          "p1-fn-001",
+          "p1-la-001",
+          "p1-aks-001",
+          "p4-auth-001",
+          "p4-az-001",
+          "debug-prod-001",
+          "expert-sysd-001",
+          "p1-arch-002",
+          "p2-arch-001",
+          "p4-auth-002",
+          "behav-001",
+          "staff-001",
+          "lead-em-001"
+        ]
+      }
+    ],
+    "glossaryIds": [
+      "clr",
+      "garbage-collection-dotnet",
+      "idisposable",
+      "configureawait",
+      "managed-identity",
+      "idempotency",
+      "dlq",
+      "well-architected",
+      "rbac",
+      "oauth",
+      "jwt",
+      "key-vault-reference",
+      "adr"
+    ],
+    "behavioralStoryIds": [
+      "behav-001",
+      "staff-001",
+      "lead-em-001"
+    ],
+    "references": [
+      {
+        "title": "Microsoft — ASP.NET Core fundamentals",
+        "url": "https://learn.microsoft.com/aspnet/core/fundamentals/"
+      },
+      {
+        "title": "Azure — Well-Architected Framework",
+        "url": "https://learn.microsoft.com/azure/well-architected/"
+      }
+    ],
+    "order": 3
+  },
+  {
+    "id": "rag-azure-ai-search-specialist",
+    "name": "RAG & Azure AI Search Specialist",
+    "company": "Generic — Azure AI stack",
+    "roleTitle": "AI Engineer (RAG / Search)",
+    "level": "senior-ic",
+    "jdSummary": "AI engineer specializing in grounded retrieval systems on Azure AI Search and Azure OpenAI. Owns the full RAG pipeline — chunking, embeddings, hybrid (BM25 + vector) retrieval with RRF, reranking, grounding and citations, and production hardening. Builds the evaluation harness (faithfulness, context precision, LLM-as-judge with calibration) and the offline-gate + online-monitoring loop. Hardens against prompt injection and hallucination, tunes vector indexes (HNSW, quantization), and decides when to RAG vs fine-tune.",
+    "mustHaveSkills": [
+      "End-to-end RAG: chunking, embeddings, retrieval, reranking, grounding, citations",
+      "Azure AI Search: hybrid search, semantic ranking, RRF fusion",
+      "Vector index tuning: HNSW (M/efSearch), quantization, recall/latency trade-offs",
+      "RAG evaluation: faithfulness, context precision, golden sets, LLM-as-judge calibration",
+      "Offline eval gate + online guardrail monitoring",
+      "Prompt-injection and hallucination defenses",
+      "RAG vs fine-tune decision framework"
+    ],
+    "niceToHaveSkills": [
+      "Document Intelligence for ingestion of complex PDFs",
+      "Query rewriting and multi-query retrieval",
+      "Cost-aware retrieval (caching, candidate-set sizing)",
+      "RAGAS or equivalent eval frameworks"
+    ],
+    "categoryIds": [
+      "rag",
+      "azure-ai",
+      "vector-search",
+      "evaluation",
+      "safety"
+    ],
+    "tagFilters": [
+      "region-global",
+      "pattern-genai-lab",
+      "pattern-faang",
+      "hybrid-search",
+      "ragas"
+    ],
+    "curatedQuestionIds": [
+      "p3-rag-001",
+      "p3-rag-002",
+      "p3-rag-003",
+      "expert-rag-001",
+      "eval-rag-faithfulness-011",
+      "found-finetune-vs-rag-011",
+      "debug-vec-001",
+      "p3-search-001",
+      "p3-search-002",
+      "p3-docint-001",
+      "p3-azai-001",
+      "p4-aiauth-002",
+      "p3-vec-001",
+      "vs-hnsw-tuning-011",
+      "vs-hybrid-fusion-012",
+      "vs-quantization-013",
+      "p3-eval-001",
+      "eval-llm-judge-bias-010",
+      "eval-offline-online-012",
+      "p3-saf-001",
+      "pe-injection-defense-009",
+      "expert-saf-001"
+    ],
+    "revisionLanes": [
+      {
+        "id": "cram-30min",
+        "name": "30-min cram",
+        "timebox": "~30 minutes",
+        "description": "The night before: the questions that define the role. RAG pipeline, hybrid search, HNSW tuning, faithfulness eval, and injection defense.",
+        "questionIds": [
+          "p3-rag-001",
+          "p3-search-001",
+          "vs-hybrid-fusion-012",
+          "vs-hnsw-tuning-011",
+          "eval-rag-faithfulness-011",
+          "expert-rag-001",
+          "pe-injection-defense-009"
+        ]
+      },
+      {
+        "id": "deep-1day",
+        "name": "1-day deep prep",
+        "timebox": "~6–8 hours",
+        "description": "Full coverage of the JD must-haves: end-to-end RAG, Azure AI Search, vector tuning, evaluation harness, and safety hardening.",
+        "questionIds": [
+          "p3-rag-001",
+          "p3-rag-002",
+          "p3-rag-003",
+          "expert-rag-001",
+          "eval-rag-faithfulness-011",
+          "found-finetune-vs-rag-011",
+          "debug-vec-001",
+          "p3-search-001",
+          "p3-search-002",
+          "p3-azai-001",
+          "p3-vec-001",
+          "vs-hnsw-tuning-011",
+          "vs-hybrid-fusion-012",
+          "vs-quantization-013",
+          "p3-eval-001",
+          "eval-llm-judge-bias-010",
+          "eval-offline-online-012",
+          "pe-injection-defense-009"
+        ]
+      },
+      {
+        "id": "mastery-3day",
+        "name": "3-day mastery",
+        "timebox": "~3 days",
+        "description": "On-site prep: the 1-day plan plus Document Intelligence ingestion, identity for AI, and the full safety + evaluation depth.",
+        "questionIds": [
+          "p3-rag-001",
+          "p3-rag-002",
+          "p3-rag-003",
+          "expert-rag-001",
+          "eval-rag-faithfulness-011",
+          "found-finetune-vs-rag-011",
+          "debug-vec-001",
+          "p3-search-001",
+          "p3-search-002",
+          "p3-docint-001",
+          "p3-azai-001",
+          "p4-aiauth-002",
+          "p3-vec-001",
+          "vs-hnsw-tuning-011",
+          "vs-hybrid-fusion-012",
+          "vs-quantization-013",
+          "p3-eval-001",
+          "eval-llm-judge-bias-010",
+          "eval-offline-online-012",
+          "p3-saf-001",
+          "pe-injection-defense-009",
+          "expert-saf-001"
+        ]
+      }
+    ],
+    "glossaryIds": [
+      "embedding",
+      "rag",
+      "vector-database",
+      "bm25",
+      "hybrid-search",
+      "reranker",
+      "chunking",
+      "grounding",
+      "faithfulness",
+      "azure-ai-search",
+      "ann",
+      "cosine-similarity",
+      "hallucination",
+      "evaluation",
+      "golden-set",
+      "llm-as-judge",
+      "prompt-injection",
+      "content-safety",
+      "azure-openai"
+    ],
+    "behavioralStoryIds": [
+      "behav-002",
+      "staff-002"
+    ],
+    "references": [
+      {
+        "title": "Azure AI Search — Retrieval-Augmented Generation",
+        "url": "https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview"
+      },
+      {
+        "title": "RAGAS — Evaluation framework",
+        "url": "https://docs.ragas.io/"
+      }
+    ],
+    "order": 4
   }
 ]

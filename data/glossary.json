@@ -2,608 +2,1507 @@
   {
     "id": "llm",
     "term": "Large Language Model (LLM)",
-    "categoryIds": ["llm-fundamentals", "foundations"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "foundations"
+    ],
     "plainEnglish": "A very large auto-complete: it's a neural network that has read most of the public internet and learned to predict the next word, so well that it can chat, code, and reason. Think 'ChatGPT, Claude, Gemini' under the hood.",
     "definition": "A transformer-based neural network with billions of parameters, pre-trained on large text corpora to predict the next token, then aligned to follow instructions via supervised fine-tuning and RLHF. Modern LLMs (GPT-4o, Claude 3.5, Gemini, Llama 3) generalize to chat, reasoning, code, and tool use.",
-    "aliases": ["LLM"],
-    "related": ["token", "context-window", "embedding", "transformer"]
+    "aliases": [
+      "LLM"
+    ],
+    "related": [
+      "token",
+      "context-window",
+      "embedding",
+      "transformer"
+    ]
   },
   {
     "id": "transformer",
     "term": "Transformer",
-    "categoryIds": ["llm-fundamentals", "foundations"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "foundations"
+    ],
     "plainEnglish": "The math recipe behind almost every modern AI model. It lets the model look at every word in the input at once and figure out which words matter most to each other.",
     "definition": "Neural network architecture (Vaswani et al., 2017) built around self-attention, which computes pairwise relevance between all tokens in parallel. Replaced RNNs/LSTMs because it scales better on GPUs and captures long-range dependencies without recurrence.",
-    "related": ["llm", "token", "embedding"]
+    "related": [
+      "llm",
+      "token",
+      "embedding"
+    ]
   },
   {
     "id": "token",
     "term": "Token",
-    "categoryIds": ["llm-fundamentals", "foundations"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "foundations"
+    ],
     "plainEnglish": "The unit a model sees. Roughly a syllable or short word — 'unbelievable' might be 3 tokens. You're billed per token, not per word.",
     "definition": "The atomic unit a language model reads and emits, produced by a tokenizer (BPE, SentencePiece, tiktoken). Roughly 0.75 words for English; pricing, context windows, and rate limits are all token-denominated.",
-    "related": ["context-window", "tokenizer"]
+    "related": [
+      "context-window",
+      "tokenizer"
+    ]
   },
   {
     "id": "tokenizer",
     "term": "Tokenizer",
-    "categoryIds": ["llm-fundamentals"],
+    "categoryIds": [
+      "llm-fundamentals"
+    ],
     "plainEnglish": "The little program that chops your text into the chunks the model actually understands. Different models use different tokenizers, which is why token counts vary by provider.",
     "definition": "A deterministic algorithm (Byte-Pair Encoding, SentencePiece, Tiktoken, Unigram) that maps strings ↔ integer token IDs. Choice of tokenizer affects vocabulary size, compression, multilingual handling, and the model's character-level behavior.",
-    "related": ["token"]
+    "related": [
+      "token"
+    ]
   },
   {
     "id": "context-window",
     "term": "Context Window",
-    "categoryIds": ["llm-fundamentals", "foundations"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "foundations"
+    ],
     "plainEnglish": "How much text the model can read at one time. If your conversation + documents exceed it, older content falls off the back like a sliding window.",
     "definition": "The maximum number of tokens (input + output) the model can attend to in one request. Hitting the limit forces truncation, summarization, or retrieval. Larger windows trade cost and latency for memory — attention is O(n²) in sequence length without optimizations.",
-    "related": ["token", "rag"]
+    "related": [
+      "token",
+      "rag"
+    ]
   },
   {
     "id": "embedding",
     "term": "Embedding",
-    "categoryIds": ["llm-fundamentals", "vector-search", "rag"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "vector-search",
+      "rag"
+    ],
     "plainEnglish": "A numeric fingerprint of a piece of text (or an image). Two texts about the same idea get fingerprints that are close together — which is how AI can 'search by meaning' instead of by keyword.",
     "definition": "A fixed-length dense numeric vector (typically 384–3072 dimensions) that represents the semantic meaning of text, images, or code. Similar inputs map to geometrically nearby vectors, enabling vector search, RAG, clustering, and classification.",
-    "related": ["vector-database", "cosine-similarity", "rag"]
+    "related": [
+      "vector-database",
+      "cosine-similarity",
+      "rag"
+    ]
   },
   {
     "id": "temperature",
     "term": "Temperature",
-    "categoryIds": ["llm-fundamentals", "prompt-engineering"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "prompt-engineering"
+    ],
     "plainEnglish": "A 'creativity knob' from 0 to 1+. Crank it down for boring, repeatable answers (extraction, classification). Crank it up for brainstorming and variety.",
     "definition": "A sampling hyperparameter that scales the logits before softmax: T=0 = greedy/deterministic argmax, T=1 = standard sampling, T>1 = flatter distribution / more diverse. Tune low for extraction/classification, higher for ideation. Often paired with top-p.",
-    "related": ["top-p"]
+    "related": [
+      "top-p"
+    ]
   },
   {
     "id": "top-p",
     "term": "Top-p (Nucleus Sampling)",
-    "categoryIds": ["llm-fundamentals"],
+    "categoryIds": [
+      "llm-fundamentals"
+    ],
     "plainEnglish": "Another way to limit the model's word choices. Instead of saying 'pick from the top 50 words', you say 'pick from however many words add up to 90% likelihood'. Often combined with temperature.",
     "definition": "Sampling strategy that draws only from the smallest set of tokens whose cumulative probability ≥ p. Adapts the candidate set per-step (unlike fixed top-k). Lowering top-p constrains the model more sharply than lowering temperature alone.",
-    "related": ["temperature"]
+    "related": [
+      "temperature"
+    ]
   },
   {
     "id": "rlhf",
     "term": "Reinforcement Learning from Human Feedback (RLHF)",
-    "categoryIds": ["llm-fundamentals", "foundations"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "foundations"
+    ],
     "plainEnglish": "How a raw LLM gets manners. Humans rate which of two answers is better, those ratings train a 'scorer', and the model is then nudged toward higher-scoring answers. It's why ChatGPT is polite and helpful instead of just rambling.",
     "definition": "Alignment technique where humans rank model outputs, those rankings train a reward model, and the base LLM is fine-tuned (typically with PPO) to maximize that reward. Newer variants — DPO (Direct Preference Optimization), IPO, KTO, Constitutional AI — skip the explicit reward model.",
-    "aliases": ["RLHF"],
-    "related": ["fine-tuning"]
+    "aliases": [
+      "RLHF"
+    ],
+    "related": [
+      "fine-tuning"
+    ]
   },
   {
     "id": "fine-tuning",
     "term": "Fine-tuning",
-    "categoryIds": ["llm-fundamentals", "mlops"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "mlops"
+    ],
     "plainEnglish": "Teaching a general-purpose model your specific style, format, or domain by training it some more on your own examples. Reach for it only after prompting and retrieval have hit a wall.",
     "definition": "Continuing gradient-based training on a smaller, task-specific dataset. Use when prompting + RAG hit a ceiling on tone, format, or domain knowledge. Parameter-Efficient Fine-Tuning (PEFT) methods like LoRA/QLoRA train tiny adapter weights instead of the full model, cutting cost ~100×.",
-    "aliases": ["LoRA", "QLoRA", "PEFT"],
-    "related": ["distillation", "rlhf"]
+    "aliases": [
+      "LoRA",
+      "QLoRA",
+      "PEFT"
+    ],
+    "related": [
+      "distillation",
+      "rlhf"
+    ]
   },
   {
     "id": "distillation",
     "term": "Distillation",
-    "categoryIds": ["llm-fundamentals", "mlops"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "mlops"
+    ],
     "plainEnglish": "Training a small, cheap model to copy a big, expensive one. You get most of the quality at a fraction of the cost — handy when latency or budget is tight.",
     "definition": "Training a smaller 'student' model to mimic the output distribution (or behavior) of a larger 'teacher'. Used to compress a multi-step prompt pipeline into a single fine-tuned small model for production latency and cost.",
-    "related": ["fine-tuning"]
+    "related": [
+      "fine-tuning"
+    ]
   },
   {
     "id": "structured-output",
     "term": "Structured Output",
-    "categoryIds": ["prompt-engineering", "llm-fundamentals"],
+    "categoryIds": [
+      "prompt-engineering",
+      "llm-fundamentals"
+    ],
     "plainEnglish": "Forcing the model to answer in a specific shape — usually valid JSON that matches your schema — so your code can actually use it without parsing free text.",
     "definition": "Constraining the decoder to emit text that conforms to a JSON schema, regex, or typed function signature at sampling time (constrained decoding), not just by instruction. Eliminates an entire class of parser failures and is the foundation of reliable tool use.",
-    "aliases": ["JSON mode", "function calling", "constrained decoding"],
-    "related": ["tool-use"]
+    "aliases": [
+      "JSON mode",
+      "function calling",
+      "constrained decoding"
+    ],
+    "related": [
+      "tool-use"
+    ]
   },
   {
     "id": "few-shot",
     "term": "Few-shot Prompting",
-    "categoryIds": ["prompt-engineering"],
+    "categoryIds": [
+      "prompt-engineering"
+    ],
     "plainEnglish": "Show the model 2–8 worked examples before your real question, so it copies the pattern. Great for getting consistent format, tone, or labels.",
     "definition": "In-context learning technique that includes a handful of input/output exemplars in the prompt to condition format and behavior. Best for shape-of-output tasks (JSON, labels, tone). Diversify the shots — homogeneous examples cause mode collapse and bias toward the shown labels.",
-    "related": ["zero-shot", "chain-of-thought"]
+    "related": [
+      "zero-shot",
+      "chain-of-thought"
+    ]
   },
   {
     "id": "zero-shot",
     "term": "Zero-shot Prompting",
-    "categoryIds": ["prompt-engineering"],
+    "categoryIds": [
+      "prompt-engineering"
+    ],
     "plainEnglish": "Just ask, no examples. Works for tasks the model has seen a million times in training (summarize, translate, label).",
     "definition": "Prompting with only an instruction and no in-context exemplars. Cheapest and works well when the task is well-represented in pretraining (summarization, translation, extraction). Falls over on novel formats — switch to few-shot.",
-    "related": ["few-shot"]
+    "related": [
+      "few-shot"
+    ]
   },
   {
     "id": "chain-of-thought",
     "term": "Chain-of-Thought (CoT)",
-    "categoryIds": ["prompt-engineering", "llm-fundamentals"],
+    "categoryIds": [
+      "prompt-engineering",
+      "llm-fundamentals"
+    ],
     "plainEnglish": "Tell the model to 'think step by step' before answering. The intermediate steps boost accuracy on math, logic, and multi-step problems. Newer 'reasoning' models do this on their own.",
     "definition": "Prompting technique that asks the model to verbalize intermediate reasoning steps before the final answer. Lifts accuracy on math, multi-hop QA, and code. Modern reasoning models (o1/o3, DeepSeek-R1, Claude with thinking) do extended CoT internally, making explicit CoT prompts often redundant or counterproductive.",
-    "aliases": ["CoT"],
-    "related": ["few-shot"]
+    "aliases": [
+      "CoT"
+    ],
+    "related": [
+      "few-shot"
+    ]
   },
   {
     "id": "system-prompt",
     "term": "System Prompt",
-    "categoryIds": ["prompt-engineering"],
+    "categoryIds": [
+      "prompt-engineering"
+    ],
     "plainEnglish": "The hidden 'rules of the game' you set before the user ever types. It defines the persona, what topics are off-limits, and the output format.",
     "definition": "The high-priority instruction role (`system` or `developer`) that defines persona, allowed topics, refusal style, and output format. The model treats it as more authoritative than user turns, though it is not immune to prompt injection.",
-    "related": ["prompt-injection"]
+    "related": [
+      "prompt-injection"
+    ]
   },
   {
     "id": "rag",
     "term": "Retrieval-Augmented Generation (RAG)",
-    "categoryIds": ["rag", "vector-search"],
+    "categoryIds": [
+      "rag",
+      "vector-search"
+    ],
     "plainEnglish": "Before answering, the system looks up relevant docs (from your wiki, support tickets, PDFs…) and pastes them into the prompt. That's how an LLM can reliably answer questions about your private or up-to-the-minute data.",
     "definition": "Architecture pattern that fetches relevant context from an external store (vector index, BM25 search, SQL/graph DB) and prepends it to the LLM prompt. Reduces hallucination and lets the model use private or post-training-cutoff data without retraining. Core building blocks: chunking → embedding → retrieval → (rerank) → generation.",
-    "aliases": ["RAG"],
-    "related": ["embedding", "vector-database", "reranker", "hybrid-search", "grounding"]
+    "aliases": [
+      "RAG"
+    ],
+    "related": [
+      "embedding",
+      "vector-database",
+      "reranker",
+      "hybrid-search",
+      "grounding"
+    ]
   },
   {
     "id": "vector-database",
     "term": "Vector Database",
-    "categoryIds": ["vector-search", "rag"],
+    "categoryIds": [
+      "vector-search",
+      "rag"
+    ],
     "plainEnglish": "A specialized store for those numeric fingerprints (embeddings). It can answer 'find me the 10 most similar items' really fast, even across millions of records.",
     "definition": "A datastore optimized for nearest-neighbor search over high-dimensional vectors using ANN indexes. Implementations: Azure AI Search (vector index), Postgres + pgvector, Pinecone, Qdrant, Weaviate, Milvus, Chroma, Redis Vector.",
-    "related": ["embedding", "ann", "hybrid-search"]
+    "related": [
+      "embedding",
+      "ann",
+      "hybrid-search"
+    ]
   },
   {
     "id": "ann",
     "term": "Approximate Nearest Neighbor (ANN)",
-    "categoryIds": ["vector-search"],
+    "categoryIds": [
+      "vector-search"
+    ],
     "plainEnglish": "A clever shortcut for 'find me the closest match' that doesn't compare against every record. Gives up a tiny bit of accuracy for huge speedups — essential at scale.",
     "definition": "Family of algorithms (HNSW, IVF, ScaNN, DiskANN, PQ) that trade exact recall for sub-linear query time on millions–billions of vectors. The recall-vs-latency knob (ef_search, nprobe) is the main thing to tune, plus index build parameters that trade index size and build time.",
-    "aliases": ["HNSW", "IVF", "DiskANN", "ScaNN"]
+    "aliases": [
+      "HNSW",
+      "IVF",
+      "DiskANN",
+      "ScaNN"
+    ]
   },
   {
     "id": "cosine-similarity",
     "term": "Cosine Similarity",
-    "categoryIds": ["vector-search"],
+    "categoryIds": [
+      "vector-search"
+    ],
     "plainEnglish": "A 0-to-1 score for 'how similar are these two embeddings in direction', ignoring how long the vectors are. 1.0 = same meaning, 0.0 = unrelated.",
     "definition": "Similarity metric defined as the dot product of two L2-normalized vectors — equivalently the cosine of the angle between them. Scale-invariant in magnitude. The default for most embedding models; some models recommend dot product or Euclidean — always check the model card.",
-    "related": ["embedding"]
+    "related": [
+      "embedding"
+    ]
   },
   {
     "id": "bm25",
     "term": "BM25 (Best Match 25)",
-    "categoryIds": ["vector-search", "rag"],
+    "categoryIds": [
+      "vector-search",
+      "rag"
+    ],
     "plainEnglish": "The classic 'keyword search' scoring formula behind tools like Elasticsearch. Great at finding exact words and rare terms — which is exactly where vector search struggles.",
     "definition": "A probabilistic bag-of-words ranking function from the BM family, dominant in lexical search engines (Lucene/Elasticsearch/OpenSearch, Azure AI Search keyword mode). Scores docs by TF–IDF-style term weights with length normalization. Complements vector search in hybrid retrieval.",
-    "aliases": ["BM25"],
-    "related": ["hybrid-search"]
+    "aliases": [
+      "BM25"
+    ],
+    "related": [
+      "hybrid-search"
+    ]
   },
   {
     "id": "hybrid-search",
     "term": "Hybrid Search",
-    "categoryIds": ["vector-search", "rag"],
+    "categoryIds": [
+      "vector-search",
+      "rag"
+    ],
     "plainEnglish": "Use keyword search and vector search at the same time, then merge their results. Keywords nail exact terms and codes; vectors handle paraphrase. Together they beat either alone.",
     "definition": "Retrieval that combines BM25/keyword scoring with vector similarity, fused via Reciprocal Rank Fusion (RRF) or a learned aggregator. Robust to both lexical-heavy queries (product codes, names) and semantic queries (paraphrase, synonym).",
-    "related": ["vector-database", "bm25", "reranker"]
+    "related": [
+      "vector-database",
+      "bm25",
+      "reranker"
+    ]
   },
   {
     "id": "reranker",
     "term": "Reranker",
-    "categoryIds": ["rag", "vector-search"],
+    "categoryIds": [
+      "rag",
+      "vector-search"
+    ],
     "plainEnglish": "A second-pass model that re-orders your top-20 search results by reading each one carefully against the query. Slower per document but usually the single biggest quality win in RAG.",
     "definition": "A cross-encoder model (e.g., Cohere Rerank, BGE-reranker, ms-marco-MiniLM) that re-scores the top-k retrieved chunks given the query, attending to both jointly. Typically lifts answer quality more than swapping the base embedding model, at the cost of an extra inference call per candidate.",
-    "related": ["rag", "embedding"]
+    "related": [
+      "rag",
+      "embedding"
+    ]
   },
   {
     "id": "chunking",
     "term": "Chunking",
-    "categoryIds": ["rag"],
+    "categoryIds": [
+      "rag"
+    ],
     "plainEnglish": "Cutting long documents into bite-sized pieces before indexing them. How you cut (by sentence, paragraph, heading, fixed token count) makes or breaks retrieval quality.",
     "definition": "The pre-indexing step that splits source documents into retrieval units. Strategy — fixed token, recursive character, sentence-aware, semantic, or structural (headings, tables) — materially affects retrieval quality. Overlap between chunks reduces boundary loss; metadata (source, section, page) enables filtering and citations.",
-    "related": ["rag", "embedding"]
+    "related": [
+      "rag",
+      "embedding"
+    ]
   },
   {
     "id": "grounding",
     "term": "Grounding",
-    "categoryIds": ["rag", "safety"],
+    "categoryIds": [
+      "rag",
+      "safety"
+    ],
     "plainEnglish": "Making the model's answer point back to real sources you provided, ideally with citations. The #1 trick to stop it making things up.",
     "definition": "Anchoring an LLM response in retrieved or tool-provided context, ideally with inline citations to source spans. The primary mitigation for hallucination and a prerequisite for auditability in regulated domains.",
-    "related": ["rag", "hallucination", "faithfulness"]
+    "related": [
+      "rag",
+      "hallucination",
+      "faithfulness"
+    ]
   },
   {
     "id": "hallucination",
     "term": "Hallucination",
-    "categoryIds": ["safety", "evaluation", "llm-fundamentals"],
+    "categoryIds": [
+      "safety",
+      "evaluation",
+      "llm-fundamentals"
+    ],
     "plainEnglish": "When the model confidently invents stuff — fake citations, made-up APIs, wrong dates. It happens because it's optimized to keep talking, not to say 'I don't know'.",
     "definition": "Confidently stated output that is not supported by the input context or by reality. Causes: missing context, stale parametric knowledge, decoder pressure to produce fluent continuations, and rewards for confident answers during training. Mitigations: grounding, abstention prompting, faithfulness checks, output verification.",
-    "related": ["grounding", "faithfulness"]
+    "related": [
+      "grounding",
+      "faithfulness"
+    ]
   },
   {
     "id": "agent",
     "term": "Agent",
-    "categoryIds": ["agents", "agent-frameworks"],
+    "categoryIds": [
+      "agents",
+      "agent-frameworks"
+    ],
     "plainEnglish": "An LLM that doesn't just answer — it can call tools (search, run code, hit your APIs), see the result, and decide what to do next, in a loop. More powerful, but slower and pricier than a single prompt.",
     "definition": "An LLM-driven control loop that observes state, decides on an action (typically a tool call with structured arguments), executes it, and feeds the result back into the next step until a stop condition. Introduces non-determinism, latency, and cost amplification — adopt only when a single prompt can't do the job.",
-    "related": ["tool-use", "agent-framework", "react"]
+    "related": [
+      "tool-use",
+      "agent-framework",
+      "react"
+    ]
   },
   {
     "id": "tool-use",
     "term": "Tool Use (Function Calling)",
-    "categoryIds": ["agents", "agent-frameworks"],
+    "categoryIds": [
+      "agents",
+      "agent-frameworks"
+    ],
     "plainEnglish": "Giving the model a menu of functions it can call (search the web, query the DB, send email) with strict argument shapes. Modern providers expose this as a first-class API.",
     "definition": "Letting the model invoke typed functions (search, code-exec, DB queries, HTTP APIs) with structured arguments validated against a schema. The provider-native 'tools' / 'function calling' API is the production-grade interface, layered on top of constrained decoding.",
-    "aliases": ["function calling"],
-    "related": ["agent", "structured-output"]
+    "aliases": [
+      "function calling"
+    ],
+    "related": [
+      "agent",
+      "structured-output"
+    ]
   },
   {
     "id": "react",
     "term": "ReAct (Reason + Act)",
-    "categoryIds": ["agents"],
+    "categoryIds": [
+      "agents"
+    ],
     "plainEnglish": "An agent style where the model writes its reasoning out loud — 'I think I need to search for X' — then takes an action, sees the result, and repeats. Easy to debug because you can read the trace.",
     "definition": "A prompting pattern (Yao et al., 2022) that interleaves Reason (thought) and Act (tool call) steps so the model verbalizes its plan before each tool call and reflects on observations after. Easy to debug; often replaced by graph-based orchestration (LangGraph, MAF workflows) for production reliability.",
-    "aliases": ["Reason+Act"],
-    "related": ["agent", "tool-use"]
+    "aliases": [
+      "Reason+Act"
+    ],
+    "related": [
+      "agent",
+      "tool-use"
+    ]
   },
   {
     "id": "agent-framework",
     "term": "Agent Framework",
-    "categoryIds": ["agent-frameworks"],
+    "categoryIds": [
+      "agent-frameworks"
+    ],
     "plainEnglish": "A library that handles the boilerplate of running an agent — registering tools, retrying failed calls, tracking state across turns, talking to multiple agents — so you focus on logic, not plumbing.",
     "definition": "A library that provides agent plumbing: tool registration, conversation state, retries, traces, multi-agent orchestration (handoffs, group chat, graphs). Examples: Microsoft Agent Framework (MAF), LangGraph, Semantic Kernel, AutoGen, CrewAI, Pydantic-AI, OpenAI Agents SDK.",
-    "aliases": ["MAF", "LangGraph", "Semantic Kernel", "AutoGen"],
-    "related": ["agent"]
+    "aliases": [
+      "MAF",
+      "LangGraph",
+      "Semantic Kernel",
+      "AutoGen"
+    ],
+    "related": [
+      "agent"
+    ]
   },
   {
     "id": "mcp",
     "term": "Model Context Protocol (MCP)",
-    "categoryIds": ["agents", "agent-frameworks"],
+    "categoryIds": [
+      "agents",
+      "agent-frameworks"
+    ],
     "plainEnglish": "A standard 'USB plug' for AI tools. Build a tool server once (e.g., 'query my GitHub') and any compliant AI host (Claude Desktop, VS Code Copilot, custom apps) can use it.",
     "definition": "An open Anthropic-led protocol for exposing tools, resources, and prompts to an LLM client over a JSON-RPC transport (stdio, HTTP+SSE, streamable HTTP). Lets one MCP server be reused across many agent hosts (Claude Desktop, GitHub Copilot, ChatGPT, custom). Spec covers auth, sampling, and roots.",
-    "aliases": ["MCP"]
+    "aliases": [
+      "MCP"
+    ]
   },
   {
     "id": "evaluation",
     "term": "Evaluation (Evals)",
-    "categoryIds": ["evaluation"],
+    "categoryIds": [
+      "evaluation"
+    ],
     "plainEnglish": "Running your AI app against a fixed list of test inputs and scoring the answers, so you can tell whether a prompt change made things better or worse instead of guessing.",
     "definition": "Measuring LLM application quality on a versioned set of inputs against a defined rubric. Combines deterministic checks (exact match, regex, schema validity), LLM-as-judge (qualitative rubrics), and behavioral metrics (refusal rate, latency, cost, safety category scores). Run in CI on a golden set to gate releases.",
-    "aliases": ["evals"],
-    "related": ["llm-as-judge", "golden-set"]
+    "aliases": [
+      "evals"
+    ],
+    "related": [
+      "llm-as-judge",
+      "golden-set"
+    ]
   },
   {
     "id": "golden-set",
     "term": "Golden Set",
-    "categoryIds": ["evaluation", "mlops"],
+    "categoryIds": [
+      "evaluation",
+      "mlops"
+    ],
     "plainEnglish": "Your curated 'truth' dataset of inputs and the answers you expect. Every prompt or model change has to score well on this before it ships.",
     "definition": "A curated, version-controlled set of input/expected-output pairs used to gate prompt and model changes in CI. Should cover happy paths, edge cases, known regressions, and adversarial inputs. Grows over time as production incidents are added as fixtures.",
-    "related": ["evaluation"]
+    "related": [
+      "evaluation"
+    ]
   },
   {
     "id": "llm-as-judge",
     "term": "LLM-as-Judge",
-    "categoryIds": ["evaluation"],
+    "categoryIds": [
+      "evaluation"
+    ],
     "plainEnglish": "Use a (usually bigger) AI model to grade another model's answers against a rubric — cheaper than paying humans, but you still need humans to spot-check whether the judge is fair.",
     "definition": "Using a (typically larger or specialized) LLM to score responses against a rubric (faithfulness, helpfulness, tone, safety). Cheaper than human review at scale but susceptible to position bias, verbosity bias, and self-preference; calibrate against human labels periodically and use pairwise rather than absolute scoring where possible.",
-    "related": ["evaluation", "faithfulness"]
+    "related": [
+      "evaluation",
+      "faithfulness"
+    ]
   },
   {
     "id": "faithfulness",
     "term": "Faithfulness",
-    "categoryIds": ["evaluation", "rag", "safety"],
+    "categoryIds": [
+      "evaluation",
+      "rag",
+      "safety"
+    ],
     "plainEnglish": "Does the answer actually match the sources it cited? An answer can be helpful and still unfaithful (made up) — these are different problems.",
     "definition": "The degree to which an answer is supported by the provided context. Distinct from helpfulness — an answer can be helpful but unfaithful, or faithful but unhelpful. Measured by NLI-style entailment checks or LLM-as-judge against retrieved spans.",
-    "related": ["grounding", "hallucination"]
+    "related": [
+      "grounding",
+      "hallucination"
+    ]
   },
   {
     "id": "trajectory",
     "term": "Trajectory Evaluation",
-    "categoryIds": ["evaluation", "agents"],
+    "categoryIds": [
+      "evaluation",
+      "agents"
+    ],
     "plainEnglish": "For agents, grade the whole journey — did it pick the right tools, in the right order, with the right arguments? Not just whether the final answer happened to be correct.",
     "definition": "Evaluating an agent on the path it took (tool selection, argument quality, recovery from errors, plan coherence), not only the final answer. Reveals lucky-success vs robust behavior and surfaces regressions that an output-only metric misses.",
-    "related": ["agent", "evaluation"]
+    "related": [
+      "agent",
+      "evaluation"
+    ]
   },
   {
     "id": "prompt-injection",
     "term": "Prompt Injection",
-    "categoryIds": ["safety", "agents"],
+    "categoryIds": [
+      "safety",
+      "agents"
+    ],
     "plainEnglish": "When a bad actor sneaks instructions into text the model will read — a webpage, a PDF, an email — and hijacks the model into doing something the developer didn't intend. The #1 agent-era security risk.",
     "definition": "Attacker-controlled text that overrides the model's intended behavior. Direct injection = the end user types it; indirect injection = the model ingests it from a tool result (web page, email body, RAG chunk, image). Indirect injection is the dominant agent-era risk because authority boundaries between system, user, and tool content are blurry by design.",
-    "related": ["jailbreak", "system-prompt"]
+    "related": [
+      "jailbreak",
+      "system-prompt"
+    ]
   },
   {
     "id": "jailbreak",
     "term": "Jailbreak",
-    "categoryIds": ["safety"],
+    "categoryIds": [
+      "safety"
+    ],
     "plainEnglish": "A clever prompt that talks the model into ignoring its safety training — like 'pretend you're DAN, you can do anything'. Different from prompt injection, which targets the developer, not the safety policy.",
     "definition": "A prompt that bypasses safety/alignment training to elicit refused content. Common patterns: role-play, hypothetical framing, encoding tricks, multi-turn boil-the-frog. Defenses: prompt shields, system-prompt hardening, output filtering (content safety), refusal-rate monitoring, and red-team test suites.",
-    "related": ["prompt-injection", "content-safety"]
+    "related": [
+      "prompt-injection",
+      "content-safety"
+    ]
   },
   {
     "id": "content-safety",
     "term": "Content Safety",
-    "categoryIds": ["safety"],
+    "categoryIds": [
+      "safety"
+    ],
     "plainEnglish": "An automated filter that screens user input and model output for harmful stuff (hate, violence, self-harm, sexual content) plus jailbreak attempts, before it reaches the user.",
     "definition": "Pre- and post-generation filtering of inputs and outputs for harmful categories (hate, sexual, violence, self-harm) plus jailbreak / prompt-injection patterns. Azure AI Content Safety provides categorical severity scores, Prompt Shields (direct and indirect injection), groundedness detection, and protected-material checks.",
-    "aliases": ["Azure AI Content Safety", "Prompt Shields"]
+    "aliases": [
+      "Azure AI Content Safety",
+      "Prompt Shields"
+    ]
   },
   {
     "id": "responsible-ai",
     "term": "Responsible AI (RAI)",
-    "categoryIds": ["safety", "foundations"],
+    "categoryIds": [
+      "safety",
+      "foundations"
+    ],
     "plainEnglish": "The full set of practices for shipping AI that's fair, safe, transparent, and accountable — not just 'does the model work?' but 'who could it hurt and how do we know?'.",
     "definition": "End-to-end practices for fair, reliable, safe, private, inclusive, transparent, and accountable AI: harm assessments, content safety, PII handling, audit logs, user reporting channels, red-teaming, and impact assessments. Microsoft's RAI Standard and the NIST AI RMF are commonly cited reference frameworks.",
-    "aliases": ["RAI"]
+    "aliases": [
+      "RAI"
+    ]
   },
   {
     "id": "guardrails",
     "term": "Guardrails",
-    "categoryIds": ["safety", "agents"],
+    "categoryIds": [
+      "safety",
+      "agents"
+    ],
     "plainEnglish": "Runtime checks wrapped around the model that block, redact, or rewrite anything dangerous before it goes out — like a bouncer for the LLM.",
     "definition": "Runtime checks around an LLM that block, redact, or rewrite unsafe inputs/outputs and constrain tool use (allowed domains, max spend, PII scrubbing, schema validation). Layered with model-side safety training; both are required — neither replaces the other."
   },
   {
     "id": "telemetry",
     "term": "Telemetry",
-    "categoryIds": ["mlops", "evaluation"],
+    "categoryIds": [
+      "mlops",
+      "evaluation"
+    ],
     "plainEnglish": "Logging every call — what prompt version ran, which model, how many tokens, how long it took, what it cost, whether the user thumbs-upped it. The raw material for debugging and improving the app.",
     "definition": "Per-call observability: prompt version, model, tokens in/out, latency, cost, outcome, user feedback, traces of tool calls. Foundation for diagnosing regressions, A/B testing, and reporting on quality. Common stacks: OpenTelemetry GenAI semconv, Application Insights, Langfuse, Arize Phoenix.",
-    "related": ["evaluation"]
+    "related": [
+      "evaluation"
+    ]
   },
   {
     "id": "feature-flag",
     "term": "Feature Flag",
-    "categoryIds": ["mlops"],
+    "categoryIds": [
+      "mlops"
+    ],
     "plainEnglish": "A toggle in config (not in code) that turns a new feature on or off for some users. Lets you roll back a bad prompt or model swap without redeploying.",
     "definition": "A runtime switch that gates a code path (new prompt, new model, new tool, new system message) so it can be rolled out gradually (% of users, specific cohorts) and rolled back without a deploy. Implementations: Azure App Configuration Feature Manager, LaunchDarkly, Unleash.",
-    "related": ["canary"]
+    "related": [
+      "canary"
+    ]
   },
   {
     "id": "canary",
     "term": "Canary Deployment",
-    "categoryIds": ["mlops"],
+    "categoryIds": [
+      "mlops"
+    ],
     "plainEnglish": "Send a tiny slice of traffic (1–5%) to the new version, watch the dashboards, and ramp up only if everything looks good. Limits the damage when something breaks.",
     "definition": "Progressive delivery strategy that routes a small slice of traffic to a new version, monitors paired golden-signal metrics (latency, error rate, cost, quality), and ramps gradually behind automated rollback rules. Reduces blast radius on prompt/model changes.",
-    "related": ["feature-flag"]
+    "related": [
+      "feature-flag"
+    ]
   },
   {
     "id": "promptops",
     "term": "PromptOps",
-    "categoryIds": ["mlops", "prompt-engineering"],
+    "categoryIds": [
+      "mlops",
+      "prompt-engineering"
+    ],
     "plainEnglish": "Treat prompts the way you treat code — versioned in git, reviewed in PRs, tested in CI, rolled out behind flags, monitored in production.",
     "definition": "Operational discipline for treating prompts as production artifacts: versioned in git, evaluated in CI against a golden set, rolled out behind feature flags / canaries, observed via telemetry, and rolled back on metric regressions. Sister discipline to MLOps for parametric models.",
-    "related": ["golden-set", "feature-flag"]
+    "related": [
+      "golden-set",
+      "feature-flag"
+    ]
   },
   {
     "id": "managed-identity",
     "term": "Managed Identity (MI)",
-    "categoryIds": ["azure-platform", "azure-ai"],
+    "categoryIds": [
+      "azure-platform",
+      "azure-ai"
+    ],
     "plainEnglish": "An identity Azure attaches to your resource (a VM, App Service, Function…) so it can log into other Azure services without you storing any passwords or keys. Pair it with RBAC and you've eliminated a whole class of leaked secrets.",
     "definition": "An Entra ID service principal automatically managed by Azure and attached to a resource (system-assigned) or shared across resources (user-assigned). Grants tokens without stored secrets via IMDS. Pair with RBAC to grant least-privilege access (e.g., Storage Blob Data Reader, Cognitive Services OpenAI User).",
-    "aliases": ["MSI", "MI"]
+    "aliases": [
+      "MSI",
+      "MI"
+    ]
   },
   {
     "id": "azure-openai",
     "term": "Azure OpenAI Service (AOAI)",
-    "categoryIds": ["azure-ai"],
+    "categoryIds": [
+      "azure-ai"
+    ],
     "plainEnglish": "Microsoft's Azure-hosted version of OpenAI's models (GPT-4o, embeddings, Whisper, image generation). Same API as OpenAI, but with enterprise extras: your VNet, your region, your encryption keys.",
     "definition": "Azure-hosted OpenAI models (GPT-4o/4.1, o-series reasoning, embeddings, Whisper, DALL·E, GPT-image) deployed under Microsoft's data-residency, VNet integration, customer-managed keys, content safety, and Entra-based auth. Same API surface as OpenAI's public endpoint, billed through Azure.",
-    "aliases": ["AOAI", "Azure OpenAI"]
+    "aliases": [
+      "AOAI",
+      "Azure OpenAI"
+    ]
   },
   {
     "id": "azure-ai-search",
     "term": "Azure AI Search",
-    "categoryIds": ["azure-ai", "vector-search", "rag"],
+    "categoryIds": [
+      "azure-ai",
+      "vector-search",
+      "rag"
+    ],
     "plainEnglish": "Microsoft's managed search service. Does keyword, vector, and 'semantic' (re-ranked) search out of the box, so it's the default index behind most Azure-native RAG apps.",
     "definition": "Managed search service offering BM25 keyword search + vector search + semantic ranking (L2 re-ranker) + integrated vectorization (built-in skillsets that chunk and embed during indexing). The default RAG retrieval layer for Azure-native solutions; supports hybrid + RBAC + private endpoints.",
-    "aliases": ["Azure Cognitive Search"],
-    "related": ["rag", "hybrid-search"]
+    "aliases": [
+      "Azure Cognitive Search"
+    ],
+    "related": [
+      "rag",
+      "hybrid-search"
+    ]
   },
   {
     "id": "foundry",
     "term": "Microsoft Foundry (Azure AI Foundry)",
-    "categoryIds": ["azure-ai", "agent-frameworks"],
+    "categoryIds": [
+      "azure-ai",
+      "agent-frameworks"
+    ],
     "plainEnglish": "Microsoft's one-stop platform for building and running AI apps and agents — picking models, hosting agents, evaluating them, watching them in production. It's the successor to Azure AI Studio.",
     "definition": "Microsoft's unified platform for building, evaluating, and operating AI apps and agents — model catalog (OpenAI + open weights + partners), projects, hosted agents, evaluation, tracing, content safety, and the Agent Service. Replaces and extends Azure AI Studio.",
-    "aliases": ["Azure AI Foundry", "AI Foundry"]
+    "aliases": [
+      "Azure AI Foundry",
+      "AI Foundry"
+    ]
   },
   {
     "id": "streaming",
     "term": "Streaming",
-    "categoryIds": ["llm-fundamentals", "frontend"],
+    "categoryIds": [
+      "llm-fundamentals",
+      "frontend"
+    ],
     "plainEnglish": "Showing words as the model produces them, instead of waiting for the full answer. The text-typing effect you see in ChatGPT. Makes apps feel ~3× faster even when total time is the same.",
     "definition": "Returning model output token-by-token over Server-Sent Events or chunked HTTP so the user sees progress in real time. Reduces perceived latency dramatically; requires care with proxy buffering (disable Nagle / nginx buffering), partial-JSON parsing, and error handling mid-stream.",
-    "related": ["server-sent-events"]
+    "related": [
+      "server-sent-events"
+    ]
   },
   {
     "id": "server-sent-events",
     "term": "Server-Sent Events (SSE)",
-    "categoryIds": ["frontend"],
+    "categoryIds": [
+      "frontend"
+    ],
     "plainEnglish": "A simple one-way 'tap' from server to browser over plain HTTP. Easier than WebSockets and exactly what you need to stream LLM tokens to a web page.",
     "definition": "A one-way `text/event-stream` HTTP transport with built-in reconnect and event IDs. The simplest production transport for streaming LLM responses to a browser. Disable proxy buffering (`X-Accel-Buffering: no`, `nginx proxy_buffering off`) or chunks queue up and defeat the point.",
-    "aliases": ["SSE"],
-    "related": ["streaming"]
+    "aliases": [
+      "SSE"
+    ],
+    "related": [
+      "streaming"
+    ]
   },
   {
     "id": "idempotency",
     "term": "Idempotency",
-    "categoryIds": ["azure-platform", "system-design"],
+    "categoryIds": [
+      "azure-platform",
+      "system-design"
+    ],
     "plainEnglish": "If you accidentally send the same request twice (network blip, retry), you still get the same result — no double-charges, no duplicate emails. Essential for any retried operation.",
     "definition": "Property where repeated requests produce the same effect as a single request. Critical for retries, queue consumers, webhooks, and 'at-least-once' message delivery. Implementation: client-supplied idempotency key + a dedupe store with a TTL (Redis, Cosmos with TTL, table storage).",
-    "related": ["dlq"]
+    "related": [
+      "dlq"
+    ]
   },
   {
     "id": "dlq",
     "term": "Dead-Letter Queue (DLQ)",
-    "categoryIds": ["azure-platform", "system-design"],
+    "categoryIds": [
+      "azure-platform",
+      "system-design"
+    ],
     "plainEnglish": "A 'parking lot' queue for messages that keep failing. Instead of looping forever or silently dropping them, they land here for a human to inspect, fix, and replay.",
     "definition": "A side queue/topic that captures messages that failed processing after their max delivery attempts. First-class on Service Bus, Event Grid, Storage Queues, SQS. Operational practice: alert on DLQ depth, inspect with a viewer, fix root cause, replay; never silently drop.",
-    "aliases": ["DLQ"]
+    "aliases": [
+      "DLQ"
+    ]
   },
   {
     "id": "well-architected",
     "term": "Well-Architected Framework (WAF)",
-    "categoryIds": ["azure-platform", "system-design", "foundations"],
+    "categoryIds": [
+      "azure-platform",
+      "system-design",
+      "foundations"
+    ],
     "plainEnglish": "Microsoft's checklist of best practices for cloud workloads, organized into five 'pillars' — reliability, security, cost, ops, performance. Useful as a review framework, not as a deployment tool.",
     "definition": "Microsoft's five pillars for cloud workloads: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency. Used via the WAF Review tool, workload-specific guides (AI, mission-critical, SaaS), and AzQR assessments. Note: distinct from 'Web Application Firewall' (also WAF).",
-    "aliases": ["WAF"]
+    "aliases": [
+      "WAF"
+    ]
   },
   {
     "id": "authn",
     "term": "Authentication (AuthN)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "Proving who you are — username + password, MFA, an SSO login, a client certificate. Answers the question 'who is this?'.",
     "definition": "Proving the identity of a principal (user, service, device). Mechanisms: passwords + MFA, federated SSO (OIDC/SAML/WS-Fed), client certificates, mTLS, API keys. Outputs verified proof — a session, a JWT, or a TLS-verified peer identity — passed downstream to authorization.",
-    "aliases": ["AuthN"],
-    "related": ["authz", "oidc", "jwt"]
+    "aliases": [
+      "AuthN"
+    ],
+    "related": [
+      "authz",
+      "oidc",
+      "jwt"
+    ]
   },
   {
     "id": "authz",
     "term": "Authorization (AuthZ)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "Once you know who someone is, deciding what they're allowed to do. 'Can Alice delete this file?' That's authz, not authn.",
     "definition": "Deciding what an authenticated principal is allowed to do on which resource. Models: RBAC (roles), ABAC (attributes/policy, e.g., OPA/Cedar), ReBAC (relationships, e.g., Zanzibar/SpiceDB). Always evaluated server-side, on the resource owner, never trusting the client.",
-    "aliases": ["AuthZ"],
-    "related": ["authn", "rbac"]
+    "aliases": [
+      "AuthZ"
+    ],
+    "related": [
+      "authn",
+      "rbac"
+    ]
   },
   {
     "id": "oauth",
     "term": "OAuth 2.0 (Open Authorization)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "The standard 'Log in with Google / Microsoft / GitHub' protocol. It lets an app get a temporary, limited ticket to call APIs on your behalf — without ever seeing your password.",
     "definition": "IETF standard for delegated authorization (RFC 6749 + RFC 9700 BCP). A third-party client obtains a scoped, expiring access token from an authorization server to call a resource server on the user's behalf. Modern flows: Authorization Code + PKCE, Client Credentials, On-Behalf-Of, Device Code, Refresh Token. Implicit and ROPC are deprecated.",
-    "aliases": ["OAuth2"],
-    "related": ["oidc", "pkce", "obo", "access-token"]
+    "aliases": [
+      "OAuth2"
+    ],
+    "related": [
+      "oidc",
+      "pkce",
+      "obo",
+      "access-token"
+    ]
   },
   {
     "id": "oidc",
     "term": "OpenID Connect (OIDC)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "An identity layer on top of OAuth 2.0. OAuth says 'this app can call your APIs'; OIDC also tells the app 'and here's who the logged-in user is' via an ID token.",
     "definition": "Authentication layer built on OAuth 2.0. Adds an ID token (JWT describing the authenticated user — `sub`, `name`, `email`, `aud`, `iss`, `nonce`), a UserInfo endpoint, and standardized discovery (`.well-known/openid-configuration` + JWKS) so apps can verify *who* signed in.",
-    "aliases": ["OIDC"],
-    "related": ["oauth", "id-token", "jwt"]
+    "aliases": [
+      "OIDC"
+    ],
+    "related": [
+      "oauth",
+      "id-token",
+      "jwt"
+    ]
   },
   {
     "id": "pkce",
     "term": "Proof Key for Code Exchange (PKCE)",
-    "categoryIds": ["system-design", "frontend", "safety"],
+    "categoryIds": [
+      "system-design",
+      "frontend",
+      "safety"
+    ],
     "plainEnglish": "An extra check during 'Login with X' that prevents attackers from stealing the authorization code mid-flow. Mandatory for browser, mobile, and desktop apps that can't keep a secret.",
     "definition": "RFC 7636 extension to the OAuth Authorization Code flow that prevents authorization-code interception. The client generates a high-entropy `code_verifier`, sends its SHA-256 hash (`code_challenge`) to the auth server, and presents the verifier when redeeming the code. Mandatory for public clients (SPAs, mobile, native); recommended for confidential clients too.",
-    "aliases": ["PKCE"],
-    "related": ["oauth"]
+    "aliases": [
+      "PKCE"
+    ],
+    "related": [
+      "oauth"
+    ]
   },
   {
     "id": "jwt",
     "term": "JSON Web Token (JWT)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A digitally-signed token that looks like three base64 strings joined by dots. It carries claims like 'I'm Alice, expires at 12:30' that any service can verify without calling back to the login server.",
     "definition": "A signed (and optionally encrypted) `header.payload.signature` token (RFC 7519) used to convey identity and claims. Validation MUST check signature, algorithm (pinned — reject `none` and unexpected algs), `iss`, `aud`, `exp`, `nbf`, and `kid` against the JWKS. Never trust the payload before validating.",
-    "aliases": ["JWT"],
-    "related": ["jwks", "access-token", "id-token", "oauth"]
+    "aliases": [
+      "JWT"
+    ],
+    "related": [
+      "jwks",
+      "access-token",
+      "id-token",
+      "oauth"
+    ]
   },
   {
     "id": "jwks",
     "term": "JSON Web Key Set (JWKS)",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A list of public keys the login provider publishes at a well-known URL. Your service downloads them to verify JWT signatures, and the provider can swap keys without breaking anything.",
     "definition": "A JSON document at a public endpoint (e.g., `/.well-known/jwks.json`) listing the public keys used to sign JWTs (RFC 7517). Clients fetch and cache keys with TTL; the JWT's `kid` header selects the right one. Enables zero-downtime signing-key rotation.",
-    "aliases": ["JWKS"],
-    "related": ["jwt", "oidc"]
+    "aliases": [
+      "JWKS"
+    ],
+    "related": [
+      "jwt",
+      "oidc"
+    ]
   },
   {
     "id": "access-token",
     "term": "Access Token",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "The short-lived ticket your app sends to an API to prove 'I'm allowed to do this'. Usually expires in an hour; you get a new one with a refresh token.",
     "definition": "A short-lived credential (typically 60–90 min) presented to a resource server in the `Authorization: Bearer …` header to prove the caller is authorized for specific scopes. Often a JWT in OIDC ecosystems, but the OAuth 2.0 spec defines it as opaque — resource servers should not introspect a token they did not issue.",
-    "related": ["jwt", "oauth", "refresh-token", "bearer-token"]
+    "related": [
+      "jwt",
+      "oauth",
+      "refresh-token",
+      "bearer-token"
+    ]
   },
   {
     "id": "id-token",
     "term": "ID Token",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "An OIDC token that tells your app 'this user just logged in, and here's their name and email'. Different from an access token — never send an ID token to an API as proof of authorization.",
     "definition": "OIDC-defined JWT (`token_type` not Bearer in usage) that describes the authenticated user — `sub`, `aud` (the client), `name`, `email`, `auth_time`, `nonce`. Consumed by the *client* to know who signed in; not used to call APIs (that's the access token's job).",
-    "related": ["oidc", "jwt", "access-token"]
+    "related": [
+      "oidc",
+      "jwt",
+      "access-token"
+    ]
   },
   {
     "id": "refresh-token",
     "term": "Refresh Token",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A longer-lived credential the app trades for a fresh access token when the old one expires, so the user isn't prompted to log in every hour.",
     "definition": "Long-lived credential issued alongside an access token, exchanged at the auth server for new access tokens without re-prompting the user. Must be stored securely (httpOnly cookie or secure storage), rotated on every use, and revocation-checked. Refresh-token reuse detection should invalidate the entire token family.",
-    "related": ["access-token", "oauth"]
+    "related": [
+      "access-token",
+      "oauth"
+    ]
   },
   {
     "id": "bearer-token",
     "term": "Bearer Token",
-    "categoryIds": ["system-design", "safety"],
+    "categoryIds": [
+      "system-design",
+      "safety"
+    ],
     "plainEnglish": "Any token where 'whoever holds it, gets in' — like a movie ticket. That's why HTTPS, short lifetimes, and safe storage matter so much.",
     "definition": "Any token whose mere possession authorizes the caller — presented as `Authorization: Bearer <token>` (RFC 6750). No additional cryptographic binding to the client by default (cf. mTLS-bound tokens, DPoP), so transport security (HTTPS), short lifetimes, and safe storage are non-negotiable.",
-    "related": ["access-token", "jwt"]
+    "related": [
+      "access-token",
+      "jwt"
+    ]
   },
   {
     "id": "obo",
     "term": "On-Behalf-Of Flow (OBO)",
-    "categoryIds": ["azure-platform", "azure-ai", "safety"],
+    "categoryIds": [
+      "azure-platform",
+      "azure-ai",
+      "safety"
+    ],
     "plainEnglish": "When your API has a user's token and needs to call another API as that same user, it 'trades up' for a new token in OBO. Preserves who the real user is through a chain of services.",
     "definition": "OAuth 2.0 token-exchange flow where a service that received a user's access token exchanges it (with its own client credentials) for a new access token to call a downstream API *as that user*. Preserves user identity and per-user permissions through service chains; supported natively by Microsoft Entra ID.",
-    "aliases": ["OBO"],
-    "related": ["oauth", "access-token", "managed-identity"]
+    "aliases": [
+      "OBO"
+    ],
+    "related": [
+      "oauth",
+      "access-token",
+      "managed-identity"
+    ]
   },
   {
     "id": "scope",
     "term": "OAuth Scope",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A named permission the app asks for — 'Mail.Read', 'user.profile'. The user (or admin) consents, and that permission gets baked into the access token.",
     "definition": "Named permission requested by an OAuth client (e.g., `Mail.Read`, `https://cognitiveservices.azure.com/.default`). Granted via user or admin consent and embedded in the access token's `scp`/`scope` claim (delegated) or `roles` claim (app-only). Resource servers enforce required scopes per operation.",
-    "related": ["oauth", "claim"]
+    "related": [
+      "oauth",
+      "claim"
+    ]
   },
   {
     "id": "claim",
     "term": "Claim",
-    "categoryIds": ["system-design", "azure-platform", "safety"],
+    "categoryIds": [
+      "system-design",
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A single fact carried inside a token — 'who issued it', 'who it's for', 'when it expires', 'what role the user has'. Authorization decisions read these.",
     "definition": "A statement carried inside a token — standard (`iss`, `aud`, `exp`, `nbf`, `sub`, `tid`) or custom (`roles`, `groups`, app-specific). Authorization decisions read claims; security depends on validating the token's signature and standard claims before trusting any business claim.",
-    "related": ["jwt", "scope"]
+    "related": [
+      "jwt",
+      "scope"
+    ]
   },
   {
     "id": "rbac",
     "term": "Role-Based Access Control (RBAC)",
-    "categoryIds": ["azure-platform", "system-design", "safety"],
+    "categoryIds": [
+      "azure-platform",
+      "system-design",
+      "safety"
+    ],
     "plainEnglish": "Permissions handed out via roles like 'Reader' or 'Contributor', assigned at a scope (this resource, this resource group, this subscription). Inherits downward — assign at the narrowest scope you can.",
     "definition": "Authorization model that grants permissions via role assignments (built-in like `Reader`, `Contributor`, `Cognitive Services OpenAI User`, or custom) at a scope (management group → subscription → resource group → resource). Assignments inherit downward; follow least privilege by assigning at the narrowest scope.",
-    "aliases": ["RBAC"],
-    "related": ["authz", "managed-identity"]
+    "aliases": [
+      "RBAC"
+    ],
+    "related": [
+      "authz",
+      "managed-identity"
+    ]
   },
   {
     "id": "workload-identity-federation",
     "term": "Workload Identity Federation (WIF)",
-    "categoryIds": ["azure-platform", "safety"],
+    "categoryIds": [
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "Lets external workloads (GitHub Actions, AWS roles, GitLab CI, an AKS pod, Google Cloud) log into Azure without storing a client secret. They present their own provider's token, Entra trusts it, and hands back an Azure token.",
     "definition": "Trust configuration on an Entra app registration that accepts an external OIDC issuer (GitHub Actions, AWS STS, GitLab, AKS, GCP) so its short-lived tokens can be exchanged for Azure access tokens via OAuth 2.0 token exchange — eliminating stored client secrets in CI/CD and external workloads.",
-    "aliases": ["WIF"],
-    "related": ["managed-identity", "oidc"]
+    "aliases": [
+      "WIF"
+    ],
+    "related": [
+      "managed-identity",
+      "oidc"
+    ]
   },
   {
     "id": "default-azure-credential",
     "term": "DefaultAzureCredential",
-    "categoryIds": ["azure-platform", "azure-ai"],
+    "categoryIds": [
+      "azure-platform",
+      "azure-ai"
+    ],
     "plainEnglish": "An Azure SDK helper that 'just works' across environments. Locally it grabs your `az login` creds; in CI it uses env vars; in Azure it uses managed identity. Same code, no `if dev else prod`.",
     "definition": "Azure Identity SDK credential that walks an ordered chain (environment vars → workload identity → managed identity → Azure CLI → VS / VS Code / Azure PowerShell) until one returns a token. Great for local-dev-to-prod parity; pin to a specific credential (e.g., `ManagedIdentityCredential`) in production for predictability and faster startup.",
-    "related": ["managed-identity", "workload-identity-federation"]
+    "related": [
+      "managed-identity",
+      "workload-identity-federation"
+    ]
   },
   {
     "id": "app-registration",
     "term": "Microsoft Entra App Registration",
-    "categoryIds": ["azure-platform", "safety"],
+    "categoryIds": [
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "The 'definition' of an application in Entra ID (formerly Azure AD) — its client ID, what URLs it can redirect to after login, what permissions it requests. Distinct from the per-tenant 'enterprise app' (service principal) that actually represents it inside a tenant.",
     "definition": "The global definition of an application in Microsoft Entra ID — client id, redirect URIs, exposed scopes / app roles, requested API permissions, certificates / client secrets, federated credentials. Distinct from the *enterprise application* (service principal), which is the per-tenant instance created when the app is consented to.",
-    "aliases": ["Entra App Registration", "Azure AD App"],
-    "related": ["oauth", "oidc"]
+    "aliases": [
+      "Entra App Registration",
+      "Azure AD App"
+    ],
+    "related": [
+      "oauth",
+      "oidc"
+    ]
   },
   {
     "id": "key-vault-reference",
     "term": "Key Vault Reference",
-    "categoryIds": ["azure-platform", "safety"],
+    "categoryIds": [
+      "azure-platform",
+      "safety"
+    ],
     "plainEnglish": "A magic placeholder you put in an App Service / Functions / Container Apps setting that says 'fetch this secret from Key Vault at runtime'. Keeps real secret values out of your config and git history.",
     "definition": "App-setting syntax (`@Microsoft.KeyVault(SecretUri=https://…vault.azure.net/secrets/foo/version)`) that lets App Service, Functions, and Container Apps resolve a secret from Key Vault at runtime via the app's Managed Identity, instead of storing the raw value in config. Caches with TTL; rotation requires app restart or `versionless` reference.",
-    "related": ["managed-identity", "rbac"]
+    "related": [
+      "managed-identity",
+      "rbac"
+    ]
+  },
+  {
+    "id": "clr",
+    "term": "Common Language Runtime (CLR)",
+    "categoryIds": [
+      "dotnet"
+    ],
+    "plainEnglish": "The engine that actually runs your C# program: it compiles, manages memory, and handles exceptions so you don't have to.",
+    "definition": "The .NET virtual machine that executes managed code. It provides JIT compilation from IL to native code, automatic memory management via the garbage collector, type safety, exception handling, and thread management.",
+    "aliases": [
+      "CLR"
+    ],
+    "related": [
+      "garbage-collection-dotnet",
+      "idisposable"
+    ]
+  },
+  {
+    "id": "garbage-collection-dotnet",
+    "term": "Garbage Collection (.NET)",
+    "categoryIds": [
+      "dotnet"
+    ],
+    "plainEnglish": "Automatic cleanup of objects you stopped using, so you rarely free memory by hand. It works in 'generations' to stay fast.",
+    "definition": "The CLR's automatic memory reclamation. Objects are tracked across three generations (0, 1, 2); short-lived objects are collected cheaply in gen 0, long-lived survivors are promoted. Understanding generations explains why allocation churn is cheap but large/long-lived allocations are costly.",
+    "related": [
+      "clr",
+      "idisposable"
+    ]
+  },
+  {
+    "id": "idisposable",
+    "term": "IDisposable / using",
+    "categoryIds": [
+      "dotnet"
+    ],
+    "plainEnglish": "A pattern for releasing things the GC can't handle — files, sockets, DB connections — deterministically with a `using` block.",
+    "definition": "An interface with a single `Dispose()` method for releasing unmanaged resources deterministically. The `using` statement guarantees `Dispose()` is called even on exceptions. Needed because the GC handles managed memory but not OS handles, connections, or streams.",
+    "related": [
+      "garbage-collection-dotnet",
+      "clr"
+    ]
+  },
+  {
+    "id": "configureawait",
+    "term": "ConfigureAwait(false)",
+    "categoryIds": [
+      "dotnet"
+    ],
+    "plainEnglish": "A hint that says 'after this await, I don't need to come back to the original thread' — used in libraries to avoid deadlocks.",
+    "definition": "Tells an awaited task not to capture and resume on the original synchronization context. Used in library code to avoid context-capture deadlocks and reduce overhead. Has no effect in contexts without a synchronization context (e.g. ASP.NET Core).",
+    "related": [
+      "idisposable"
+    ]
+  },
+  {
+    "id": "jvm",
+    "term": "Java Virtual Machine (JVM)",
+    "categoryIds": [
+      "java"
+    ],
+    "plainEnglish": "The program that runs Java bytecode on any OS, handles memory, and speeds your code up as it runs.",
+    "definition": "The runtime that executes Java bytecode. It provides JIT compilation, garbage collection, the Java Memory Model, and platform independence ('write once, run anywhere'). The JVM also hosts other languages (Kotlin, Scala, Clojure).",
+    "aliases": [
+      "JVM"
+    ],
+    "related": [
+      "jmm",
+      "garbage-collection-java",
+      "virtual-threads"
+    ]
+  },
+  {
+    "id": "jmm",
+    "term": "Java Memory Model (JMM)",
+    "categoryIds": [
+      "java"
+    ],
+    "plainEnglish": "The rulebook for what one thread is guaranteed to see of another thread's writes — the basis for `volatile` and `synchronized`.",
+    "definition": "The specification defining how threads interact through memory: visibility, ordering, and atomicity guarantees. It defines the happens-before relationship that `volatile`, `synchronized`, and `final` establish, preventing reordering surprises in concurrent code.",
+    "related": [
+      "jvm",
+      "virtual-threads"
+    ]
+  },
+  {
+    "id": "garbage-collection-java",
+    "term": "Garbage Collection (JVM)",
+    "categoryIds": [
+      "java"
+    ],
+    "plainEnglish": "Automatic memory cleanup in the JVM. Modern collectors like G1 and ZGC aim for very short pauses.",
+    "definition": "The JVM's automatic memory reclamation. Collectors trade throughput against pause time: G1 (default, balanced), ZGC and Shenandoah (sub-millisecond pauses for large heaps), and Parallel (max throughput). Tuning targets pause-time goals and allocation rate.",
+    "related": [
+      "jvm"
+    ]
+  },
+  {
+    "id": "virtual-threads",
+    "term": "Virtual Threads (Project Loom)",
+    "categoryIds": [
+      "java"
+    ],
+    "plainEnglish": "Super-cheap threads (Java 21+) that let you write simple blocking code but scale to millions of concurrent tasks.",
+    "definition": "Lightweight, JVM-managed threads (Java 21+) that are cheap to create and block. They let blocking-style code scale to massive concurrency without the complexity of reactive/async APIs, by unmounting from carrier threads while blocked on I/O.",
+    "aliases": [
+      "Project Loom"
+    ],
+    "related": [
+      "jvm",
+      "jmm"
+    ]
+  },
+  {
+    "id": "gil",
+    "term": "Global Interpreter Lock (GIL)",
+    "categoryIds": [
+      "python"
+    ],
+    "plainEnglish": "A lock in CPython that lets only one thread run Python code at a time — why threads don't speed up CPU-bound work.",
+    "definition": "A mutex in CPython that allows only one thread to execute Python bytecode at once. It simplifies memory management but prevents true multi-core parallelism for CPU-bound threads; use multiprocessing or native extensions for CPU parallelism. (Python 3.13 introduces an experimental free-threaded build.)",
+    "aliases": [
+      "GIL"
+    ],
+    "related": [
+      "asyncio-event-loop"
+    ]
+  },
+  {
+    "id": "asyncio-event-loop",
+    "term": "asyncio Event Loop",
+    "categoryIds": [
+      "python"
+    ],
+    "plainEnglish": "A single-threaded scheduler that juggles many I/O tasks by switching between them at `await` points.",
+    "definition": "The core of Python's asyncio: a single-threaded loop that runs coroutines, switching between them at `await` suspension points. It delivers high I/O concurrency on one thread, but any blocking/CPU-heavy call freezes the whole loop.",
+    "related": [
+      "gil"
+    ]
+  },
+  {
+    "id": "context-manager",
+    "term": "Context Manager (with)",
+    "categoryIds": [
+      "python"
+    ],
+    "plainEnglish": "The `with` block — it guarantees setup and cleanup (open/close, acquire/release) run even if an error happens.",
+    "definition": "An object implementing `__enter__`/`__exit__` (or built via `@contextmanager`) used with the `with` statement to guarantee resource acquisition and release, even on exceptions. Common for files, locks, DB sessions, and transactions.",
+    "related": [
+      "asyncio-event-loop"
+    ]
+  },
+  {
+    "id": "duck-typing",
+    "term": "Duck Typing",
+    "categoryIds": [
+      "python"
+    ],
+    "plainEnglish": "'If it walks like a duck and quacks like a duck...' — Python cares what an object can do, not what class it is.",
+    "definition": "A typing style where an object's suitability is determined by the presence of methods/attributes rather than its explicit type. Enables flexible, polymorphic code; `Protocol` types (PEP 544) add static checking to this dynamic pattern.",
+    "related": [
+      "context-manager"
+    ]
+  },
+  {
+    "id": "strangler-fig",
+    "term": "Strangler Fig Pattern",
+    "categoryIds": [
+      "migration"
+    ],
+    "plainEnglish": "Replace a legacy system gradually by routing slices of traffic to new services until the old one can be switched off.",
+    "definition": "An incremental migration pattern (named by Martin Fowler) where a new system grows around the old one, intercepting and replacing functionality piece by piece until the legacy system is fully retired — avoiding a risky big-bang rewrite.",
+    "aliases": [
+      "Strangler pattern"
+    ],
+    "related": [
+      "anti-corruption-layer"
+    ],
+    "references": [
+      {
+        "title": "Martin Fowler — StranglerFigApplication",
+        "url": "https://martinfowler.com/bliki/StranglerFigApplication.html"
+      }
+    ]
+  },
+  {
+    "id": "anti-corruption-layer",
+    "term": "Anti-Corruption Layer (ACL)",
+    "categoryIds": [
+      "migration"
+    ],
+    "plainEnglish": "A translation layer that keeps a messy legacy model from leaking into your clean new system.",
+    "definition": "A DDD pattern that isolates a new system from a legacy or external model by translating between them, preventing the old model's concepts from corrupting the new design. Frequently paired with the Strangler Fig during migrations.",
+    "aliases": [
+      "ACL"
+    ],
+    "related": [
+      "strangler-fig"
+    ]
+  },
+  {
+    "id": "lift-and-shift",
+    "term": "Lift and Shift (Rehosting)",
+    "categoryIds": [
+      "migration"
+    ],
+    "plainEnglish": "Move an app to the cloud as-is, with minimal changes — fast, but you don't get cloud-native benefits yet.",
+    "definition": "A cloud migration strategy (rehosting) that moves workloads to the cloud with little or no redesign. Fast and low-risk, but doesn't capture elasticity or managed-service benefits; often a first step before later replatforming or refactoring.",
+    "aliases": [
+      "rehosting"
+    ],
+    "related": [
+      "strangler-fig"
+    ],
+    "references": [
+      {
+        "title": "Microsoft — Cloud migration approaches (5 Rs)",
+        "url": "https://learn.microsoft.com/azure/cloud-adoption-framework/migrate/"
+      }
+    ]
+  },
+  {
+    "id": "one-on-one",
+    "term": "1:1 (One-on-One)",
+    "categoryIds": [
+      "leadership"
+    ],
+    "plainEnglish": "A regular private meeting between a manager and a report — the report's time to raise issues, growth, and blockers.",
+    "definition": "A recurring private meeting between a manager and a direct report, owned by the report's agenda. Used for unblocking, career growth, feedback, and trust-building — not status updates. A foundational management ritual.",
+    "aliases": [
+      "1:1",
+      "one-on-ones"
+    ],
+    "related": [
+      "calibration",
+      "pip"
+    ]
+  },
+  {
+    "id": "calibration",
+    "term": "Calibration",
+    "categoryIds": [
+      "leadership"
+    ],
+    "plainEnglish": "A meeting where managers compare ratings across people so 'exceeds expectations' means the same thing everywhere.",
+    "definition": "A cross-manager process to normalize performance ratings and promotion decisions, reducing individual-manager bias and ensuring consistent standards across a team or org. Central to fair performance and promotion cycles.",
+    "related": [
+      "one-on-one",
+      "pip"
+    ]
+  },
+  {
+    "id": "pip",
+    "term": "Performance Improvement Plan (PIP)",
+    "categoryIds": [
+      "leadership"
+    ],
+    "plainEnglish": "A formal, time-boxed plan with clear goals for an underperforming employee — improve or face consequences.",
+    "definition": "A structured, time-bound plan documenting specific performance gaps, expectations, and support, with defined check-ins. A formal HR step that should follow earlier informal feedback, not replace it.",
+    "aliases": [
+      "PIP"
+    ],
+    "related": [
+      "calibration",
+      "one-on-one"
+    ]
+  },
+  {
+    "id": "engineer-manager-pendulum",
+    "term": "Engineer/Manager Pendulum",
+    "categoryIds": [
+      "leadership"
+    ],
+    "plainEnglish": "The idea that you can swing between IC and management roles over a career, gaining from each side.",
+    "definition": "Charity Majors' concept that moving between individual-contributor and management tracks over a career is healthy, not a failure — each role refreshes skills the other erodes. Counters the myth that management is a one-way promotion.",
+    "related": [
+      "one-on-one"
+    ],
+    "references": [
+      {
+        "title": "Charity Majors — The Engineer/Manager Pendulum",
+        "url": "https://charity.wtf/2017/05/11/the-engineer-manager-pendulum/"
+      }
+    ]
+  },
+  {
+    "id": "star-method",
+    "term": "STAR Method",
+    "categoryIds": [
+      "behavioral"
+    ],
+    "plainEnglish": "A way to structure a behavioral answer: Situation, Task, Action, Result — so your story is clear and complete.",
+    "definition": "A framework for answering behavioral interview questions: Situation (context), Task (your responsibility), Action (what you specifically did), Result (quantified outcome). Often extended with Reflection (what you learned).",
+    "aliases": [
+      "STAR",
+      "STAR+R"
+    ],
+    "related": [
+      "leadership-principles"
+    ]
+  },
+  {
+    "id": "leadership-principles",
+    "term": "Leadership Principles (LP)",
+    "categoryIds": [
+      "behavioral"
+    ],
+    "plainEnglish": "Amazon's 16 values (Ownership, Customer Obsession, etc.) that interviewers explicitly grade your stories against.",
+    "definition": "Amazon's 16 cultural tenets used as the explicit rubric in behavioral interviews. Candidates are expected to map stories to specific principles. Many companies have analogous value frameworks scored in 'behavioral' or 'culture' rounds.",
+    "aliases": [
+      "LP",
+      "Amazon LP"
+    ],
+    "related": [
+      "star-method",
+      "bar-raiser"
+    ],
+    "references": [
+      {
+        "title": "Amazon — Leadership Principles",
+        "url": "https://www.amazon.jobs/content/en/our-workplace/leadership-principles"
+      }
+    ]
+  },
+  {
+    "id": "bar-raiser",
+    "term": "Bar Raiser",
+    "categoryIds": [
+      "behavioral"
+    ],
+    "plainEnglish": "A trained interviewer from outside the hiring team with veto power, there to keep the hiring bar high.",
+    "definition": "An Amazon (and similar at other firms) interview role: a trained, objective interviewer not on the hiring team who safeguards hiring quality and can veto an offer. Focuses heavily on Leadership Principles and long-term fit.",
+    "related": [
+      "leadership-principles",
+      "star-method"
+    ]
+  },
+  {
+    "id": "rfc",
+    "term": "RFC (Request for Comments)",
+    "categoryIds": [
+      "staff-plus"
+    ],
+    "plainEnglish": "A written proposal shared for feedback before building something significant — how senior engineers drive alignment.",
+    "definition": "A written technical proposal circulated for review before implementation, capturing context, options, trade-offs, and a recommendation. A primary tool for Staff+ engineers to build alignment and influence without authority across teams.",
+    "aliases": [
+      "design doc"
+    ],
+    "related": [
+      "adr",
+      "tech-strategy"
+    ]
+  },
+  {
+    "id": "adr",
+    "term": "Architecture Decision Record (ADR)",
+    "categoryIds": [
+      "staff-plus",
+      "system-design"
+    ],
+    "plainEnglish": "A short, dated note recording one architectural decision and why you made it — so future teams understand the context.",
+    "definition": "A lightweight, immutable document capturing a single architectural decision: context, the decision, status, and consequences. Kept in version control alongside code so the rationale survives team turnover.",
+    "aliases": [
+      "ADR"
+    ],
+    "related": [
+      "rfc",
+      "tech-strategy"
+    ],
+    "references": [
+      {
+        "title": "Michael Nygard — Documenting Architecture Decisions",
+        "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions"
+      }
+    ]
+  },
+  {
+    "id": "tech-strategy",
+    "term": "Technical Strategy",
+    "categoryIds": [
+      "staff-plus"
+    ],
+    "plainEnglish": "A multi-quarter plan for where the technology should go and why — the Staff+ deliverable beyond shipping features.",
+    "definition": "A coherent, multi-quarter direction connecting technical investments to business outcomes — naming the hard problems, sequencing bets, and creating leverage. A defining Staff+ output: setting direction, not just executing tasks.",
+    "related": [
+      "rfc",
+      "adr",
+      "glue-work"
+    ]
+  },
+  {
+    "id": "glue-work",
+    "term": "Glue Work",
+    "categoryIds": [
+      "staff-plus"
+    ],
+    "plainEnglish": "The unglamorous coordination — unblocking, reviewing, mentoring, aligning — that holds a project together but is easy to undervalue.",
+    "definition": "The non-feature work that keeps teams and projects functioning: facilitating decisions, reviewing designs, onboarding, cross-team coordination. High-leverage and a multiplier signal for Staff+, but often under-credited in promotion calibration.",
+    "related": [
+      "tech-strategy",
+      "rfc"
+    ],
+    "references": [
+      {
+        "title": "Tanya Reilly — Being Glue",
+        "url": "https://noidea.dog/glue"
+      }
+    ]
   }
 ]

@@ -24,6 +24,33 @@ function wordCount(s: string): number {
   return s.trim().split(/\s+/).filter(Boolean).length;
 }
 
+// Curated allow-list for region/pattern/role tags. Keep in sync with
+// docs/COMPANY-PATTERNS.md and the /patterns page shortcuts. Any tag matching
+// /^(region|pattern|role)-/ that is NOT here is treated as drift and errors out.
+const SPECIAL_TAGS = new Set<string>([
+  // region
+  "region-india",
+  "region-singapore",
+  "region-uae",
+  "region-global",
+  // company pattern
+  "pattern-faang",
+  "pattern-services-firm",
+  "pattern-bigtech-india",
+  "pattern-product-startup",
+  "pattern-bank-fintech",
+  "pattern-gov-public-sector",
+  "pattern-genai-lab",
+  // role
+  "role-staff-ic",
+  "role-eng-manager",
+  "role-architect",
+  "role-tech-lead",
+  "role-forward-deployed-engineer",
+  "role-ml-engineer",
+]);
+const SPECIAL_TAG_PREFIX = /^(region|pattern|role)-/;
+
 function main() {
   const categories = getCategories();
   const tracks = getTracks();
@@ -115,6 +142,16 @@ function main() {
     for (const r of q.references) {
       if (!r.url.startsWith("https://")) {
         warnings.push({ id: q.id, message: `reference URL not https: ${r.url}` });
+      }
+    }
+
+    // Special-tag drift: region/pattern/role tags must be in the allow-list
+    for (const tag of q.tags) {
+      if (SPECIAL_TAG_PREFIX.test(tag) && !SPECIAL_TAGS.has(tag)) {
+        errors.push({
+          id: q.id,
+          message: `unknown region/pattern/role tag "${tag}" (add to SPECIAL_TAGS allow-list + docs/COMPANY-PATTERNS.md, or fix the typo)`,
+        });
       }
     }
   }

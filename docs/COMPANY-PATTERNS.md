@@ -248,7 +248,7 @@ Every senior, behavioural, regional, or company-pattern question carries one or 
 
 - `region-india` · `region-singapore` · `region-uae` · `region-global`
 - `pattern-faang` · `pattern-services-firm` · `pattern-bigtech-india` · `pattern-product-startup` · `pattern-bank-fintech` · `pattern-gov-public-sector` · `pattern-genai-lab`
-- `role-staff-ic` · `role-eng-manager` · `role-architect` · `role-tech-lead`
+- `role-staff-ic` · `role-eng-manager` · `role-architect` · `role-tech-lead` · `role-forward-deployed-engineer` · `role-ml-engineer`
 
 Combine these in `/browse` with category and difficulty filters to build a focused practice set.
 

@@ -31,6 +31,8 @@ const SHORTCUTS: Shortcut[] = [
   { label: "Gov / public sector", href: "/browse?tag=pattern-gov-public-sector", description: "Mission-pull behavioral, ownership evidence, sovereign-cloud constraints" },
   { label: "Eng Manager loop", href: "/browse?tag=role-eng-manager", description: "IC→Mgr, hiring, performance, conflict, prioritization, org design" },
   { label: "Staff+ IC loop", href: "/browse?tag=role-staff-ic", description: "Scope, influence-without-authority, architecture review, AI strategy" },
+  { label: "Forward-deployed eng", href: "/browse?tag=role-forward-deployed-engineer", description: "Customer-facing GenAI delivery, ambiguity, scrappy prototyping, stakeholder management" },
+  { label: "ML engineer", href: "/browse?tag=role-ml-engineer", description: "Training/serving pipelines, fine-tuning, eval harnesses, model lifecycle" },
 ];
 
 export default function PatternsPage() {
