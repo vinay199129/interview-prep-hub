@@ -6,6 +6,7 @@ dist
 .DS_Store
 *.log
 tsconfig.tsbuildinfo
+docs/personal/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
