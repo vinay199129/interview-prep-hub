@@ -124,6 +124,21 @@ export default function LastMilePage() {
         </div>
       </details>
 
+      <Link
+        href="#technical-question-bank-rapid-fire-by-jd-topic"
+        className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+      >
+        <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+          ⚡ Technical question bank (rapid-fire, by JD topic)
+        </div>
+        <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+          44 quick-drill Q&amp;A mapped to the exact stack: Kafka/event-driven,
+          distributed systems, microservices &amp; API, Java/Node/Python, Azure
+          (AKS/APIM/PostgreSQL/Data Lake), AI/ML &amp; MLOps, observability/DevSecOps,
+          and last-mile domain.
+        </div>
+      </Link>
+
       <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
         <PatternsToc markdown={markdown} toc={toc} />
       </section>
