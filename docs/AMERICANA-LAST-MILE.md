@@ -176,6 +176,52 @@ Add **rent (~AED 11k–13k)** and **schooling (~AED 3.5k–4.5k/month amortised)
 
 **Red flags to avoid in this conversation:** quoting a base with no package awareness; ignoring the cost floor (rent + schooling); forgetting dependents in visas/flights/insurance; trading away gratuity-bearing basic for headline allowances without doing the math.
 
+#### 10. Your target package — a concrete ask (family of 4, 14 yrs, GenAI/Azure)
+
+> **Read this as:** *Floor* = walk-away minimum for a comfortable family life; *Target* = what to anchor on (open here); *Stretch* = justified by scarce AI skills + a top-tier employer (G42/Mubadala portfolio, tier-1 bank, Big Tech). All **tax-free AED, Dubai**; Abu Dhabi trends ~5–8% higher. Quote a **range that opens at Target**, and negotiate the *package*, not just base.
+
+**A. Monthly cash (structure the split — basic drives gratuity)**
+
+| Component | Floor | **Target** | Stretch | Notes |
+| --- | --- | --- | --- | --- |
+| Basic salary | 24,000 | **30,000** | 38,000 | Keep basic ~55–60% of cash → bigger end-of-service gratuity |
+| Housing allowance | 10,000 | **13,000** | 16,000 | Funds a mid-tier family 3BR (~AED 130–160k/yr) |
+| Transport allowance | 2,500 | **3,000** | 4,000 | Car + fuel + Salik |
+| Other/general allowance | 4,000 | **6,000** | 9,000 | Flex/utilities buffer |
+| **Total monthly cash** | **~40,500** | **~52,000** | **~67,000** | |
+| **Annualised** | **~486k** | **~624k** | **~804k** | Tax-free |
+
+**B. Benefits & variable (ask for these explicitly — they're where the real value hides)**
+
+| Item | What to ask for |
+| --- | --- |
+| Annual / performance bonus | **15–20% of annual base** (target ~AED 65k–90k), tied to clear KPIs |
+| Family medical insurance | **Comprehensive, fully employer-paid** for you + spouse + 2 children |
+| Children's schooling | **AED 40,000–55,000/yr** support (2 kids, good CBSE) — or as high a cap as possible |
+| Annual home-leave flights | **4 return tickets** (whole family) to India each year |
+| Long-term incentive (if applicable) | **RSUs/stock or retention bonus** — standard at Big Tech / sovereign-AI, worth asking |
+| End-of-service gratuity | Confirmed per UAE law, accruing on **basic** |
+
+**C. One-time (joining) — get the company to absorb the relocation floor**
+
+| Item | What to ask for |
+| --- | --- |
+| Signing / sign-on bonus | **AED 40,000–60,000** — offsets setup + any notice-period gap; justified by scarce GenAI/Azure skills |
+| Relocation / settling-in lump sum | **AED 30,000–50,000** |
+| Household shipping | **AED 15,000–30,000** (family-sized move from India) |
+| Temporary housing | **3–4 weeks** serviced apartment on arrival |
+| Visas + Emirates ID + medical tests | **For all 4**, fully company-paid |
+
+**D. Does it work? — the savings check**
+
+At **Target (~AED 52,000/month cash)** against a comfortable family cost floor of **~AED 30,000/month** (mid-tier 3BR rent ~13k + 2 kids CBSE ~4k + living ~13k), you net roughly **AED 20,000+/month in tax-free savings** — *before* bonus and with schooling/medical ideally employer-covered. That's the headline to keep in mind: a UAE move at this band should leave you **materially ahead** of an India CTC after tax, not just level.
+
+**E. The one-line ask (say this in the screen)**
+
+> "For a Senior Architect / EM with GenAI + Azure depth, I'm targeting **total cash around AED 50,000–58,000/month, tax-free**, structured with a healthy basic for gratuity, plus a standard senior expat package — **bonus, fully-covered family medical, children's schooling support, annual home flights, and relocation/shipping/visas for my dependents.** Given a family-of-four relocation, that keeps me comfortably ahead of my current net. What band does this role sit in?"
+
+> **Leverage reminders:** you bring **scarce GenAI + Azure architecture skills**, a deep cert stack (AZ-305, AI-102, …), **Fortune-500 + direct UAE-government delivery**, and public-speaking/enablement. Anchor on *value and scarcity*, ask for the full package in one go, and **never trade gratuity-bearing basic for headline allowances** without doing the math.
+
 ---
 
 ## Round 2 · Hiring manager
