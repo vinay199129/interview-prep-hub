@@ -33,7 +33,7 @@ const ROUNDS: Round[] = [
   {
     label: "3 · System design",
     href: "#round-3-system-design",
-    description: "Order processing, dispatch/orchestration, Kafka streaming, ETA, scale to 99.99%",
+    description: "5 cases: order processing, dispatch/matching, live tracking & ETA, demand forecasting/surge, multi-region residency — scale to 99.99%",
   },
   {
     label: "4 · Coding / technical",

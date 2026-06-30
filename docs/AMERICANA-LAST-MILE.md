@@ -309,7 +309,7 @@ At **Target (~AED 52,000/month cash)** against a comfortable family cost floor o
 
 > **Framework for every prompt:** (1) clarify functional + non-functional requirements and scale; (2) estimate (orders/sec, peak multiplier, storage); (3) define APIs/events; (4) high-level architecture; (5) data model + storage choices; (6) deep-dive the hard part; (7) reliability/scaling/observability; (8) trade-offs and what you'd do next.
 
-### Design a real-time order-processing & delivery-orchestration platform for multi-market QSR delivery.
+### Case 1 · Design a real-time order-processing & delivery-orchestration platform for multi-market QSR delivery.
 
 **Strong answer skeleton:**
 
@@ -357,6 +357,73 @@ Clients (app / web / aggregator webhooks)
 - "How do you guarantee a customer is never charged twice or an order dispatched twice?" → idempotency keys + outbox/inbox + idempotent payment/dispatch APIs.
 - "Lunch rush is 15× normal — what scales and what breaks first?" → consumer lag and DB connections; pre-scale via schedule + HPA on lag, partition headroom, backpressure, shed load gracefully.
 - "Order events arrive out of order — how do you handle it?" → partition by key for per-order ordering; use event versioning / state-machine guards to reject stale transitions.
+
+### Case 2 · Design the real-time rider-dispatch & assignment engine.
+
+**1. Requirements.** *Functional:* given open orders and available riders in a city, assign the best rider (or a batch of nearby orders) per rider, and continuously re-evaluate as new orders arrive, riders go on/offline, or traffic shifts. *Non-functional:* assignment latency in **seconds**, high availability, optimize **ETA + cost + rider utilization**, fairness to riders, handle **1–2k orders/sec** per city-region at peak.
+
+**2. Approach — periodic optimization tick, not greedy.**
+- Maintain real-time state: **rider positions** stream in via Event Hubs/Kafka (partition by `riderId`) into an **in-memory geospatial index** (Uber **H3** / geohash, backed by Redis Geo for durability), plus rider availability/capacity and an open-order queue.
+- Run an **assignment tick per city/region every ~2–5 s**: build candidate `(order, rider)` pairs filtered by proximity (H3 ring), **score** each by predicted ETA + travel cost + rider utilization + SLA-breach risk, then solve as a **min-cost bipartite matching** (Hungarian, or constrained greedy at very high scale), **batching** nearby orders onto one rider. Global optimization per tick beats first-come greedy — fewer idle miles, better on-time %.
+
+**3. Hard parts.**
+- **Double-dispatch race:** make **one authority per region** (partition the dispatch service by city — e.g. Service Fabric reliable actors or a partitioned consumer) so a rider/order is assigned by a single writer; use an **assignment token + idempotent rider-accept** with an ack timeout → auto-reassign on no-ack.
+- **Stale GPS:** TTL on positions, last-known + light dead-reckoning, drop riders whose pings went silent.
+- **Declines / no-shows:** reassign with backoff and reliability scoring; **supply imbalance** → feed surge/positioning (see Case 4).
+
+**4. Reliability & scale.** Partition by city so each region is **independent and horizontally scalable** and the matching problem stays bounded; checkpoint state for fast pod-restart recovery; **graceful degradation** to nearest-available-rider greedy if the optimizer is slow/unavailable.
+
+- **Trade-offs:** batch size vs. delivery speed; optimization frequency vs. compute cost; own fleet vs. 3PL.
+- **Key points:** geospatial indexing (H3); periodic matching/optimization; **single-writer per region** to prevent double-dispatch; idempotent accept; degrade to greedy.
+- **Red flags:** greedy per-order only; no double-assignment guard; one global optimizer over all cities; ignoring stale location.
+
+### Case 3 · Design live order tracking & ETA for millions of concurrent customers.
+
+**1. Requirements.** *Functional:* show the customer the rider's live position and a continuously-updated ETA from placed → delivered. *Non-functional:* update latency of a few seconds, scale to **hundreds of thousands–millions of concurrent trackers** at peak, cost-efficient, available.
+
+**2. Scale.** Riders ping every 3–5 s → ~100k active riders ≈ **~25k pings/s** ingest, plus customer-side **fan-out**.
+
+**3. Approach — hot path / cold path split.**
+- **Ingest:** rider GPS → **Event Hubs** (partition by `riderId`); a Location service writes current position to a **fast store** (Redis/Azure Cache) with TTL — last-write-wins, ephemeral.
+- **Fan-out:** customers subscribe to their order's channel via a **managed real-time push** service (**Azure Web PubSub / SignalR**, or MQTT) — the tracker pushes position + ETA deltas. **Never let customers poll the transactional DB.**
+- **ETA:** recompute travel-time ETA **periodically** from the model endpoint (not on every ping); cache it and push only on a **material change**; client-side snap-to-road/interpolation keeps motion smooth with fewer messages.
+- **Cold path:** persist the full track asynchronously to ADLS/Cosmos for history/audit/ML — keeping the hot path cheap.
+
+**4. Hard parts & scale.** Millions of **connections** → use managed pub/sub that scales out, sharded by region; **thundering herd** at peak → backpressure and **adaptive sampling** (lower ping/update frequency under load); accuracy vs. cost → update only on meaningful movement; poor-network riders → last-known + dead-reckoning. Everything is **eventual** and degrades gracefully.
+
+- **Trade-offs:** push vs. poll; update frequency vs. battery/cost/accuracy; ephemeral vs. durable.
+- **Key points:** hot/cold path separation; **managed pub/sub** for fan-out; ETA recompute **decoupled** from ping rate; partitioned geospatial ingest; graceful frequency degradation.
+- **Red flags:** customers polling Postgres; recomputing ETA on every ping; a single websocket server; persisting every ping to the transactional DB.
+
+### Case 4 · Design the demand-forecasting & capacity/surge system.
+
+**1. Requirements.** *Functional:* predict order demand per **store × zone × day-part** (next hours/days) to drive **rider supply positioning, kitchen prep/staffing, and surge incentives**. *Non-functional:* accurate enough to act on, refreshed frequently, **explainable**, multi-country, robust to holidays/Ramadan/promos.
+
+**2. Approach.**
+- **Data:** medallion **lakehouse** — Event Hubs Capture → ADLS bronze; curate orders + weather + events + traffic into silver; **gold features** in an Azure ML **feature store** shared by training and serving (**no train/serve skew**).
+- **Models:** **hierarchical** forecasting per store/day-part — **Prophet/NeuralProphet** for seasonality + holiday/event regressors (Ramadan, Eid, paydays, promos) and **XGBoost/LightGBM** with rich features for accuracy; a **global model** to handle **cold-start** stores by borrowing strength; AutoML for the baseline.
+- **Serving:** **batch** forecasts (hourly/daily) written to a serving store that dispatch/ops read, **plus** a near-real-time signal (current order velocity vs. forecast via ADX/Stream Analytics) to **trigger surge**. Surge/positioning compares predicted demand vs. available supply per zone → multiplier/incentive/pre-position recommendation, with **guardrails** (caps, fairness, regulatory limits).
+
+**3. MLOps & hard parts.** Azure ML pipelines, model registry, **eval gates**, **drift monitoring**, scheduled + drift-triggered **retraining**; track forecast error (**MAPE/pinball**) per segment vs. a naive seasonal baseline. Hard parts: holiday/promo spikes (event regressors + manual overrides); new-store cold start (global/hierarchical); concept drift; **acting safely** on predictions (guardrails + human-in-the-loop for pricing).
+
+- **Trade-offs:** accuracy vs. interpretability (business trust); model complexity vs. ops; real-time vs. batch.
+- **Key points:** lakehouse + feature store; hierarchical/global models for cold start; **event regressors** for Ramadan/promos; **batch forecast + streaming surge trigger**; drift monitoring + retraining; pricing **guardrails**.
+- **Red flags:** one global model ignoring per-store seasonality; no holiday handling; un-guardrailed pricing; train/serve skew; no drift monitoring.
+
+### Case 5 · Design multi-country resilience with UAE/KSA/Egypt data residency.
+
+**1. Requirements.** *Functional:* run across UAE, KSA and Egypt with each market independently resilient. *Non-functional:* **99.99%**, survive a **region outage**, keep **personal data in-country** (UAE **PDPL** / sector cloud rules), low in-market latency, exactly-once money handling.
+
+**2. Approach — cell-per-country.**
+- **Topology:** a **stack (cell) per market** in the in-country/nearest Azure region, data **partitioned by country**; **multi-AZ** within a country for HA, and **active-passive (warm standby)** or active-active **only within permitted geographies** for region failure.
+- **Residency:** customer **PII stays in-region**; classify/label with **Purview**; enforce **allowed-regions via Azure Policy**; **per-region Key Vault** keys; replicate only **anonymized/aggregated** data to a global analytics plane. *(This is exactly the governed, lineage-tracked, access-controlled posture I delivered on the UAE-government data-sovereignty engagement.)*
+- **Routing & state:** **Front Door / Traffic Manager** routes users to their market's cell with health-based failover; **Postgres** (zone-redundant + geo-backup) is the per-country system of record; Cosmos with regional writes for read scale. **Money is never multi-master** — idempotency + **saga** + reconciliation.
+
+**3. Hard parts.** Prevent **cross-border leakage** (isolation by design, not a network ACL afterthought); **failover without data loss** (defined RPO/RTO, geo-replicated backups, **tested DR runbooks/game days**); avoid **split-brain** in active-active (no multi-master on transactional/ledger data; per-entity home region; conflict-free only where eventual is acceptable); balance **global config vs. local autonomy**.
+
+- **Trade-offs:** active-active (cost/complexity) vs. active-passive (cheaper, some RTO); strong in-region vs. eventual cross-region; strict isolation vs. a unified customer profile.
+- **Key points:** **cell-per-country** isolation with contained blast radius; residency via **policy + Purview + regional keys**; health-based global routing; multi-AZ + geo-backup + **tested DR**; **no multi-master on money**.
+- **Red flags:** one global DB holding all countries' PII; multi-master ledger; untested DR; residency treated as an afterthought; ignoring RPO/RTO.
 
 ---
 
