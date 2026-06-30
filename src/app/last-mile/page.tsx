@@ -23,7 +23,7 @@ const ROUNDS: Round[] = [
   {
     label: "1 · Recruiter / HR screen",
     href: "#round-1-recruiter-hr-screen",
-    description: "Motivation, comp, visa/relocation, leadership scope, MENA market fit",
+    description: "Motivation, leadership scope, MENA fit, plus a tax-free expat comp & relocation playbook (salary, housing, schooling, setup costs)",
   },
   {
     label: "2 · Hiring manager",

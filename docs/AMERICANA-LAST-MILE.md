@@ -61,6 +61,123 @@ Practice out loud. For system design, always **drive the requirements yourself**
 
 ---
 
+### 💰 Expat compensation & relocation playbook (UAE, 2025)
+
+> **Why this section exists.** The HR screen is where comp gets anchored, and in the UAE the *package* matters more than the base. This playbook is built for a profile like the candidate's — **~14 years' experience, Solution Architect / Technical Lead, GenAI + Azure, top Azure/AI certs, Indian national requiring employment-visa sponsorship, relocating with family**. It lets you walk in with a researched, family-aware number instead of a guess.
+>
+> **All figures are tax-free AED, 2025 market estimates** (Dubai-weighted; Abu Dhabi base typically 5–8% higher, especially government / semi-government). They are negotiation anchors, **not an offer** — confirm against the specific employer, emirate, and free-zone vs. mainland rules. Sources are listed at the bottom of this guide.
+> **Assumed family shape for the worked examples:** spouse + 2 school-age children, CBSE/Indian curriculum, mid-tier family community.
+
+#### 1. Know your number — salary benchmark for this profile
+
+For a senior architect / engineering-lead profile with scarce **GenAI + Azure** skills, the 2025 UAE market sits roughly at:
+
+| Band | Monthly (tax-free AED) | Annual (tax-free AED) | Who lands here |
+| --- | --- | --- | --- |
+| Market base | 30,000 – 45,000 | 360k – 540k | Senior EM / Principal / Solution Architect, 12–15 yrs |
+| Strong total cash (base + allowances) | 40,000 – 60,000 | 480k – 720k | AI/cloud-heavy employers, in-demand skills, good negotiation |
+| Top tier | 55,000 – 80,000+ | 660k – 960k+ | Sovereign-AI (G42 / Mubadala portfolio), tier-1 banks, Big Tech, niche AI leadership |
+
+- **Total-comp packaging matters.** UAE offers are usually split into **basic salary + housing allowance + transport allowance + other allowances**. End-of-service **gratuity** accrues on *basic* (≈21 days' basic pay/yr for years 1–5, 30 days/yr after), so a higher basic-to-allowance ratio is worth more long-term — negotiate the split, not just the headline.
+- **Your leverage:** scarce GenAI/Azure skill set, AZ-305 + AI-102 + the wider cert stack, Fortune-500 and **direct UAE-government delivery** (a strong regional-relevance signal in MENA), and recurring public-speaking / enablement. Lead the comp conversation with *value and scarcity*, then anchor at the **upper-market band**.
+
+#### 2. The expat math — what "tax-free" actually buys
+
+There is **0% personal income tax** in the UAE, so the gross *is* roughly the net (small deductions only). The right mental model is **total package − committed family costs = real savings**. Build your ask bottom-up from the cost floor below, not just "what's market."
+
+#### 3. Housing — the single biggest line
+
+Family-friendly communities near good Indian/international schools: **JVC, Al Barsha, Dubai Hills Estate, Mirdif, Dubai Silicon Oasis, Sports City** (Dubai); Khalifa City / Al Reef (Abu Dhabi).
+
+| Home (mid-tier family area) | Annual rent (AED) | ≈ Monthly (AED) |
+| --- | --- | --- |
+| 2-bedroom apartment | 90,000 – 140,000 | 7,500 – 11,700 |
+| 3-bedroom apartment | 120,000 – 200,000 | 10,000 – 16,700 |
+| Prime areas (Marina, Downtown, Palm) | +40–80% | — |
+
+- **Plan AED ~130,000–160,000/yr** (≈ AED 11k–13k/month) for a comfortable family 3BR in a mid-tier community.
+- **Add-ons:** annual **5% housing fee** (billed via DEWA), agency commission **~5%** of annual rent, and a security deposit **~5%**. Rents rose **10–20%** in 2025 — budget renewal increases.
+- **Cheque culture:** landlords often want 1–4 post-dated cheques; **fewer cheques = lower rent**, so upfront liquidity (or a housing allowance paid in advance) is real negotiating power.
+
+#### 4. Kids' schooling — protect this in the offer
+
+| Curriculum (per child / yr) | KG / FS | Primary | Secondary |
+| --- | --- | --- | --- |
+| Indian (CBSE) — good/very-good | 9,000 – 20,000 | 12,000 – 26,000 | 18,000 – 35,000 |
+| Indian (CBSE) — premium | up to 36,000 | up to 46,000 | up to 54,000 |
+| British curriculum | 9,000 – 57,000 | 11,000 – 79,000 | 12,000 – 98,000 |
+
+- **Budget ~AED 15,000–30,000/yr per child** for a good CBSE school; **add 15–25%** for transport, uniforms, books and activities, plus one-time **registration/admission fees**.
+- **Two CBSE children ≈ AED 40,000–55,000/yr** all-in. A school/education allowance is a common expat benefit but is **often capped or partial** — ask whether it's covered, for how many children, and whether it's cash or reimbursed.
+
+#### 5. Relocation, signing bonus & shipping
+
+| Component | Typical 2025 range (senior tech) | Notes |
+| --- | --- | --- |
+| Signing / sign-on bonus | AED 10,000 – 100,000+ | Not universal; strongest for scarce AI/cloud hires — *ask for it* |
+| Relocation/settling-in allowance | AED 5,000 – 50,000+ | Flights, temp housing, visa costs; lump-sum or itemised |
+| Household shipping | AED 10,000 – 30,000 | Sea/air freight; scales with family + origin |
+| Temporary housing | 2–4 weeks hotel/serviced apt | While you find a long-term home |
+| Flights | Joining + **annual home leave** for family | Confirm dependents are included |
+| Family medical insurance | Mandatory; ideally **fully** employer-paid | Cover spouse + children, not just you |
+
+- Always clarify **cash allowance vs. direct company payment**, and **get every component in writing**.
+
+#### 6. One-time setup / movement cost (family of four)
+
+Even with a relocation allowance, plan for upfront outlay before reimbursement lands:
+
+| Item | Estimated AED |
+| --- | --- |
+| Rent paid upfront (≈3 months / first cheque) | 30,000 – 50,000 |
+| Security deposit (~5%) | 6,500 – 10,000 |
+| Agency commission (~5%) | 6,500 – 10,000 |
+| DEWA deposit (apartment) | 2,000 |
+| Furnishing (if unfurnished) | 15,000 – 50,000 |
+| Car down payment (or buy used) | 5,000 – 20,000 |
+| Emirates ID (×4) | 1,500 – 4,700 |
+| Dependent residence visas (×3) | 9,000 – 13,000 |
+| Medical tests for visas (×4) | 2,000 – 8,000 |
+| **Indicative total** | **~AED 80,000 – 165,000** |
+
+> **Negotiation point:** push for **temporary housing + a settling-in lump sum + visa/Emirates-ID/medical for the whole family on the company**, so this floor doesn't come out of pocket.
+
+#### 7. Monthly run-rate — family of four (excluding rent)
+
+| Item | Monthly AED |
+| --- | --- |
+| Groceries | 2,000 – 3,000 |
+| DEWA (water/electricity) | 500 – 1,200 |
+| Internet + mobile | 400 – 600 |
+| Car (lease + fuel + Salik + insurance) | 2,200 – 3,500 |
+| Health insurance (if not employer-paid) | 800 – 1,200 |
+| Domestic help / nanny (part- to full-time) | 1,000 – 3,000 |
+| **Subtotal (ex-rent, ex-schooling)** | **~10,000 – 14,000** |
+
+Add **rent (~AED 11k–13k)** and **schooling (~AED 3.5k–4.5k/month amortised)** → a comfortable family in a mid-tier community needs roughly **AED 28,000 – 35,000/month committed**, leaving the rest as **tax-free savings**.
+
+#### 8. Worked example — building the ask
+
+> "Based on my research, for a Senior Architect / EM profile with GenAI + Azure depth, the Dubai market is around **AED 40,000–55,000/month total cash, tax-free**. Given a family relocation, my committed cost floor — mid-tier 3BR, two children in CBSE schooling, transport and insurance — is about **AED 30,000/month**, so I'm targeting **total cash in the AED 48,000–58,000 range**, plus a standard expat package: **relocation/shipping, family medical, annual home flights, visas for my dependents, and schooling support if available.** Could you share the band this role sits in so we can align early?"
+
+- **Anchor high but evidenced**, tie the number to a researched cost floor, and **bundle the package** (don't trade base for benefits blindly). Confirm **emirate** (Abu Dhabi often pays more) and **free-zone vs. mainland** (affects entitlements like DIFC).
+
+#### 9. HR-screen negotiation checklist
+
+- [ ] Total cash **split** (basic vs. allowances) → affects gratuity.
+- [ ] **Housing** allowance or upfront cheques; who pays the 5% housing fee + agency.
+- [ ] **Schooling** support — covered? capped? how many children?
+- [ ] **Relocation + shipping + temporary housing** lump sum.
+- [ ] **Signing bonus** (ask explicitly for scarce-skill roles).
+- [ ] **Family medical insurance** fully covered; **annual home flights** for all dependents.
+- [ ] **Visa + Emirates ID + medical** for self and dependents on the company.
+- [ ] **Notice period** stated honestly + realistic start date.
+- [ ] Bonus structure, gratuity, and any **RSU/long-term incentive** (rare but exists at Big Tech / sovereign-AI).
+
+**Red flags to avoid in this conversation:** quoting a base with no package awareness; ignoring the cost floor (rent + schooling); forgetting dependents in visas/flights/insurance; trading away gratuity-bearing basic for headline allowances without doing the math.
+
+---
+
 ## Round 2 · Hiring manager
 
 **What they're testing:** Can you own the last-mile platform end-to-end? Do you think in business outcomes, not just tech? How do you set strategy, partner with Product/Ops, and run delivery?
@@ -508,6 +625,7 @@ These are "what would you do" prompts. The interviewer wants your **structured a
 - **Azure:** Microsoft Learn — AKS, API Management, Azure Database for PostgreSQL Flexible Server, ADLS Gen2, Azure ML; Azure Well-Architected Framework (Reliability & Operational Excellence pillars).
 - **AI/ML:** NeuralProphet / Prophet docs; XGBoost and scikit-learn docs; MLOps guidance (Azure ML, Google's MLOps maturity); drift-monitoring patterns.
 - **Leadership:** *The Manager's Path* (Fournier); *An Elegant Puzzle* (Larson); Amazon-style behavioral / STAR; SRE error-budget practice (Google SRE book).
+- **UAE expat comp & cost-of-living (Round 1 playbook, 2025 figures):** market salary benchmarks and package norms — Naukrigulf (Senior EM / Senior Solution Architect UAE), Labeeb UAE Salary Insights 2025/26, Indeed UAE, Levels.fyi, RFS HR salary benchmarking; rent — Bayut/MyBayut Dubai Rental Market Report 2025, DubaiBeat, Clemenceau/DDA/Amary rent guides; schooling — GEMS Education fees-by-grade and KHDA-based curriculum fee guides; relocation/package — JobXDubai Relocation Allowance Guide 2025, 360 Global Relocations, salary.ae, Housearch, HZLegal (DIFC expat clauses); setup & monthly run-rate — Dubai cost-of-living/setup estimates (2024–25). **All AED figures are tax-free 2025 market estimates for negotiation, not an offer; Abu Dhabi base typically 5–8% higher and free-zone/mainland entitlements differ.**
 - **MENA / market context:** Americana Restaurants investor materials and the UAE delivery-aggregator landscape (Talabat, Deliveroo, Careem, Noon); UAE PDPL for data residency. See the `/patterns` page's **UAE 🇦🇪** section for regional loop specifics. Key public figures used above:
   - Americana Restaurants — Investors overview: https://www.americanarestaurants.com/investors/
   - "Americana Restaurants reports $2.20bln revenue in 2024" (Zawya): https://www.zawya.com/en/press-release/companies-news/americana-restaurants-reports-220bln-revenue-in-2024-highlighting-business-resilience-tr70p421
