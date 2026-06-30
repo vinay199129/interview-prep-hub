@@ -468,6 +468,142 @@ Prepare a story bank covering these prompts (have a metric for each):
 
 ---
 
+## Technology & skills map — JD stack ↔ Azure ↔ your resume
+
+> **How to use this.** For each core technology in the role's stack, this maps **what it does**, its **Azure-native equivalent/alternative** (so you can speak the platform's language even where the JD names an OSS tool), and the **resume evidence** you already own — then gives **prep questions** to rehearse. The goal: in any round you can say *"the JD uses X; the Azure-native way is Y; here's where I've done it."* Pull the matching answers from the rapid-fire bank, the round write-ups, and the `/leadership` + `/patterns` pages.
+
+### 1. Event streaming & messaging — *Confluent Kafka*
+
+- **What it does:** durable, ordered, replayable event log for decoupling producers/consumers; the backbone of real-time order/dispatch/telemetry pipelines.
+- **Azure alternatives:** **Azure Event Hubs** (Kafka-protocol compatible — point an existing Kafka client at it), **Azure Service Bus** (queues/topics for transactional, command-style messaging + sessions for ordering), **Event Grid** (lightweight pub/sub for discrete events).
+- **Your résumé evidence:** *Event-driven and distributed systems*; **Azure Service Bus**, **IoT Hub**; the **connected-vehicle platform (20M+ vehicles, ~2M telemetry msgs/min)** — exactly Kafka/Event Hubs-class throughput.
+- **Prep questions:**
+  1. **Event Hubs vs. Kafka — when would you stay on Confluent vs. move to Event Hubs?** (Cue: Kafka-protocol compatibility, ecosystem/Connect vs. managed-Azure ops, throughput units/partitions, Schema Registry parity, cost.)
+  2. **Service Bus vs. Event Hubs vs. Event Grid — pick one per scenario.** (Cue: SB = commands/ordering/sessions/dead-letter; EH = high-volume streaming/telemetry; EG = reactive discrete events.)
+  3. **How do you guarantee per-order ordering and exactly-once-ish delivery?** (Cue: partition key = orderId; idempotency keys + transactional outbox; SB sessions.)
+  4. **Map your 2M-msg/min connected-car pipeline onto Event Hubs.** (Cue: partition strategy, consumer groups, capture to ADLS, backpressure.)
+
+### 2. Container orchestration — *Kubernetes / Azure AKS*
+
+- **What it does:** runs/scales containerized microservices with self-healing, rolling deploys, and horizontal autoscaling.
+- **Azure alternatives:** **AKS** (the JD's choice), **Azure Container Apps** (serverless containers + KEDA scale-to-zero), **Azure Service Fabric** (stateful microservices), **App Service** (simpler PaaS).
+- **Your résumé evidence:** **Docker**, **Kubernetes**, **Service Fabric**; *cloud-native/serverless platforms*; Azure DevOps CI/CD.
+- **Prep questions:**
+  1. **AKS vs. Container Apps — when do you pick each for a delivery platform?** (Cue: ACA for event-driven/bursty services with KEDA; AKS for full control, custom networking, large estates.)
+  2. **How do you autoscale to handle a Ramadan/peak-event surge?** (Cue: HPA on custom metrics + KEDA on Kafka/Event Hubs lag; cluster autoscaler; pod disruption budgets.)
+  3. **Zero-downtime deploys at 99.99%?** (Cue: rolling/blue-green/canary, readiness probes, surge settings, graceful drain.)
+  4. **Where would Service Fabric fit, given your résumé, vs. AKS?** (Cue: stateful reliable services/actors vs. broad container portability.)
+
+### 3. API management & integration — *APIM*
+
+- **What it does:** front-doors microservices and partner/aggregator APIs — auth, rate-limiting, transformation, versioning, developer portal.
+- **Azure alternatives:** **Azure API Management** (the JD's choice), **Application Gateway / Front Door** (L7 routing, WAF, global edge), **Logic Apps / Data Factory** (workflow & data integration).
+- **Your résumé evidence:** **REST APIs**, **Microservices**, *Integration architecture*; **Logic Apps**, **Data Factory**, **Service Bus**; ASP.NET Web API.
+- **Prep questions:**
+  1. **How do you onboard a new aggregator (Talabat/Careem) safely via APIM?** (Cue: product/subscription keys, quotas, IP allow-list, request validation, mock-then-cutover.)
+  2. **APIM vs. Front Door vs. App Gateway — who does what?** (Cue: APIM = API governance; AppGw = regional L7+WAF; Front Door = global edge/failover.)
+  3. **Backward-compatible API versioning across multi-country clients?** (Cue: versioning schemes, revisions, deprecation policy, contract tests.)
+  4. **Webhook reliability for POS/aggregator callbacks?** (Cue: idempotency, retries with backoff, dead-letter, signature validation.)
+
+### 4. Relational data — *PostgreSQL*
+
+- **What it does:** transactional source of truth for orders, payments, store/menu data — ACID, joins, constraints.
+- **Azure alternatives:** **Azure Database for PostgreSQL Flexible Server** (the JD's choice), **Azure SQL Database**, **Cosmos DB** (global, multi-model — for high-scale/low-latency reads), **Cosmos DB for PostgreSQL (Citus)** for sharding.
+- **Your résumé evidence:** *data migration to SQL platforms* (UAE-government engagement, Informatica→SQL + Purview); SQL across .NET/Azure delivery.
+- **Prep questions:**
+  1. **Postgres Flexible Server HA/DR for 99.99%?** (Cue: zone-redundant HA, read replicas, PITR, cross-region geo-restore.)
+  2. **When do you reach for Cosmos DB over Postgres on this platform?** (Cue: global distribution, single-digit-ms reads, partition-key design, eventual vs. strong consistency.)
+  3. **Hot-partition / write-contention on the orders table at peak?** (Cue: partitioning, connection pooling (PgBouncer), CQRS read models, outbox.)
+  4. **Zero-downtime schema migration on a live orders DB?** (Cue: expand/contract, backfill, dual-write, feature flags.)
+
+### 5. Data lake, analytics & governance — *Azure Data Lake*
+
+- **What it does:** cheap, scalable store for raw/curated event + telemetry data feeding analytics and ML.
+- **Azure alternatives:** **ADLS Gen2** (the JD's choice), **Microsoft Fabric / Synapse** (lakehouse + warehouse), **Azure Data Explorer (ADX/Kusto)** (real-time telemetry analytics), **Microsoft Purview** (catalog, lineage, governance), **Data Factory** (orchestration/ELT).
+- **Your résumé evidence:** **ADX/Kusto**, **Data Factory**, **Graph Data Connect**, **Microsoft Purview**, *governed data services marketplace with lineage & access controls* (UAE-gov data-sovereignty project).
+- **Prep questions:**
+  1. **Design the lakehouse: from Event Hubs to ML features.** (Cue: bronze/silver/gold (medallion), Event Hubs Capture → ADLS, Fabric/Synapse curation, feature store.)
+  2. **Real-time on-time-% dashboards — ADX or Synapse?** (Cue: ADX for high-ingest time-series/telemetry; Synapse/Fabric for batch BI.)
+  3. **How does Purview give data sovereignty/lineage for a multi-country platform?** (Cue: catalog, classification, lineage, access policies — tie to your UAE-gov project + UAE PDPL.)
+  4. **Data-residency across UAE/Egypt/KSA — how do you enforce it?** (Cue: regional storage, policy, tenant/partition isolation.)
+
+### 6. AI/ML platform & MLOps — *Azure AI-ML*
+
+- **What it does:** trains, registers, deploys and monitors models (ETA, demand forecasting, dynamic routing) with governance.
+- **Azure alternatives:** **Azure Machine Learning** (training/registry/endpoints/MLOps), **Azure AI Foundry** (GenAI app + agent platform), **Azure OpenAI** (LLMs), **Azure AI Search** (vector/hybrid retrieval for RAG), **Databricks** (large-scale ML/feature engineering).
+- **Your résumé evidence:** **Azure ML**, **Azure AI Foundry**, **Azure OpenAI**, **Azure AI Search**; **RAG**, **multi-agent**, *AI evaluation*, *fine-tuning vs. RAG trade-off* (CPG procurement platform); *invoice-intelligence* and *plant-ops assistant* deliveries.
+- **Prep questions:**
+  1. **End-to-end MLOps for an ETA model on Azure ML.** (Cue: pipelines, model registry, managed online endpoints, CI/CD, A/B + shadow, drift monitoring, retraining triggers.)
+  2. **RAG vs. fine-tuning — how did you decide (and what would you do here)?** (Cue: your CPG project; retrieval cost vs. accuracy, freshness, governance — Azure AI Search + AOAI.)
+  3. **How do you govern model rollout so a bad model doesn't silently hurt on-time %?** (Cue: offline eval gates, canary, guardrail metrics, rollback, Responsible AI.)
+  4. **Where does Azure AI Foundry fit vs. raw Azure ML?** (Cue: GenAI/agent app layer + evaluations/observability vs. classical model lifecycle.)
+
+### 7. Forecasting & classical-ML libraries — *NeuralProphet · XGBoost · scikit-learn · TensorFlow*
+
+- **What it does:** the actual modelling toolkit — time-series demand forecasting, gradient-boosted ETA/regression, deep models.
+- **Azure alternatives / hosts:** all run **inside Azure ML** (compute clusters, environments, AutoML for baseline models); **Databricks** for distributed training; **ONNX Runtime** for portable inference.
+- **Your résumé evidence:** **PyTorch**, **HuggingFace Transformers** (M.Tech AIML in progress — training/fine-tuning/evaluation); Python data stack.
+- **Prep questions:**
+  1. **Demand forecasting: NeuralProphet/Prophet vs. XGBoost vs. deep learning — how do you choose?** (Cue: seasonality/holidays/Ramadan, exogenous regressors, interpretability, data volume, cold-start stores.)
+  2. **Baseline first — how would you use AutoML before hand-tuning?** (Cue: quick benchmark, leaderboard, then targeted feature work.)
+  3. **Serving: PyTorch/TF model → low-latency endpoint.** (Cue: ONNX export, batching, autoscale, latency SLO.)
+  4. **Evaluating a forecast — which metrics and why?** (Cue: MAPE/SMAPE/pinball loss, backtesting, per-segment error.)
+
+### 8. GenAI & agent orchestration — *(your differentiator)*
+
+- **What it does:** orchestrates LLMs/agents/tools for assistants, document intelligence, and automation (the platform's "AI-driven optimization" + internal copilots).
+- **Azure alternatives / homes:** **Semantic Kernel** & **Microsoft Agent Framework** (Azure-native orchestration), **Azure AI Foundry Agent Service**, **Copilot Studio**, **Azure AI Search** (RAG retrieval), **Azure OpenAI**. (LangGraph/CrewAI/LangChain run on Azure compute too.)
+- **Your résumé evidence:** **LangGraph, CrewAI, Semantic Kernel, LangChain, Microsoft Agent Framework, Copilot Studio, M365 SDK**, *prompt orchestration*, *Responsible AI*; Teams plant-ops assistant; procurement RAG platform.
+- **Prep questions:**
+  1. **Semantic Kernel / Agent Framework vs. LangGraph/CrewAI — when Azure-native vs. OSS?** (Cue: governance, Entra integration, support, portability; you've shipped both.)
+  2. **Design a multi-agent workflow for order-exception handling.** (Cue: planner + tool agents, guardrails, human-in-the-loop, eval/observability.)
+  3. **How do you evaluate and guardrail a GenAI feature in production?** (Cue: groundedness/faithfulness, AI Foundry evaluations, content safety, red-teaming.)
+  4. **RAG over multi-brand/multi-country docs — retrieval design?** (Cue: AI Search hybrid+semantic, chunking, metadata filters for brand/country/region tags.)
+
+### 9. Languages & app frameworks — *Java / Node.js / Python*
+
+- **What it does:** the services themselves — order APIs, dispatch logic, integrations, ML serving.
+- **Azure homes:** Functions, App Service, AKS/ACA, API Management — language-agnostic.
+- **Your résumé evidence:** **Python (FastAPI, Flask)**, **C#/.NET Core**, **ASP.NET Web API**, **React.js/Angular**. (Java is the JD gap — bridge with "polyglot on the JVM patterns; strong on Python/.NET equivalents.")
+- **Prep questions:**
+  1. **You're strongest in Python/.NET; the stack is Java/Node — how do you ramp and lead?** (Cue: language-agnostic distributed-systems fluency, code review by principle, lean on senior Java ICs, ramp plan.)
+  2. **Idempotent order-processing endpoint — show it (FastAPI/.NET).** (Cue: idempotency key, dedup store, transactional outbox.)
+  3. **REST vs. gRPC vs. event-driven for inter-service calls?** (Cue: sync vs. async, contracts, latency, coupling.)
+
+### 10. IaC, DevOps & CI/CD — *Terraform · Azure DevOps*
+
+- **What it does:** reproducible infra + automated build/test/deploy pipelines.
+- **Azure alternatives:** **Terraform** or **Bicep/ARM**; **Azure DevOps** or **GitHub Actions**; **GitOps (Flux/ArgoCD)** for AKS.
+- **Your résumé evidence:** **Terraform**, **Azure DevOps**, **CI/CD**, **Docker/Kubernetes**.
+- **Prep questions:**
+  1. **Terraform vs. Bicep for an all-Azure delivery platform — trade-offs?** (Cue: multi-cloud/state vs. native day-0 support, modules, drift.)
+  2. **Safe-deploy pipeline for microservices at 99.99%?** (Cue: env promotion, automated tests, canary, approvals, rollback, IaC scanning.)
+  3. **Managing secrets/config across multi-country envs?** (Cue: Key Vault, managed identity, per-region config.)
+
+### 11. Observability & reliability — *Datadog · telemetry*
+
+- **What it does:** metrics/logs/traces + SLOs to detect and resolve incidents fast.
+- **Azure alternatives:** **Azure Monitor + Application Insights + Log Analytics**, **Azure Data Explorer (ADX/Kusto)** for high-volume telemetry, **Managed Grafana/Prometheus** for AKS.
+- **Your résumé evidence:** **SLA/SLO ownership**, **incident management**, **telemetry-based monitoring**, **Datadog**, **ADX/Kusto**; SLA targets (98–99%) on the connected-vehicle platform.
+- **Prep questions:**
+  1. **Define SLIs/SLOs and an error budget for order delivery.** (Cue: on-time %, order-success rate, latency; budget-driven release gating.)
+  2. **An aggregator webhook is silently dropping orders — how do you detect/triage?** (Cue: golden signals, distributed tracing, DLQ depth alerts, runbook.)
+  3. **Datadog vs. Azure Monitor — would you consolidate, and why?** (Cue: single-pane vs. native cost/integration; OpenTelemetry portability.)
+
+### 12. Identity, security & compliance — *Entra ID · Purview*
+
+- **What it does:** authN/authZ, data governance, and regional compliance (UAE PDPL, sector cloud rules).
+- **Azure alternatives:** **Microsoft Entra ID** (identity, managed identities, RBAC, B2C for customers), **Microsoft Purview** (governance), **Key Vault**, **Defender for Cloud**.
+- **Your résumé evidence:** **Entra ID**, **Microsoft Purview**, *security/governance/observability*, *access controls + lineage* (UAE-gov project); Well-Architected reviews; SC-900 certified.
+- **Prep questions:**
+  1. **Service-to-service auth without secrets across AKS/APIM/Postgres?** (Cue: managed identities, workload identity, Key Vault, least privilege.)
+  2. **How do you meet UAE data-residency/PDPL for customer data?** (Cue: regional isolation, Purview classification/policy, retention, consent — tie to your UAE-gov delivery.)
+  3. **Customer identity for multi-brand super-apps?** (Cue: Entra External ID/B2C, federation, token scoping per brand/country.)
+
+> **Interview framing tip:** lead with the **capability** ("durable event streaming," "managed model lifecycle"), name the **JD tool and the Azure-native equivalent**, then anchor on a **résumé proof point**. That shows platform fluency *and* relevant delivery — exactly the senior signal these loops reward.
+
+---
+
 ## Technical question bank (rapid-fire, by JD topic)
 
 A focused drill-set mapped directly to the job description's named technologies. Use it for quick self-testing — each item has a tight, defensible model answer. Where a topic is deep-dived elsewhere, the relevant round is noted.

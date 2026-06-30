@@ -124,7 +124,19 @@ export default function LastMilePage() {
         </div>
       </details>
 
-      <div className="grid sm:grid-cols-3 gap-2">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        <Link
+          href="#technology-skills-map-jd-stack-azure-your-resume"
+          className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+        >
+          <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+            🧭 Tech &amp; skills map
+          </div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            12 stack areas: what each does, the Azure-native equivalent, your
+            resume evidence, and prep questions for each.
+          </div>
+        </Link>
         <Link
           href="#technical-question-bank-rapid-fire-by-jd-topic"
           className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
