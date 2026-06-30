@@ -124,20 +124,44 @@ export default function LastMilePage() {
         </div>
       </details>
 
-      <Link
-        href="#technical-question-bank-rapid-fire-by-jd-topic"
-        className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
-      >
-        <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
-          ⚡ Technical question bank (rapid-fire, by JD topic)
-        </div>
-        <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-          44 quick-drill Q&amp;A mapped to the exact stack: Kafka/event-driven,
-          distributed systems, microservices &amp; API, Java/Node/Python, Azure
-          (AKS/APIM/PostgreSQL/Data Lake), AI/ML &amp; MLOps, observability/DevSecOps,
-          and last-mile domain.
-        </div>
-      </Link>
+      <div className="grid sm:grid-cols-3 gap-2">
+        <Link
+          href="#technical-question-bank-rapid-fire-by-jd-topic"
+          className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+        >
+          <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+            ⚡ Technical bank (rapid-fire)
+          </div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            44 quick-drill Q&amp;A across Kafka, distributed systems, microservices/API,
+            Java/Node/Python, Azure, AI/ML, observability and the last-mile domain.
+          </div>
+        </Link>
+        <Link
+          href="#more-technical-questions-deeper-staff-level"
+          className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+        >
+          <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+            🧠 Deeper / staff-level
+          </div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            10 harder questions: exactly-once to Postgres, hot partitions, zero-downtime
+            migrations, active-active regions, chaos testing.
+          </div>
+        </Link>
+        <Link
+          href="#scenario-based-questions-situational-troubleshooting"
+          className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+        >
+          <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+            🎯 Scenario-based
+          </div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            14 &quot;what would you do&quot; incident, scaling, data/ML, integration,
+            DR and cost scenarios — with structured approaches and red flags.
+          </div>
+        </Link>
+      </div>
 
       <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
         <PatternsToc markdown={markdown} toc={toc} />

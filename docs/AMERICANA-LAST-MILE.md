@@ -425,9 +425,83 @@ A focused drill-set mapped directly to the job description's named technologies.
 
 ---
 
+## More technical questions (deeper / staff-level)
 
+Beyond the rapid-fire bank — questions that probe depth and judgment.
 
-This guide is grounded in the role's job description plus standard, well-documented engineering patterns. Use these to deepen specific areas:
+45. **Design idempotent payment capture across retries and partial failures.** Idempotency key per order at the payment service; persist `(key → result)` before calling the PSP; on retry return the stored result; reconcile asynchronously against the PSP's settlement file to catch the "charged but we crashed before recording" case. Never trust the network; always have a reconciliation backstop.
+46. **How do you evolve an event schema consumed by 8 services without downtime?** Backward/forward-compatible changes only (add optional fields, never remove/rename), enforced by Schema Registry; roll consumers before producers for new required reads; use a new topic/version for breaking changes and dual-write during migration, then cut over.
+47. **Exactly-once from Kafka to PostgreSQL — how, really?** Either the **transactional outbox/inbox** (dedupe on a unique message-id in the same DB tx as the write) or Kafka transactions with an idempotent sink; the durable dedup key in Postgres is what actually makes the effect exactly-once.
+48. **Hot partition: one mega-store gets 10× the orders. Fix?** Re-key (composite key like `storeId#bucket`) or use a custom partitioner to spread load; or give that store its own topic/partitions; watch that re-keying doesn't break required per-order ordering.
+49. **Backpressure end-to-end when a downstream slows.** Bounded queues, consumer pause/resume on lag thresholds, reactive backpressure (Reactor/Node streams), and load-shedding at the edge (APIM rate limits / 429) so the slow component degrades gracefully instead of cascading.
+50. **Multi-region active-active for order data — consistency model?** Partition ownership by market/region (each region is the writer for its own orders) to avoid cross-region write conflicts; async replicate for read/DR; reserve global consensus only for truly shared state. Define RTO/RPO explicitly.
+51. **Prevent thundering-herd retries during an outage.** Exponential backoff **with jitter**, circuit breakers, retry budgets/token buckets, and idempotent operations so safe-to-retry doesn't mean retry-storm.
+52. **Tune consumer throughput vs. latency.** `max.poll.records`, batch size, `fetch.min.bytes`/`fetch.max.wait`, async commits, parallel in-partition processing where ordering allows; measure p99 and lag, not just averages.
+53. **Zero-downtime schema migration on a hot Postgres table.** Expand→migrate→contract: add nullable column / new table, dual-write, backfill in batches, switch reads, then drop old — never a blocking `ALTER` on a large hot table; use `CREATE INDEX CONCURRENTLY`.
+54. **Test a distributed system like this before peak.** Load/soak tests at projected peak, **chaos testing** (kill brokers/pods, inject POS latency), DLQ/replay drills, and game-day DR failover rehearsals with the on-call team.
+
+---
+
+## Scenario-based questions (situational & troubleshooting)
+
+These are "what would you do" prompts. The interviewer wants your **structured approach**, not a single right answer: clarify → hypothesize → triage to mitigate → root-cause → prevent. Lead with customer/business impact and reversibility.
+
+### Production incidents / on-call
+
+55. **"It's 8:30 PM on a Friday. Orders are being accepted but customers aren't getting delivery updates, and dispatch is lagging. Walk me through your response."**
+*Approach:* Declare an incident and assume command; check the dashboards first (consumer lag on `riders.location`/`orders.status`, DLQ depth, dispatch latency, error rates). Most likely a consumer group stalled or lag exploded under peak. **Mitigate before root-cause:** scale consumers/pods, pause noisy producers if needed, fail the ETA service over to its heuristic fallback so customers still see *an* estimate. Communicate to Ops/leadership with impact + ETA. Once stable, root-cause (poison message? a slow downstream? a bad deploy?), then a blameless postmortem with a systemic fix (e.g. separate location topic, autoscale-on-lag, DLQ). *Good signals:* mitigate-first instinct, dashboards before guesses, clear comms. *Red flags:* debugging root cause while customers bleed; no comms; blaming a person.
+
+56. **"Customers report being charged twice for one order. What now?"**
+*Approach:* Severity-1 (money + trust). Immediately quantify blast radius (how many, since when — correlate to a deploy/retry storm); stop the bleeding (feature-flag off the suspect path, disable aggressive retries); make customers whole (automated refunds + proactive comms). Root-cause is almost always a non-idempotent payment path or a retry without an idempotency key. Fix: idempotency key + inbox dedup + reconciliation against the PSP settlement file. *Red flags:* treating it as low priority; fixing code before refunding customers.
+
+57. **"A deploy went out 20 minutes ago and error rates are climbing. What do you do?"**
+*Approach:* Roll back first (or flip the feature flag) — restore service, investigate after. The recent deploy is the prime suspect; reversibility is your friend. Then diff the change, reproduce in staging, add a regression test, and tighten the canary/automated-rollback gate so it catches it next time. *Red flags:* trying to hot-fix forward under pressure instead of rolling back.
+
+58. **"Kafka consumer lag is steadily rising on the order-status topic and not recovering. Diagnose."**
+*Approach:* Is it ingress up (real surge) or egress down (slow/stuck consumers)? Check per-partition lag (one stuck partition = poison message or a hot key), consumer CPU/GC, downstream latency (DB/3rd-party), and rebalance storms. Mitigate: route poison messages to DLQ, scale consumers up to partition count, add partitions if structurally under-provisioned, fix the slow downstream. *Red flags:* "just add more consumers" beyond partition count; ignoring the poison-message/hot-partition possibility.
+
+59. **"The Oracle Simphony POS integration for one brand starts timing out. Orders are piling up. What happens to the platform?"**
+*Approach:* The bulkhead/circuit-breaker should already isolate it so *only that brand's* fulfilment is affected, not global order intake. Orders queue durably (don't drop them); the circuit opens to stop hammering the POS; kitchens get an SMS/printer fallback; when POS recovers, drain the queue idempotently (no duplicate tickets). Comms to that brand's ops. *Red flags:* a synchronous design where one POS outage stalls everything; dropping orders.
+
+### Scaling / capacity
+
+60. **"Marketing launches a flash 50%-off promo at noon tomorrow without warning engineering. You find out at 9 AM. What do you do?"**
+*Approach:* Quantify expected multiplier from past promos; pre-scale now (AKS node pools, consumer/partition headroom, DB connections/replicas, PSP rate limits); set up a war room and dashboards; prepare load-shedding/graceful-degradation switches; align with Ops on rider capacity. Then the *organizational* fix: a launch-readiness checklist so Product/Marketing loop engineering in early. *Red flags:* only a tech answer with no process fix; assuming autoscaling alone handles an unforecasted spike.
+
+61. **"At peak you hit the Postgres connection limit and everything stalls. Immediate and long-term fix?"**
+*Approach:* Immediate: PgBouncer/connection pooling, lower per-pod pool sizes, shed load. Long-term: read replicas for reporting, cache hot reads, async/event-driven where you're over-using sync DB calls, and partition/scale the hot tables. *Red flags:* "raise max_connections" as the only answer (it makes contention worse).
+
+### Data / ML
+
+62. **"On-time delivery % quietly dropped 8% over two weeks. No incident fired. Where do you look?"**
+*Approach:* Likely silent **model/data drift** or a data-pipeline change, not an outage. Check ETA prediction error (MAE) and dispatch-decision metrics over the window; look for feature drift (new store, traffic pattern, a broken feature in the pipeline), label leakage regressions, or an upstream schema change. Fix the data/model, add drift + business-metric alerting so it fires next time. *Good signals:* knowing models fail *silently*; monitoring business metrics, not just infra. *Red flags:* assuming it's purely an infra problem.
+
+63. **"Your ETA predictions are systematically 10 minutes optimistic during lunch. How do you investigate and fix?"**
+*Approach:* Decompose ETA (prep vs. wait vs. travel) and find which stage is biased — likely prep-time underestimated under kitchen load, or travel-time ignoring lunch traffic. Check for label leakage and missing load/traffic features; retrain with the right features; validate with rolling-origin backtesting; A/B before full rollout; keep the heuristic fallback. *Red flags:* tweaking the model blindly without decomposing the error.
+
+### Integration / multi-tenant
+
+64. **"A new market launch (e.g. KFC in a new country) must go live in 8 weeks on the same platform. How do you approach it?"**
+*Approach:* Treat it as configuration/multi-tenancy, not a fork: per-market config (currency, language/Arabic, tax, aggregators, data-residency region), brand/country isolation in data, and reuse the multi-brand app platform. Plan data residency (UAE PDPL-style), aggregator onboarding via the adapter layer, load expectations, and a phased rollout (one city → scale). *Red flags:* proposing a separate codebase per market; ignoring data residency.
+
+65. **"Talabat changes their webhook contract with little notice and orders from that channel start failing. How is your platform protected, and how do you respond?"**
+*Approach:* The anti-corruption/adapter layer means only that one adapter breaks, not the core; failures go to a DLQ, not lost. Respond: detect via adapter error alerts, hot-fix the adapter mapping, replay the DLQ, and add contract tests + schema monitoring on partner APIs. Longer term, push for versioned partner contracts. *Red flags:* aggregator quirks leaking into core domain logic; dropping failed orders.
+
+### Reliability / DR / cost
+
+66. **"A whole Azure region (your primary) goes down during dinner peak. What happens?"**
+*Approach:* This is where the 99.99% story is tested. Multi-AZ shouldn't be enough for a region loss — you need a tested **DR plan**: traffic fails over to the secondary region (active-active per market, or active-passive with replicated Kafka/DB), with defined RTO/RPO and DNS/Traffic-Manager failover. Be honest about data-loss windows (RPO) and degraded modes. *Good signals:* knowing AZ ≠ region resilience; having rehearsed failover. *Red flags:* assuming "it's in the cloud so it's fine."
+
+67. **"Finance says the platform's cloud bill doubled this quarter with flat order volume. Lead the investigation."**
+*Approach:* FinOps triage: break cost down by service (AKS nodes, Kafka, DB, Data Lake, egress); look for over-provisioned/un-rightsized node pools, runaway log/telemetry ingestion, missing autoscale-down, untiered Data Lake storage, or cross-region egress. Tie cost to a per-order unit metric so regressions are visible, and set budgets/alerts. *Red flags:* no cost-per-order framing; guessing without a breakdown.
+
+68. **"Two of your senior engineers are blocked, deadlocked on REST vs. event-driven for a new service, and the deadline is slipping. As EM, what do you do?"**
+*Approach:* Classify the decision (reversible? then bias to action and time-box). Have both write the options + trade-offs against agreed criteria (latency, resilience, operability, time-to-market); facilitate a short design review; if still tied, make the call as DRI, document it in an ADR with a revisit date, and get explicit disagree-and-commit. Unblock the team today. *Red flags:* letting it fester; deciding by seniority/volume instead of criteria.
+
+---
+
+## Sources & further reading
+
 
 - **Event-driven / Kafka:** Confluent docs and *Designing Event-Driven Systems* (Stopford); Kafka exactly-once semantics; the **transactional outbox** and **saga** patterns (microservices.io).
 - **System design:** *Designing Data-Intensive Applications* (Kleppmann); the System Design Primer; Uber/DoorDash/Careem engineering blogs on dispatch, ETA and geospatial indexing (H3).
