@@ -31,6 +31,11 @@ const ROUNDS: Round[] = [
     description: "Ownership of last-mile platform, org scope, roadmap, stakeholder alignment",
   },
   {
+    label: "2B · Hiring manager (functional)",
+    href: "#round-2b-hiring-manager-functional-business-consultant",
+    description: "Meeting a functional/business consultant: order-to-cash process, settlement & reconciliation, refunds/returns, promotions, master data, UAT & change management, functional KPIs",
+  },
+  {
     label: "3 · System design",
     href: "#round-3-system-design",
     description: "5 cases: order processing, dispatch/matching, live tracking & ETA, demand forecasting/surge, multi-region residency — scale to 99.99%",
