@@ -579,6 +579,180 @@ class OrderProcessor:
 
 ---
 
+## Round 5B · Full-stack reference architecture (edge → database)
+
+**What they're testing:** This is the *fully technical* round — the one where a panel of senior engineers/architects walks the whole stack with you, **layer by layer, from the client edge all the way down to the database**, and asks *"why this component, what are the trade-offs, what would you use at lower load, and how does it change for one region vs. many?"*. Round 3 designs five *features*; this round proves you understand the **platform underneath all of them** and can defend every box on the diagram.
+
+> **How to run this round:** Draw the end-to-end path once (below), then let them pull on any layer. For **each** component, answer in the same four beats: **(1) role** — what it does in the request/data path; **(2) choice + why** — the Azure/OSS pick and the reason it fits the JD's scale and residency needs; **(3) trade-offs** — what you gave up; **(4) the dials** — what you'd run at *lower load* (cost-down) and what changes for *single- vs. multi-region*. Say the words **"start simple, evolve under evidence"** — over-engineering a day-one platform is as much a red flag as under-designing a four-nines one.
+
+### The end-to-end picture (one diagram, two paths)
+
+There are two journeys through the platform: the **synchronous request path** (a customer places an order and gets an ack in <1–2 s) and the **asynchronous event/data path** (that order fans out to fulfilment, tracking, analytics and ML). Both are shown together so you can point at any hop.
+
+```
+                         ┌─────────────────────────── EDGE ───────────────────────────┐
+ Customer app / web      │  Azure Front Door (global anycast) + WAF + CDN + DDoS        │
+ Aggregator webhooks ───►│  TLS term · caching of static/menu · geo-routing · bot rules │
+ (Talabat/Deliveroo)     └───────────────┬─────────────────────────────────────────────┘
+                                         ▼
+                         ┌──────────── API TIER (north-south) ─────────────┐
+                         │  Azure API Management (APIM)                     │
+                         │  authN/Z (JWT/OAuth) · rate-limit & quota ·      │
+                         │  versioning · partner products · req transform   │
+                         └───────────────┬─────────────────────────────────┘
+                                         ▼   (private)
+                         ┌──────────── INGRESS / MESH (AKS) ───────────────┐
+                         │  AGIC / NGINX ingress · mTLS mesh (optional) ·   │
+                         │  retries/timeouts/circuit-break at the edge sidecar
+                         └───────────────┬─────────────────────────────────┘
+                                         ▼
+   ┌──────────────────────────── COMPUTE: microservices on AKS ────────────────────────────┐
+   │  Order Svc   Store/POS Svc   Pricing/Promo Svc   Dispatch Svc   Tracking Svc   Notif Svc │
+   │  (Java/Node/Python · stateless · HPA/KEDA on Kafka lag · PDBs · workload identity)        │
+   └───┬───────────────┬──────────────────┬───────────────┬───────────────┬──────────────────┘
+       │ produce/consume (async backbone)                                  │ push
+       ▼                                                                   ▼
+   ┌───────────────── MESSAGING: Confluent Kafka / Event Hubs ─────────────────┐   ┌──────────────┐
+   │  topics: order.*  store.*  dispatch.*  tracking.*  payment.*  dlq.*        │   │ Real-time    │
+   │  RF≥3 · minISR=2 · partition by storeId/orderId/riderId · Schema Registry  │   │ push tier    │
+   └───┬──────────────┬───────────────────┬───────────────────┬────────────────┘   │ Web PubSub / │
+       │ stream proc  │ CDC (Debezium)    │ outbox drain      │ Capture            │ SignalR/MQTT │
+       ▼              │                   │                   ▼                    └──────┬───────┘
+ ┌───────────────┐    │             ┌─────────────┐   ┌──────────────────┐                │ live pos/ETA
+ │ Flink / Kafka │    │             │ Redis / Azure│   │ ADLS Gen2 (bronze│                ▼
+ │ Streams /     │    │             │ Cache (hot   │   │ →silver→gold) +  │           Customers
+ │ Stream Analyt.│    │             │ geo, ETA,    │   │ Event Hubs Capture│
+ └──────┬────────┘    │             │ idem keys)   │   └────────┬─────────┘
+        │ curated     │             └─────────────┘            │ features
+        ▼             ▼                                        ▼
+ ┌──────────────────────── DATABASE LAYER (systems of record) ────────────────────────┐
+ │  Azure Database for PostgreSQL – Flexible Server  (zone-redundant HA, per-service   │
+ │  schema/DB) · PgBouncer pooling · read replicas (reporting) · outbox tables · PITR  │
+ │  ── polyglot: Redis (ephemeral hot state) · ADX/Kusto (telemetry/time-series) ·     │
+ │     Cosmos DB (global read scale where eventual is OK) · ADLS (lakehouse/ML)        │
+ └────────────────────────────────────────────────────────────────────────────────────┘
+
+ Cross-cutting (every layer): Entra ID + Managed/Workload Identity · Key Vault · Private
+ Endpoints/VNet · Azure Monitor + Log Analytics + App Insights + Prometheus/Grafana ·
+ Bicep/Terraform IaC · GitHub Actions/Azure DevOps CI/CD · Purview + Azure Policy (residency)
+```
+
+> **Read it out loud like this:** "A tap in the app hits **Front Door** (edge cache + WAF), goes through **APIM** for auth and rate-limiting, into the **AKS ingress**, to the **Order service**, which writes to its **Postgres** schema *and* an **outbox** row in the same transaction. **CDC/outbox drain** publishes `order.placed` to **Kafka**; Dispatch, Pricing and Tracking consume it; **Tracking** pushes live position over **Web PubSub**; every event is **Captured** to the **Data Lake** for analytics and ML. Money lives only in **Postgres** with idempotency; ephemeral state lives in **Redis**." Then invite them to pick a layer.
+
+### Layer 1 · Client & edge — Azure Front Door + WAF + CDN
+
+- **Role.** First hop for every client and aggregator webhook: global anycast entry, TLS termination, **WAF** (OWASP/bot rules), **DDoS** protection, and **CDN** caching of static assets and semi-static menu/catalog reads so they never touch the origin.
+- **Choice + why.** *Front Door Premium* gives global HTTP load-balancing + WAF + private-origin (Private Link to APIM/AKS) in one managed hop — right for a multi-market, aggregator-facing platform. Health-probe-based failover here is the backbone of the multi-region story.
+- **Trade-offs.** Another managed hop (small latency + cost); caching menus risks staleness → short TTL + explicit purge on price/menu change.
+- **The dials.** *Lower load / single region:* you can start with just **Application Gateway + WAF** in one region and skip global Front Door entirely. *Multi-region:* Front Door does **latency/priority routing** and health-based failover across market cells — this is the layer that makes "region down" survivable.
+
+### Layer 2 · API tier — Azure API Management (APIM)
+
+- **Role.** The **north-south contract**: authenticate/authorize (JWT/OAuth via Entra ID), rate-limit and quota **per partner** (aggregators get their own *product*/subscription), version APIs, transform/aggregate, and shield internal services. Directly satisfies the JD's *"API-first integration / API management."*
+- **Choice + why.** APIM's product/subscription model is purpose-built for onboarding aggregators (Talabat/Deliveroo/Careem) with isolated keys, throttles and analytics; developer portal speeds partner integration.
+- **Trade-offs.** Not a business-logic tier — keep it thin (auth, throttle, route), or it becomes a distributed monolith. Premium tier for multi-region/VNet costs real money.
+- **The dials.** *Lower load:* APIM **Consumption/Basic** or even ingress-only (NGINX + a JWT filter) if you have no external partners yet. *Multi-region:* APIM **Premium** with multi-region gateways behind Front Door, or one gateway per market cell for residency.
+
+### Layer 3 · Ingress & service mesh — AGIC / NGINX (+ optional mesh)
+
+- **Role.** East-west entry inside AKS: routes to services, terminates internal TLS, and applies **timeouts, retries, and circuit-breaking at the sidecar** so a slow POS/aggregator can't cascade.
+- **Choice + why.** **AGIC** (App Gateway Ingress Controller) or **NGINX ingress** for L7 routing; add a mesh (**Istio/Linkerd/OSM**) only when you need **mTLS everywhere, fine-grained traffic-splitting (canary), and per-call telemetry** across many services.
+- **Trade-offs.** A mesh adds real operational weight (control plane, sidecar overhead, debugging). Don't adopt it for three services.
+- **The dials.** *Lower load:* plain ingress, no mesh. *Scale/multi-region:* mesh for uniform mTLS + canary + retry-budget policy; consistent policy across cells.
+
+### Layer 4 · Compute — event-driven microservices on AKS
+
+- **Role.** The business services (Order, Store/POS, Pricing/Promo, Dispatch, Tracking, Notification, Payment). **Stateless**, horizontally scalable, each owning its data.
+- **Choice + why.** **AKS** with multiple node pools (system / general workload / GPU for ML), **HPA + KEDA** scaling on **Kafka consumer lag** (not just CPU — lag is the true backlog signal), **PDBs**, multi-AZ node pools, and **workload identity** for keyless Azure access. Languages per the JD: Java/Node/Python.
+- **Trade-offs.** Microservices buy independent scaling/deploy but cost you distributed-systems complexity (sagas, idempotency, eventual consistency, more observability). A modular monolith is *faster* early.
+- **The dials.** *Lower load:* fewer, coarser services (or a modular monolith) on a small AKS/Container Apps setup — you don't need 12 deployables for thousands of orders/day. *Scale:* fine-grained services, KEDA on lag, cluster autoscaler, pre-scale on schedule for known peaks (iftar, promos). *Multi-region:* one AKS cluster **per market cell**; identical IaC, independent scaling.
+
+### Layer 5 · Messaging backbone — Confluent/Apache Kafka (or Event Hubs)
+
+- **Role.** The **async spine**: decoupled, replayable, ordered-per-key event flow for order/state/tracking/payment. This is the JD's headline tech.
+- **Choice + why.** **Confluent Kafka** (or **Event Hubs** Kafka-API to stay Azure-managed) with **RF≥3, min ISR=2**, **Schema Registry** for contract governance, and a **partitioning strategy per topic**: partition `order.*` by `orderId`/`storeId` for per-order ordering; put the high-volume `tracking.*` firehose on **separate topics** so location pings can't starve order processing. **DLQ** topics for poison messages.
+- **Trade-offs.** Operating Kafka is non-trivial (rebalances, partition sizing, exactly-once nuance). Managed (Confluent Cloud / Event Hubs) trades cost for far less ops.
+- **The dials.** *Lower load:* fewer partitions, RF=2/3, or even **Event Hubs / Service Bus** if volumes are modest and you want less to run; a queue is fine before you need replay + multiple independent consumers. *Scale:* more partitions (headroom for peak), tiered storage, dedicated clusters. *Multi-region:* **MirrorMaker 2 / Cluster Linking** for DR replication; keep **per-market ownership** — don't multi-master the ledger topics.
+
+### Layer 6 · Stream processing — Flink / Kafka Streams / Stream Analytics
+
+- **Role.** Continuous transforms on the event stream: enrich, join, window, aggregate (e.g. live order velocity vs. forecast to **trigger surge**), and curate raw events into the lakehouse.
+- **Choice + why.** **Kafka Streams** for lightweight per-service stream logic; **Flink** for heavy stateful/windowed joins at scale; **Azure Stream Analytics/ADX** for SQL-style near-real-time analytics without running Flink.
+- **Trade-offs.** Stateful stream processing (Flink) is powerful but adds a stateful cluster to operate; Kafka Streams keeps state local but couples processing to the service.
+- **The dials.** *Lower load:* skip a dedicated stream engine — do it in-consumer or with Stream Analytics. *Scale:* Flink with checkpointing/savepoints, partitioned state.
+
+### Layer 7 · Caching & real-time push — Redis + Web PubSub/SignalR
+
+- **Role.** Two jobs: **(a)** hot ephemeral state — rider geo-index, current ETA cache, **idempotency keys**, session/menu cache — in **Redis/Azure Cache**; **(b)** **fan-out** of live tracking to millions of customer connections via **Azure Web PubSub / SignalR** (managed WebSocket) so customers **never poll Postgres**.
+- **Choice + why.** Redis Geo + TTL is the right home for last-write-wins location and short-lived dedup keys; managed pub/sub scales connection fan-out horizontally, sharded by region.
+- **Trade-offs.** Cache = another consistency surface (invalidation, TTL tuning); ephemeral by design — never the source of truth for money/state.
+- **The dials.** *Lower load:* a single Redis; short-poll a lightweight endpoint instead of WebSockets if concurrency is small. *Scale:* Redis clustering/partitioning, Web PubSub scale units per region. *Multi-region:* per-region Redis + push tier (low latency, residency-friendly); don't stretch a cache across regions.
+
+### Layer 8 · The database layer — PostgreSQL as system of record (+ polyglot stores)
+
+This is the layer the panel will linger on — *"walk me down to the database."* Say clearly: **each service owns its data; money and order state live in a relational system of record; everything else uses the right store for its access pattern.**
+
+- **System of record — Azure Database for PostgreSQL – Flexible Server.**
+  - **Why Postgl.** ACID for orders/payments/settlement, rich SQL + **PostGIS** for geo, JSONB for flexible fields, mature ecosystem, and it's named in the JD. **Schema-per-service** (or DB-per-service) keeps ownership clean.
+  - **HA & durability.** **Zone-redundant HA** (sync standby in another AZ) for automatic failover; **PITR** + geo-redundant backups for DR; explicit **RPO/RTO** targets.
+  - **Scale reads.** **Read replicas** for reporting/analytics so BI never contends with order writes; **PgBouncer** (transaction pooling) so thousands of pods don't exhaust connections — *the #1 Postgres failure at peak is connection exhaustion, not CPU*.
+  - **Scale writes.** Partition hot tables (e.g. `orders` by **date/market**) for manageable indexes and cheap retention drops; re-key or shard a hot store's traffic; keep transactions short.
+  - **Consistency to Kafka.** **Transactional outbox** (write business row + outbox row in one tx) drained by **CDC/Debezium** → no dual-write inconsistency; **inbox dedup** (unique message-id) makes Kafka→Postgres effects **exactly-once**.
+- **Polyglot persistence — the right store per pattern.**
+  - **Redis** — ephemeral hot state (geo, ETA cache, idempotency), TTL'd, not durable truth.
+  - **Azure Data Explorer (Kusto)** — high-volume telemetry/location time-series and operational analytics (fast ingest, time-series queries) that you'd never want in the transactional DB.
+  - **Cosmos DB** — global, low-latency **read** scale for read-heavy, eventually-consistent data (e.g. customer profile, order history feed) where multi-region reads matter.
+  - **ADLS Gen2 (lakehouse)** — bronze→silver→gold analytics/ML store fed by Event Hubs Capture + CDC; the **feature store** lives on top for training/serving parity.
+- **Trade-offs to say out loud.** DB-per-service kills cross-service JOINs (you compose via events/APIs instead) but gives isolation and independent scaling; relational strong-consistency for money vs. eventual/polyglot for scale; normalized OLTP vs. denormalized read models (**CQRS**) for hot read paths.
+- **The dials.**
+  - *Lower load / single region:* **one** zone-redundant Postgres Flexible Server with schema-per-service, PgBouncer, and daily backups — **no sharding, no Cosmos, no ADX** until a metric forces it. Redis optional. This is the cost-sane default and a *senior* answer ("I don't shard on day one").
+  - *Growth:* add read replicas, move telemetry off Postgres into ADX, introduce Redis for hot reads, add CQRS read models where the hot path hurts.
+  - *Multi-region:* **Postgres is not multi-master.** Partition **ownership by market** — each market's region is the **writer** for its own orders (system of record stays in-country for **UAE PDPL/KSA** residency); async **geo-replica** for read/DR; Cosmos (multi-region writes) only for data where eventual consistency is acceptable; **reconciliation + saga** for money, never cross-region multi-master on the ledger. Per-region Key Vault keys; replicate only **anonymized/aggregated** data to a global analytics plane.
+
+### The scaling ladder — same architecture, three postures
+
+State this table to prove you scale **cost-consciously**, not by reflexively deploying the four-nines version on day one.
+
+| Layer | Startup / low load (thousands/day, 1 region) | Growth (tens of K–low millions/mo) | Scale & 99.99% (millions/mo, multi-region) |
+| --- | --- | --- | --- |
+| Edge | App Gateway + WAF | Front Door (single region) | Front Door Premium, health-failover across cells |
+| API | Ingress + JWT, or APIM Consumption | APIM Standard | APIM Premium, multi-region / per-cell |
+| Compute | Modular monolith / few services, Container Apps or small AKS | AKS, HPA on CPU/lag | AKS multi-AZ, KEDA on lag, pre-scale for peaks, cell-per-market |
+| Messaging | Service Bus / Event Hubs, or small Kafka | Kafka RF=3, per-topic partitioning | Kafka tiered storage, MirrorMaker DR, per-market ownership |
+| Real-time | Short-poll a light endpoint | Redis + Web PubSub (1 region) | Per-region Redis + push tier, sharded fan-out |
+| Database | **1** zone-redundant Postgres, PgBouncer, backups | + read replicas, Redis, ADX for telemetry | Per-market writer Postgres + geo-replica, polyglot (Cosmos/ADX/ADLS), reconciliation |
+| DR | PITR backups, single AZ→ZR | Zone-redundant HA | Tested cross-region failover, defined RTO/RPO, game days |
+
+### Single-region vs. multi-region — how to decide
+
+- **Stay single-region (multi-AZ) when:** one market, no in-country residency mandate yet, and 99.9%-class SLA is acceptable. Multi-AZ already survives a datacenter/zone loss; it does **not** survive a *region* loss — be honest about that gap.
+- **Go multi-region when** any is true: a **region-outage SLA** (99.99% ⇒ ~52 min/yr — a single region can't guarantee it), **data-residency law** (UAE PDPL, KSA sector-cloud) forcing in-country data, or **latency** for a distant market. Prefer **cell-per-country (active-passive warm standby)** first — cheaper, bounded blast radius, simpler than active-active. Reserve **active-active** for read scale / lowest RTO, and **never multi-master the money/ledger** — partition writer ownership by market and reconcile.
+- **Always state RTO/RPO**, keep residency **by design** (Purview classification + Azure Policy allowed-regions + per-region keys), and **test DR** (game days) — an untested DR plan is a red flag at four-nines.
+
+### Deep system-design questions this round adds
+
+- **"Trace a single order top to bottom and name every component, protocol, and store it touches."** — the walk-through above; the signal is that you can defend *each* hop, its failure mode, and its scaling dial.
+- **"Where exactly does an order become durable, and how do you publish that fact exactly once?"** — Postgres write + **outbox row in the same transaction**; CDC/Debezium drains the outbox to Kafka; inbox dedup on the consumer. No dual-write.
+- **"Design the database layer alone: schemas, partitioning, HA, replicas, pooling, and how services that can't JOIN still compose data."** — schema/DB-per-service; partition `orders` by date/market; zone-redundant HA + replicas + PgBouncer; compose across services via **events/APIs + CQRS read models**, not cross-DB JOINs.
+- **"Give me the cheapest architecture that still meets 99.9%, then evolve it to 99.99% one change at a time."** — the scaling-ladder table; each step justified by a metric (lag, connection saturation, region-loss requirement).
+- **"Which components are stateful, and how does each recover after a pod/node/zone/region loss?"** — Postgres (ZR HA + PITR), Kafka (RF/ISR + tiered storage), Redis (ephemeral, rehydrate), stream state (checkpoints); stateless services just reschedule.
+- **"Draw the data path from an order event to a demand-forecast feature."** — Kafka → Capture/CDC → ADLS bronze→silver→gold → feature store → training/serving with no skew.
+- **"How do you enforce data residency at the database layer specifically?"** — per-market writer Postgres in-country, per-region keys, Azure Policy allowed-regions, only anonymized/aggregated data leaves the cell.
+
+### Scenario questions this round adds
+
+- **"The panel says 'you're over-engineered — this is a new market with 5k orders/day.' Defend or simplify your design live."** *Approach:* Agree, then collapse it: modular monolith / few services on small AKS or Container Apps, **one** zone-redundant Postgres + PgBouncer, Event Hubs instead of a Kafka cluster, no Cosmos/ADX/mesh, short-poll instead of WebSockets. Name the **evidence** (metric thresholds) that would trigger each upgrade. *Signal:* seniority = knowing when *not* to build the big version. *Red flag:* insisting on the full four-nines stack for a pilot.
+- **"Postgres CPU is fine but the app is throwing 'too many connections' at dinner peak. Walk the layers."** *Approach:* Immediate — **PgBouncer** transaction pooling, cut per-pod pool size, shed load at APIM. Structural — read replicas for reporting, cache hot reads in Redis, move telemetry to ADX, reduce sync DB calls in favor of events. *Red flag:* "raise `max_connections`" as the only lever (worsens contention).
+- **"A hot store (one mega-brand) is 10× the write load and its Postgres partition is the bottleneck."** *Approach:* Re-key/compose partition key (`storeId#bucket`), give it dedicated partitions/replicas, offload reads to CQRS/Redis, and verify re-keying doesn't break required per-order ordering upstream in Kafka. *Red flag:* one global unpartitioned `orders` table.
+- **"Regulator mandates KSA customer data must never leave KSA. What changes, layer by layer, from your single-region design?"** *Approach:* Stand up a **KSA cell** (Front Door routing, own APIM/AKS/Kafka/Postgres in-region), classify+label PII (Purview), enforce **Azure Policy** allowed-regions and **per-region Key Vault**, replicate only anonymized/aggregated data out. *Red flag:* one global DB holding all countries' PII.
+- **"Redis (your hot geo/ETA cache) goes down at peak. What breaks and what still works?"** *Approach:* It's **ephemeral** — order intake and Postgres writes continue; live tracking/ETA degrade (fall back to last-known + heuristic ETA, recompute from source); rehydrate Redis from the stream. *Signal:* you never made the cache a source of truth. *Red flag:* orders failing because a cache is down.
+- **"You must migrate the `orders` table schema with zero downtime during business hours."** *Approach:* **Expand→migrate→contract** — add nullable column/new table, dual-write, backfill in batches, `CREATE INDEX CONCURRENTLY`, switch reads, then drop old. Never a blocking `ALTER` on a hot table. *Red flag:* a long lock during dinner peak.
+
+- **Key points (say these):** every component justified by role + trade-off + a *lower-load* alternative + a *single vs. multi-region* dial; **Postgres = system of record with outbox/CDC**, polyglot for the rest; **not multi-master on money**; residency enforced *at the database layer*; "start simple, evolve under evidence."
+- **Red flags:** deploying the full four-nines multi-region stack for a pilot; a single shared database for all services/markets; multi-master ledger; treating a cache as source of truth; no outbox (dual-write); residency as a network afterthought; no RTO/RPO or untested DR.
+
+---
+
 ## Round 6 · AI/ML & MLOps
 
 **What they're testing:** Can you lead — not necessarily hand-build — the AI optimization roadmap, choose sane models, and operationalize them responsibly (the JD names NeuralProphet, XGBoost, scikit-learn, TensorFlow + MLOps)?

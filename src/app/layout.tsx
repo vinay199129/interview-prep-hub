@@ -62,6 +62,7 @@ export default function RootLayout({
                 <NavLink href="/roles">Roles</NavLink>
                 <NavLink href="/leadership">Leadership</NavLink>
                 <NavLink href="/last-mile">Last-Mile</NavLink>
+                <NavLink href="/skills-prep">Skills</NavLink>
                 <NavLink href="/patterns">Patterns</NavLink>
                 <NavLink href="/interview">Interview</NavLink>
                 <NavLink href="/practice">Practice</NavLink>

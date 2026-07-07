@@ -51,6 +51,11 @@ const ROUNDS: Round[] = [
     description: "AKS, APIM, PostgreSQL, Data Lake, event-driven integration, observability",
   },
   {
+    label: "5B · Full-stack reference architecture",
+    href: "#round-5b-full-stack-reference-architecture-edge-database",
+    description: "Component-by-component walkthrough edge→database: every layer's choice, trade-offs, lower-load alternative, single vs multi-region — plus deep design & scenario Qs",
+  },
+  {
     label: "6 · AI/ML & MLOps",
     href: "#round-6-aiml-mlops",
     description: "Demand forecasting, ETA models, dynamic routing, model lifecycle governance",
