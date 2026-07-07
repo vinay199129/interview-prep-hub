@@ -183,6 +183,18 @@ export default function LastMilePage() {
             DR and cost scenarios — with structured approaches and red flags.
           </div>
         </Link>
+        <Link
+          href="#real-world-case-studies-how-uber-doordash-zomato-swiggy-solve-this"
+          className="block rounded-lg border border-brand-200 dark:border-brand-100/20 bg-brand-50 dark:bg-brand-100/5 p-4 hover:shadow transition"
+        >
+          <div className="font-semibold text-sm text-brand-700 dark:text-brand-100">
+            🌍 Real-world case studies
+          </div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            How Uber (H3/DeepETA), DoorDash (Kafka/DeepRed), Zomato and Swiggy
+            actually build this — each mapped to the Azure equivalent, with refs.
+          </div>
+        </Link>
       </div>
 
       <section className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">

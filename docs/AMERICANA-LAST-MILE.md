@@ -437,6 +437,31 @@ Clients (app / web / aggregator webhooks)
 - Maintain real-time state: **rider positions** stream in via Event Hubs/Kafka (partition by `riderId`) into an **in-memory geospatial index** (Uber **H3** / geohash, backed by Redis Geo for durability), plus rider availability/capacity and an open-order queue.
 - Run an **assignment tick per city/region every ~2–5 s**: build candidate `(order, rider)` pairs filtered by proximity (H3 ring), **score** each by predicted ETA + travel cost + rider utilization + SLA-breach risk, then solve as a **min-cost bipartite matching** (Hungarian, or constrained greedy at very high scale), **batching** nearby orders onto one rider. Global optimization per tick beats first-come greedy — fewer idle miles, better on-time %.
 
+**Architecture / flow.**
+
+```
+Rider GPS pings ──► Event Hubs/Kafka (partition by riderId)
+order.placed ─────► Kafka                    │
+                      │                       ▼
+        ┌──── Dispatch cell = ONE authority per city/region ────────────────┐
+        │  In-memory geospatial index (H3 / geohash) ◄── Redis Geo (durable) │
+        │  Rider state: availability · capacity · reliability score          │
+        │  Open-order queue                                                  │
+        │                                                                    │
+        │   every ~2–5 s  ── ASSIGNMENT TICK ──                              │
+        │   1) candidates = H3-ring proximity filter (order × rider)         │
+        │   2) score = f(predicted ETA, travel cost, utilization, SLA risk)  │
+        │   3) solve MIN-COST BIPARTITE MATCHING (Hungarian) + batching      │
+        │                                                                    │
+        │   assignment token ──► rider app  (accept within timeout)          │
+        │            └── no-ack → auto-reassign (backoff, reliability score)  │
+        └──────────┬─────────────────────────────────────────────────────────┘
+                   ▼ idempotent accept
+        dispatch.assigned (Kafka) ──► Tracking · Notification · Postgres (outbox)
+
+  Degrade: optimizer slow/down → nearest-available GREEDY fallback
+```
+
 **3. Hard parts.**
 - **Double-dispatch race:** make **one authority per region** (partition the dispatch service by city — e.g. Service Fabric reliable actors or a partitioned consumer) so a rider/order is assigned by a single writer; use an **assignment token + idempotent rider-accept** with an ack timeout → auto-reassign on no-ack.
 - **Stale GPS:** TTL on positions, last-known + light dead-reckoning, drop riders whose pings went silent.
@@ -460,6 +485,27 @@ Clients (app / web / aggregator webhooks)
 - **ETA:** recompute travel-time ETA **periodically** from the model endpoint (not on every ping); cache it and push only on a **material change**; client-side snap-to-road/interpolation keeps motion smooth with fewer messages.
 - **Cold path:** persist the full track asynchronously to ADLS/Cosmos for history/audit/ML — keeping the hot path cheap.
 
+**Architecture / flow (hot path vs. cold path).**
+
+```
+════════════ HOT PATH (ephemeral, cheap, seconds) ════════════
+Rider GPS (every 3–5s) ─► Event Hubs (partition by riderId) ─► Location Svc
+                                                                  │ write current pos (TTL,
+                                                                  ▼ last-write-wins)
+                                                          Redis / Azure Cache
+ ETA model endpoint ──recompute PERIODICALLY / on material change──┐   │
+                                                                   ▼   ▼
+                        Web PubSub / SignalR (managed, sharded by region)
+                                                                   │ push pos + ETA delta
+                                                                   ▼
+                             Customers (100k–millions concurrent trackers)
+                             client-side snap-to-road / interpolation
+   backpressure at peak → ADAPTIVE SAMPLING (lower update frequency)
+
+════════════ COLD PATH (durable, async) ════════════
+Event Hubs Capture ─► ADLS / Cosmos  (full track history · audit · ML features)
+```
+
 **4. Hard parts & scale.** Millions of **connections** → use managed pub/sub that scales out, sharded by region; **thundering herd** at peak → backpressure and **adaptive sampling** (lower ping/update frequency under load); accuracy vs. cost → update only on meaningful movement; poor-network riders → last-known + dead-reckoning. Everything is **eventual** and degrades gracefully.
 
 - **Trade-offs:** push vs. poll; update frequency vs. battery/cost/accuracy; ephemeral vs. durable.
@@ -475,6 +521,29 @@ Clients (app / web / aggregator webhooks)
 - **Models:** **hierarchical** forecasting per store/day-part — **Prophet/NeuralProphet** for seasonality + holiday/event regressors (Ramadan, Eid, paydays, promos) and **XGBoost/LightGBM** with rich features for accuracy; a **global model** to handle **cold-start** stores by borrowing strength; AutoML for the baseline.
 - **Serving:** **batch** forecasts (hourly/daily) written to a serving store that dispatch/ops read, **plus** a near-real-time signal (current order velocity vs. forecast via ADX/Stream Analytics) to **trigger surge**. Surge/positioning compares predicted demand vs. available supply per zone → multiplier/incentive/pre-position recommendation, with **guardrails** (caps, fairness, regulatory limits).
 
+**Architecture / flow (batch train + streaming trigger).**
+
+```
+Orders + weather + events + traffic
+        │ Event Hubs Capture / CDC
+        ▼
+ADLS medallion:  bronze(raw) ──► silver(curated) ──► gold(features)
+                                                        │
+                                            Azure ML FEATURE STORE
+                                        (shared by train + serve — no skew)
+                        ┌───────────────────────┴───────────────────────┐
+              TRAINING  ▼                                                ▼  SERVING
+     Prophet/NeuralProphet (seasonality + holiday/event regressors)   BATCH forecasts
+     XGBoost/LightGBM (accuracy) · Global model (cold-start stores)   (hourly/daily) ──► serving
+     Azure ML: registry · eval gates · drift · scheduled+drift retrain   store (dispatch/ops)
+                                                                            │ demand vs supply/zone
+ STREAMING: order velocity vs forecast ─(ADX / Stream Analytics)──┐        ▼
+                                                                  └─► SURGE / POSITIONING engine
+                                                                      → multiplier · incentive ·
+                                                                        pre-position riders
+        Guardrails: caps · fairness · regulatory · human-in-the-loop for pricing
+```
+
 **3. MLOps & hard parts.** Azure ML pipelines, model registry, **eval gates**, **drift monitoring**, scheduled + drift-triggered **retraining**; track forecast error (**MAPE/pinball**) per segment vs. a naive seasonal baseline. Hard parts: holiday/promo spikes (event regressors + manual overrides); new-store cold start (global/hierarchical); concept drift; **acting safely** on predictions (guardrails + human-in-the-loop for pricing).
 
 - **Trade-offs:** accuracy vs. interpretability (business trust); model complexity vs. ops; real-time vs. batch.
@@ -489,6 +558,29 @@ Clients (app / web / aggregator webhooks)
 - **Topology:** a **stack (cell) per market** in the in-country/nearest Azure region, data **partitioned by country**; **multi-AZ** within a country for HA, and **active-passive (warm standby)** or active-active **only within permitted geographies** for region failure.
 - **Residency:** customer **PII stays in-region**; classify/label with **Purview**; enforce **allowed-regions via Azure Policy**; **per-region Key Vault** keys; replicate only **anonymized/aggregated** data to a global analytics plane. *(This is exactly the governed, lineage-tracked, access-controlled posture I delivered on the UAE-government data-sovereignty engagement.)*
 - **Routing & state:** **Front Door / Traffic Manager** routes users to their market's cell with health-based failover; **Postgres** (zone-redundant + geo-backup) is the per-country system of record; Cosmos with regional writes for read scale. **Money is never multi-master** — idempotency + **saga** + reconciliation.
+
+**Architecture / flow (cell-per-country).**
+
+```
+                     Azure Front Door / Traffic Manager
+                     (health-based · geo/latency routing · failover)
+        ┌────────────────────┬────────────────────┬────────────────────┐
+        ▼                    ▼                    ▼
+  ┌───────────┐        ┌───────────┐        ┌───────────┐
+  │ UAE CELL  │        │ KSA CELL  │        │ EGYPT CELL│  ◄─ in-country / nearest region
+  │ APIM+AKS  │        │ APIM+AKS  │        │ APIM+AKS  │     multi-AZ within the country
+  │ Kafka     │        │ Kafka     │        │ Kafka     │
+  │ Postgres  │        │ Postgres  │        │ Postgres  │  ◄─ system of record; PII stays
+  │ (ZR HA +  │        │ (ZR HA +  │        │ (ZR HA +  │     in-country; warm standby +
+  │  geo-bkp) │        │  geo-bkp) │        │  geo-bkp) │     geo-backup for region loss
+  │ Key Vault │        │ Key Vault │        │ Key Vault │  ◄─ per-region keys
+  └─────┬─────┘        └─────┬─────┘        └─────┬─────┘
+        │  anonymized / aggregated ONLY (Purview-classified, policy-enforced)
+        └────────────────────┴───────────► Global analytics plane (no raw PII)
+
+  Guardrails: Azure Policy allowed-regions · Purview lineage/labels · per-region Key Vault
+  Money: NEVER multi-master → idempotency + saga + reconciliation
+```
 
 **3. Hard parts.** Prevent **cross-border leakage** (isolation by design, not a network ACL afterthought); **failover without data loss** (defined RPO/RTO, geo-replicated backups, **tested DR runbooks/game days**); avoid **split-brain** in active-active (no multi-master on transactional/ledger data; per-entity home region; conflict-free only where eventual is acceptable); balance **global config vs. local autonomy**.
 
@@ -750,6 +842,54 @@ State this table to prove you scale **cost-consciously**, not by reflexively dep
 
 - **Key points (say these):** every component justified by role + trade-off + a *lower-load* alternative + a *single vs. multi-region* dial; **Postgres = system of record with outbox/CDC**, polyglot for the rest; **not multi-master on money**; residency enforced *at the database layer*; "start simple, evolve under evidence."
 - **Red flags:** deploying the full four-nines multi-region stack for a pilot; a single shared database for all services/markets; multi-master ledger; treating a cache as source of truth; no outbox (dual-write); residency as a network afterthought; no RTO/RPO or untested DR.
+
+---
+
+## Real-world case studies — how Uber, DoorDash, Zomato & Swiggy solve this
+
+**Why this round matters:** The five design cases above aren't hypothetical — they mirror what the big delivery/mobility platforms have published on their engineering blogs. Being able to say *"here's how Uber/DoorDash/Zomato actually did it, and here's the same pattern on Azure"* is a strong senior signal: it shows you read the field and can map it to this stack. **Frame everything as public engineering-blog knowledge, never as insider claims** about any specific company (least of all the one you're interviewing with).
+
+### The pattern is industry-standard (case ↔ real world)
+
+| Our design case | Industry-standard approach | Who does it (public) |
+| --- | --- | --- |
+| **Case 1 · Order processing** | Event-driven microservices on Kafka; an OMS as the order source of truth; async status events fan out to fulfilment | DoorDash (Kafka backbone), Swiggy (OMS + Kafka), Zomato |
+| **Case 2 · Dispatch / matching** | Geospatial index + periodic **batched optimization** scored on ETA/cost/reliability — *not* greedy nearest-rider | Uber (H3 + Marketplace batched matching), DoorDash (DeepRed), Swiggy (scoring engine) |
+| **Case 3 · Live tracking** | GPS → Kafka → consumers → **WebSocket fan-out**; buffer bursts in Kafka; never poll the DB | Zomato (~500 ms GPS → Kafka → WebSockets), Swiggy, Uber |
+| **Case 4 · Demand / ETA / surge** | ML on a platform (feature store + model registry), real-time **and** batch features; surge from supply/demand imbalance | Uber (DeepETA on Michelangelo), Zomato (Flink+Spark, Redis feature store, MLflow), DoorDash |
+| **Case 5 · Multi-region / HA** | Region/city partitioning into independent cells, replicated stores, tested failover, polyglot persistence | Uber, DoorDash (multi-datastore), all global players |
+
+### Uber — H3, batched matching, DeepETA on Michelangelo
+- **H3** is Uber's open-source **hexagonal geospatial index**; both supply (drivers) and demand (riders) are mapped to hex cells to aggregate density and find candidates — this is exactly our **Case 2** "H3-ring proximity filter."
+- Uber's **Marketplace** does **batched / optimization matching** (score candidates, solve as a matching problem), not pure first-come greedy — our "assignment tick + min-cost bipartite matching."
+- **DeepETA** (a deep-learning ETA model) is served on **Michelangelo**, Uber's ML platform with feature store, registry and monitoring — our **Case 4** feature store + Azure ML.
+- **Azure mapping:** H3/geohash in **Redis Geo**; Michelangelo → **Azure ML** (feature store, registry, drift); DeepETA → an XGBoost/DL ETA model on an **Azure ML online endpoint**.
+- Refs: `eng.uber.com/h3`, `eng.uber.com/deepeta`, `eng.uber.com/michelangelo`.
+
+### DoorDash — Kafka backbone, DeepRed dispatch, polyglot stores
+- **Kafka** is the event backbone: order and Dasher status changes publish events consumed by many microservices — our **Case 1** async backbone.
+- **DeepRed** is the dispatch/assignment brain (match order → Dasher, predict ETA per stage: prep + travel + wait).
+- **Polyglot persistence:** **Cassandra** for high-velocity location/time-series, **CockroachDB** for strongly-consistent transactional order state — this validates our **Round 5B database-layer split**: a relational system of record for money/state, a separate fast store for telemetry. They've also published on **reducing hot-spots** across datastores — our hot-partition scenario.
+- **Azure mapping:** Kafka → Confluent/**Event Hubs**; Cassandra → **ADX/Cosmos**; CockroachDB → **Postgres Flexible Server**; same hot-partition lessons.
+- Refs: DoorDash Engineering — "Scales Reliable Delivery Logistics with Apache Kafka," "Scaling DoorDash's Microservices Ecosystem," "Reducing Hotspots in Distributed Datastores."
+
+### Zomato — 500 ms GPS → Kafka → WebSockets, ML runtime
+- Rider apps stream GPS (~every 500 ms) which is **posted to Kafka rather than straight to WebSockets** — Kafka buffers spikes and transient failures; consumer services then fan out to clients over **WebSockets**. This is precisely our **Case 3** hot path: *decouple ingest via the log, fan out via managed pub/sub, never poll the DB.*
+- **ML runtime:** real-time features via **Flink** + batch via **Spark**, a **Redis/DynamoDB feature store**, **MLflow** model store, and a low-latency serving gateway — our **Case 4** feature store + streaming signal.
+- **Azure mapping:** Kafka → **Event Hubs**; WebSockets → **Azure Web PubSub / SignalR**; Flink → **Stream Analytics/Flink**; Redis feature store → **Azure Cache + Azure ML feature store**; MLflow → **Azure ML registry**.
+
+### Swiggy — OMS source of truth, scoring-based allocation, "ETA as a contract"
+- An **Order Management System (OMS)** is the order source of truth; **geohash** checks serviceability; the **assignment engine scores** candidates on ETA + current workload + predicted prep time + historical reliability — so a partner *farther away* can win. This is our **Case 2** "score beyond proximity."
+- **ETA is treated like a contract**, recomputed at each stage; if a partner's ETA degrades, the order can be **reassigned** — our re-evaluation loop. Swiggy moved to **managed (Confluent) Kafka** to cut ops toil.
+- **Azure mapping:** Confluent Kafka on Azure / **Event Hubs**; scoring engine on **AKS**; ETA model on an **Azure ML** endpoint.
+
+### Also matching — including MENA-local players
+- **Careem** (Uber-owned MENA super-app, Dubai HQ) and **Talabat** (Delivery Hero, Kuwait/UAE) are the **closest regional analogs** to an Americana-style last-mile platform: the same order → dispatch → track → settle loop, an aggregator model, and Ramadan/iftar demand peaks. Their internal stacks are **not publicly documented** — cite them as *market context*, not architecture claims.
+- **Grab / Gojek** (SE-Asia super-apps), **Instacart**, **Deliveroo**, **Rappi** and **Glovo** solve the identical primitives (geospatial matching, ETA ML, surge/positioning, Kafka streaming, polyglot storage) — reinforcing that this reference architecture is the field standard, not a bespoke design.
+
+### How to use this in the interview
+- Bring **one concrete example per case** ("Uber's H3 for the geospatial index; DoorDash's Kafka + polyglot split for the data layer; Zomato's GPS→Kafka→WebSocket tracking"), then **immediately map it to the Azure equivalent** you'd build. That pairing — *knows the field* **and** *can execute on Azure* — is the senior signal.
+- **Honesty caveat:** everything here is from public engineering blogs. Never claim insider knowledge of Americana's, Talabat's or Careem's internal design. Say: *"Publicly, Uber/DoorDash/Zomato do X; I'd apply the same pattern here on Azure, adapted for MENA residency and QSR peaks."*
 
 ---
 
