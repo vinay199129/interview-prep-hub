@@ -765,14 +765,15 @@ There are two journeys through the platform: the **synchronous request path** (a
 ### Layer 4 · Compute — event-driven microservices on AKS
 
 - **Role.** The business services (Order, Store/POS, Pricing/Promo, Dispatch, Tracking, Notification, Payment). **Stateless**, horizontally scalable, each owning its data.
-- **Choice + why.** **AKS** with multiple node pools (system / general workload / GPU for ML), **HPA + KEDA** scaling on **Kafka consumer lag** (not just CPU — lag is the true backlog signal), **PDBs**, multi-AZ node pools, and **workload identity** for keyless Azure access. Languages per the JD: Java/Node/Python.
+- **Choice + why.** **AKS** with multiple node pools (system / general workload / GPU for ML), **HPA + KEDA** scaling on **Kafka consumer lag** (not just CPU — lag is the true backlog signal), **PDBs**, multi-AZ node pools, and **workload identity** for keyless Azure access. Languages per the JD: Java/Node/Python. **AKS Automatic** (GA 2025) is a third option worth naming: it auto-manages node pools, sizing, patching, upgrades and baseline security/networking, trading fine-grained node control for near-zero cluster ops — a good fit for a lean platform team that doesn't want to hand-tune node pools.
 - **Trade-offs.** Microservices buy independent scaling/deploy but cost you distributed-systems complexity (sagas, idempotency, eventual consistency, more observability). A modular monolith is *faster* early.
-- **The dials.** *Lower load:* fewer, coarser services (or a modular monolith) on a small AKS/Container Apps setup — you don't need 12 deployables for thousands of orders/day. *Scale:* fine-grained services, KEDA on lag, cluster autoscaler, pre-scale on schedule for known peaks (iftar, promos). *Multi-region:* one AKS cluster **per market cell**; identical IaC, independent scaling.
+- **The dials.** *Lower load:* fewer, coarser services (or a modular monolith) on a small AKS/Container Apps setup — you don't need 12 deployables for thousands of orders/day. *Scale:* fine-grained services, KEDA on lag, cluster autoscaler, pre-scale on schedule for known peaks (iftar, promos); **AKS Automatic** if you want that scaling without owning node-pool tuning. *Multi-region:* one AKS cluster **per market cell**; identical IaC, independent scaling.
 
 ### Layer 5 · Messaging backbone — Confluent/Apache Kafka (or Event Hubs)
 
 - **Role.** The **async spine**: decoupled, replayable, ordered-per-key event flow for order/state/tracking/payment. This is the JD's headline tech.
 - **Choice + why.** **Confluent Kafka** (or **Event Hubs** Kafka-API to stay Azure-managed) with **RF≥3, min ISR=2**, **Schema Registry** for contract governance, and a **partitioning strategy per topic**: partition `order.*` by `orderId`/`storeId` for per-order ordering; put the high-volume `tracking.*` firehose on **separate topics** so location pings can't starve order processing. **DLQ** topics for poison messages.
+- **KRaft, not ZooKeeper.** Since **Kafka 4.0 (GA March 2025)**, ZooKeeper is fully removed — brokers run **KRaft** (Kafka Raft) with a small quorum of controller nodes handling metadata/consensus natively. Operationally this means: no separate ZK ensemble to run/patch/secure, faster controller failover and higher partition-count ceilings, and a different bootstrap/upgrade path (`kraft.version`, controller quorum voters) — know this is the current default before you describe "how Kafka elects a controller."
 - **Trade-offs.** Operating Kafka is non-trivial (rebalances, partition sizing, exactly-once nuance). Managed (Confluent Cloud / Event Hubs) trades cost for far less ops.
 - **The dials.** *Lower load:* fewer partitions, RF=2/3, or even **Event Hubs / Service Bus** if volumes are modest and you want less to run; a queue is fine before you need replay + multiple independent consumers. *Scale:* more partitions (headroom for peak), tiered storage, dedicated clusters. *Multi-region:* **MirrorMaker 2 / Cluster Linking** for DR replication; keep **per-market ownership** — don't multi-master the ledger topics.
 - **Backbone, not a synchronous front-door.** Expect *"shouldn't the bus sit in front of every service?"* — **no.** The **request path stays synchronous** (Front Door → APIM → ingress → Order Svc → Postgres+outbox → ack in **<1–2 s**); routing every inbound call through Kafka first would break that low-latency ack and turn request/response into fire-and-forget. Services **produce to and consume from** the log — it sits *between* them as the async spine. A queue *in front of* a service is right **only for ingest/command/buffering** paths (GPS firehose, webhook intake, absorbing surge, shielding a slow POS/3PL), i.e. **queue-based load leveling** — not as a universal gateway for reads or anything needing an immediate answer.
@@ -1044,6 +1045,8 @@ Prepare a story bank covering these prompts (have a metric for each):
      **Answer:** True cross-system exactly-once is a myth; aim for **ordered + idempotent + effectively-once**. *Ordering:* produce all events for an entity with a stable partition key (`orderId`/`storeId`) so they land on one partition where order is guaranteed — never rely on cross-partition order. *De-dup:* attach an idempotency key per message and make consumers idempotent (check a processed-keys store, use upserts, keep handlers safe on retry). *Atomicity* between the DB write and the event publish: use the **transactional outbox** (write state + outbox row in one transaction; a relay publishes) or Service Bus sessions + duplicate detection. Together these make at-least-once delivery and retries safe.
   4. **Map your 2M-msg/min connected-car pipeline onto Event Hubs.**
      **Answer:** ~33k msg/s is squarely Event Hubs territory. Ingest into an Event Hub **partitioned by `vehicleId`** (enough partitions for parallelism + headroom, e.g. 32+), sized in throughput/processing units with **auto-inflate**. Consumers run as a scaled **consumer group** (on AKS/Functions) using the EventProcessor with **checkpointing** to balance partitions and resume safely. Enable **Event Hubs Capture** to land raw Avro/Parquet in ADLS for the lakehouse and replay. Handle backpressure with batching, async checkpoints, and **KEDA autoscaling on partition lag**, buffering to protect downstream stores. This mirrors my connected-vehicle platform (20M+ vehicles, ~2M telemetry msgs/min), where I owned exactly this ingest-at-scale + reliability pattern.
+  5. **Kafka no longer needs ZooKeeper — what changed operationally?**
+     **Answer:** Since **Kafka 4.0 (GA March 2025)**, ZooKeeper is fully removed; brokers run **KRaft** (Kafka Raft), where a small set of **controller nodes** (or combined broker+controller in smaller clusters) manage metadata via Raft consensus instead of an external ZK ensemble. Operationally this means **one system to run instead of two** (no ZK to patch/secure/scale separately), faster controller failover, and a higher practical ceiling on partition counts. It changes bootstrap (`process.roles`, controller quorum voters instead of `zookeeper.connect`) and the upgrade/rollback story. If asked to design "how does the cluster elect a controller today," the answer is **KRaft's Raft quorum**, not ZooKeeper's ZAB — worth knowing even though Confluent/Event Hubs abstract this away for you day-to-day.
 
 ### 2. Container orchestration — *Kubernetes / Azure AKS*
 
@@ -1059,6 +1062,8 @@ Prepare a story bank covering these prompts (have a metric for each):
      **Answer:** Rolling updates with **readiness/liveness probes** and tuned `maxSurge`/`maxUnavailable` so capacity never dips below demand; pods take traffic only after readiness passes, and **graceful shutdown** (preStop + connection draining) finishes in-flight work. For risky changes use **blue-green or canary** (shift 1%→10%→100% via ingress/mesh) with **automated rollback on SLO/error-budget burn**. Keep schema and API changes **backward-compatible (expand/contract)** so old and new pods coexist, and use **feature flags** to decouple deploy from release. At 99.99% (~52 min/yr) the deploy pipeline itself must be a non-event.
   4. **Where would Service Fabric fit, given your résumé, vs. AKS?**
      **Answer:** **Service Fabric** shines for **stateful microservices** — its Reliable Services/Actors give partitioned, replicated in-memory state with strong consistency without an external store, which I've used for low-latency stateful workloads. **AKS/Kubernetes** is the broader, more portable, larger-ecosystem choice for stateless containers and is where the industry (and this JD) standardized. Today I'd default to **AKS/ACA** for portability and talent availability, choosing Service Fabric (or stateful K8s patterns like StatefulSets/operators) only when the actor/stateful model is a genuine fit. So: Service Fabric = stateful/actor specialism; AKS = general-purpose, portable, ecosystem-rich default.
+  5. **AKS Automatic — when would you pick it over standard AKS?**
+     **Answer:** **AKS Automatic** (GA 2025) is a managed AKS SKU that auto-provisions and tunes node pools (including scaling to/from zero for workload pools), applies baseline security hardening and networking, and handles node-image/Kubernetes upgrades for you — trading fine node-pool control for near-zero cluster ops. I'd pick it for a **lean platform team** standing up the event-driven services fast without a dedicated K8s-ops function, or for new markets where I don't want to hand-tune node pools yet. I'd stay on **standard AKS** where I need custom node pools (GPU shapes, specific CNI/network policy), a service mesh, or very large multi-team estates with bespoke placement rules. Rule of thumb: **Automatic for speed and low ops overhead; standard AKS when you need to control the knobs.**
 
 ### 3. API management & integration — *APIM*
 
@@ -1138,7 +1143,7 @@ Prepare a story bank covering these prompts (have a metric for each):
 ### 8. GenAI & agent orchestration — *(your differentiator)*
 
 - **What it does:** orchestrates LLMs/agents/tools for assistants, document intelligence, and automation (the platform's "AI-driven optimization" + internal copilots).
-- **Azure alternatives / homes:** **Semantic Kernel** & **Microsoft Agent Framework** (Azure-native orchestration), **Azure AI Foundry Agent Service**, **Copilot Studio**, **Azure AI Search** (RAG retrieval), **Azure OpenAI**. (LangGraph/CrewAI/LangChain run on Azure compute too.)
+- **Azure alternatives / homes:** **Semantic Kernel** & **Microsoft Agent Framework** (Azure-native orchestration), **Azure AI Foundry Agent Service**, **Copilot Studio**, **Azure AI Search** (RAG retrieval), **Azure OpenAI**, **MCP (Model Context Protocol)** for standardized tool/context wiring. (LangGraph/CrewAI/LangChain run on Azure compute too.)
 - **Your résumé evidence:** **LangGraph, CrewAI, Semantic Kernel, LangChain, Microsoft Agent Framework, Copilot Studio, M365 SDK**, *prompt orchestration*, *Responsible AI*; Teams plant-ops assistant; procurement RAG platform.
 - **Prep questions:**
   1. **Semantic Kernel / Agent Framework vs. LangGraph/CrewAI — when Azure-native vs. OSS?**
@@ -1149,6 +1154,8 @@ Prepare a story bank covering these prompts (have a metric for each):
      **Answer:** Two layers. *Quality evals:* measure **groundedness/faithfulness, relevance, task success** on a curated golden set using **Azure AI Foundry evaluations**, gate releases on them, and run **red-teaming/jailbreak** tests. *Runtime guardrails:* **Azure AI Content Safety** on inputs/outputs, prompt-injection defenses, PII redaction, grounding on retrieved context with **citations**, and refusal/fallback behavior. Plus production telemetry: log prompts/responses (privacy-safe), track thumbs-up/down and downstream outcomes, and monitor for drift/regressions. Treat **prompts/models as versioned artifacts** with rollback. Responsible AI (fairness, transparency, human oversight) is built in, not bolted on.
   4. **RAG over multi-brand/multi-country docs — retrieval design?**
      **Answer:** Use **Azure AI Search** with **hybrid retrieval** (keyword + vector) plus **semantic ranking**. Chunk documents thoughtfully (section-aware, with overlap) and attach **metadata — brand, country, region, language, access level** — to every chunk so queries **filter to the right tenant** and **security-trim** by user permission (critical for multi-brand/multi-country). At query time, rewrite/expand the query, retrieve top-k within the filtered scope, and pass **cited** context to the LLM. Handle **bilingual (Arabic/English)** content with multilingual embeddings and per-language analyzers. Evaluate **retrieval (recall@k)** separately from generation. This is the pattern from my procurement RAG platform, generalized to brand/country tags.
+  5. **How does MCP (Model Context Protocol) fit your multi-agent design?**
+     **Answer:** **MCP** is the emerging open standard (Anthropic-originated, now adopted across OpenAI, Microsoft/Azure AI Foundry, and Semantic Kernel) for wiring an agent/LLM to **tools, data sources and context** through one uniform client-server protocol, instead of a bespoke function-calling integration per tool. For the order-exception agent above, I'd expose the order-lookup, refund, and re-dispatch capabilities as **MCP servers** (or consume existing ones) so the same agent can call them consistently, and any orchestrator (Agent Framework, Semantic Kernel, Copilot Studio) can plug into the same tool surface without re-wiring. It also decouples **who builds the tool** from **who builds the agent** — a platform team ships an MCP server once (e.g. "order service" tools) and every agent team reuses it. Same guardrails apply — auth per MCP server, allow-listed tools, human-in-the-loop for high-impact calls — MCP standardizes the *plumbing*, not the safety policy.
 
 ### 9. Languages & app frameworks — *Java / Node.js / Python*
 
@@ -1234,63 +1241,66 @@ A focused drill-set mapped directly to the job description's named technologies.
 6. **Replication factor / min-ISR for durability?** RF≥3 with `min.insync.replicas=2` and `acks=all` so a single broker loss doesn't lose data or block writes.
 7. **What does Schema Registry buy you?** Enforced, versioned event contracts (Avro/Protobuf/JSON-Schema) with compatibility checks, so producers can't break consumers — essential across many teams/markets.
 8. **Compacted topic — when?** For "current state" snapshots keyed by entity (e.g. latest order status), where you only need the last value per key, not the full history.
+9. **KRaft vs. ZooKeeper — what's the current default?** Since **Kafka 4.0 (GA March 2025)**, ZooKeeper is removed entirely; brokers run **KRaft**, with a small controller-node quorum managing metadata via Raft — one system to operate instead of two, faster failover, higher partition ceilings. Know this before describing controller election.
 
 ### B. Distributed systems & reliability
 
-9. **How do you stop a slow third party (POS/aggregator/3PL) taking you down?** Bulkhead + circuit breaker + timeouts + async accept with retry/DLQ; never block order intake on a synchronous downstream.
-10. **Saga vs. distributed transaction (2PC)?** 2PC doesn't scale across independent services; use a **saga** — a sequence of local transactions with **compensating actions** (e.g. refund if dispatch fails). Orchestrated or choreographed.
-11. **How do you make a payment/dispatch call idempotent?** Idempotency key (order/external ref) + an inbox table or unique constraint so retries are no-ops; return the original result on replay.
-12. **CAP in practice for order state?** Order state is eventually consistent across services (favor availability), but money must be exactly-once/consistent — separate the two and treat them differently.
-13. **Two dispatchers assign the same rider concurrently — prevent it?** Optimistic concurrency (version column / `WHERE version = n`) or a short-lived distributed lock; the loser retries. Avoid long-held locks.
-14. **Out-of-order events — how to handle?** Per-key partition ordering + a state-machine guard that rejects stale transitions (e.g. `version <= current`).
+10. **How do you stop a slow third party (POS/aggregator/3PL) taking you down?** Bulkhead + circuit breaker + timeouts + async accept with retry/DLQ; never block order intake on a synchronous downstream.
+11. **Saga vs. distributed transaction (2PC)?** 2PC doesn't scale across independent services; use a **saga** — a sequence of local transactions with **compensating actions** (e.g. refund if dispatch fails). Orchestrated or choreographed.
+12. **How do you make a payment/dispatch call idempotent?** Idempotency key (order/external ref) + an inbox table or unique constraint so retries are no-ops; return the original result on replay.
+13. **CAP in practice for order state?** Order state is eventually consistent across services (favor availability), but money must be exactly-once/consistent — separate the two and treat them differently.
+14. **Two dispatchers assign the same rider concurrently — prevent it?** Optimistic concurrency (version column / `WHERE version = n`) or a short-lived distributed lock; the loser retries. Avoid long-held locks.
+15. **Out-of-order events — how to handle?** Per-key partition ordering + a state-machine guard that rejects stale transitions (e.g. `version <= current`).
 
 ### C. Microservices, API & integration
 
-15. **Service boundaries for this platform?** By domain capability — order, pricing, store/POS, dispatch, tracking, notification, reconciliation — each owning its data; integrate via events + well-versioned APIs.
-16. **REST vs. event-driven — when each?** Synchronous REST for request/response with immediate need (e.g. price quote); events for decoupled, replayable state propagation (order lifecycle). Most real systems are hybrid.
-17. **What does APIM give you as the gateway?** AuthN/Z (JWT validation), rate-limit/quota per aggregator partner (product/subscription model), versioning, transformation, and a WAF edge — the "API-first integration" the JD calls for.
-18. **How do you abstract many aggregators (Talabat/Deliveroo/Careem) behind one interface?** An anti-corruption layer / adapter per aggregator translating their contract into your canonical order model; isolate vendor quirks at the edge.
-19. **API versioning strategy?** Backward-compatible additive changes; version in the path/header for breaking changes; deprecate with a sunset window — critical when external partners integrate.
+16. **Service boundaries for this platform?** By domain capability — order, pricing, store/POS, dispatch, tracking, notification, reconciliation — each owning its data; integrate via events + well-versioned APIs.
+17. **REST vs. event-driven — when each?** Synchronous REST for request/response with immediate need (e.g. price quote); events for decoupled, replayable state propagation (order lifecycle). Most real systems are hybrid.
+18. **What does APIM give you as the gateway?** AuthN/Z (JWT validation), rate-limit/quota per aggregator partner (product/subscription model), versioning, transformation, and a WAF edge — the "API-first integration" the JD calls for.
+19. **How do you abstract many aggregators (Talabat/Deliveroo/Careem) behind one interface?** An anti-corruption layer / adapter per aggregator translating their contract into your canonical order model; isolate vendor quirks at the edge.
+20. **API versioning strategy?** Backward-compatible additive changes; version in the path/header for breaking changes; deprecate with a sunset window — critical when external partners integrate.
 
 ### D. Languages — Java / Node.js / Python
 
-20. **Java for low-latency services — what matters?** JVM memory model & happens-before, `CompletableFuture`/reactive for async, **virtual threads (Project Loom)** for high-concurrency I/O, and GC tuning (G1/ZGC) to avoid pause spikes.
-21. **Node.js event loop — why does it matter here?** Single-threaded event loop excels at high-concurrency I/O (webhooks, fan-out notifications) but you must never block it with CPU work; honor stream **backpressure** when bridging Kafka.
-22. **Python — where does it fit and what's the GIL trap?** Great for ML/data and FastAPI async services; the GIL limits CPU-bound threading, so use `asyncio` for I/O and multiprocessing/native libs for CPU/ML.
-23. **Polyglot platform — how do you keep it coherent?** Shared event schemas (Schema Registry), common observability conventions, API contracts, and golden-path templates per language — not one-language dogma.
+21. **Java for low-latency services — what matters?** JVM memory model & happens-before, `CompletableFuture`/reactive for async, **virtual threads (Project Loom)** for high-concurrency I/O, and GC tuning (G1/ZGC) to avoid pause spikes.
+22. **Node.js event loop — why does it matter here?** Single-threaded event loop excels at high-concurrency I/O (webhooks, fan-out notifications) but you must never block it with CPU work; honor stream **backpressure** when bridging Kafka.
+23. **Python — where does it fit and what's the GIL trap?** Great for ML/data and FastAPI async services; the GIL limits CPU-bound threading, so use `asyncio` for I/O and multiprocessing/native libs for CPU/ML.
+24. **Polyglot platform — how do you keep it coherent?** Shared event schemas (Schema Registry), common observability conventions, API contracts, and golden-path templates per language — not one-language dogma.
 
 ### E. Azure platform (AKS / APIM / PostgreSQL / Data Lake / AI)
 
-24. **AKS for resilience & scale — key choices?** Multi-AZ node pools, separate system/workload/GPU pools, HPA + cluster autoscaler, **KEDA** to scale on Kafka lag, pod disruption budgets, workload identity for keyless Azure access.
-25. **Postgres at scale — how do you run it?** Azure Database for PostgreSQL **Flexible Server**, zone-redundant HA, read replicas for reporting, **PgBouncer** connection pooling, partitioning hot tables, careful index/lock management.
-26. **What goes in Azure Data Lake (ADLS Gen2) vs. Postgres?** Postgres = transactional/operational; ADLS = analytics/ML store in a **medallion** layout (bronze→silver→gold), fed by Kafka + CDC, serving BI and the feature store.
-27. **Secrets & identity?** Managed Identity + Key Vault everywhere (no passwords in config), Private Endpoints + VNet integration, least-privilege RBAC.
-28. **Event Hubs vs. Confluent Kafka on Azure?** Event Hubs offers a Kafka-compatible endpoint (lower ops); Confluent gives the full ecosystem (Connect, ksqlDB, Schema Registry, multi-cloud) — pick on portability vs. managed-simplicity.
+25. **AKS for resilience & scale — key choices?** Multi-AZ node pools, separate system/workload/GPU pools, HPA + cluster autoscaler, **KEDA** to scale on Kafka lag, pod disruption budgets, workload identity for keyless Azure access.
+26. **Postgres at scale — how do you run it?** Azure Database for PostgreSQL **Flexible Server**, zone-redundant HA, read replicas for reporting, **PgBouncer** connection pooling, partitioning hot tables, careful index/lock management.
+27. **What goes in Azure Data Lake (ADLS Gen2) vs. Postgres?** Postgres = transactional/operational; ADLS = analytics/ML store in a **medallion** layout (bronze→silver→gold), fed by Kafka + CDC, serving BI and the feature store.
+28. **Secrets & identity?** Managed Identity + Key Vault everywhere (no passwords in config), Private Endpoints + VNet integration, least-privilege RBAC.
+29. **Event Hubs vs. Confluent Kafka on Azure?** Event Hubs offers a Kafka-compatible endpoint (lower ops); Confluent gives the full ecosystem (Connect, ksqlDB, Schema Registry, multi-cloud) — pick on portability vs. managed-simplicity.
+30. **AKS Automatic vs. standard AKS?** AKS Automatic (GA 2025) auto-manages node pools, scaling, patching and baseline security for near-zero cluster ops — good for a lean team standing up services fast; standard AKS when you need custom node pools, GPU shapes, a mesh, or fine-grained placement control.
 
 ### F. AI/ML & MLOps (NeuralProphet / XGBoost / scikit-learn / TensorFlow)
 
-29. **Why XGBoost before deep learning for ETA?** Strong tabular performance, fast to train, interpretable feature importance, robust baseline — only escalate to deep/sequence models if it clearly pays off.
-30. **NeuralProphet vs. XGBoost — when each?** NeuralProphet/Prophet for interpretable time-series demand with multiple seasonalities + holiday regressors (Ramadan/Eid); XGBoost/LightGBM for per-order tabular prediction (prep/travel time).
-31. **Biggest correctness risk in these models?** **Data/label leakage** — using post-event features (e.g. actual delivery time) at predict time; and time leakage in CV. Use time-based splits and rolling-origin backtesting.
-32. **Offline vs. online evaluation?** Offline: MAE/MAPE/RMSE on holdout. Online: the *business* metric (on-time %, cost-per-delivery) via A/B test with guardrails — the model must move the operational number, not just the loss.
-33. **What's in your MLOps loop?** Feature/version control + feature store, experiment tracking (MLflow), model registry with stage gates, drift/performance monitoring, scheduled retraining with approval, rollback, and production model governance/lineage.
-34. **Serving latency for ETA — how do you keep it fast and safe?** Precompute/feature-store lookups, lightweight model at the edge of the request, cache, and a **heuristic fallback** if the model/service is unavailable so the order pipeline never blocks.
+31. **Why XGBoost before deep learning for ETA?** Strong tabular performance, fast to train, interpretable feature importance, robust baseline — only escalate to deep/sequence models if it clearly pays off.
+32. **NeuralProphet vs. XGBoost — when each?** NeuralProphet/Prophet for interpretable time-series demand with multiple seasonalities + holiday regressors (Ramadan/Eid); XGBoost/LightGBM for per-order tabular prediction (prep/travel time).
+33. **Biggest correctness risk in these models?** **Data/label leakage** — using post-event features (e.g. actual delivery time) at predict time; and time leakage in CV. Use time-based splits and rolling-origin backtesting.
+34. **Offline vs. online evaluation?** Offline: MAE/MAPE/RMSE on holdout. Online: the *business* metric (on-time %, cost-per-delivery) via A/B test with guardrails — the model must move the operational number, not just the loss.
+35. **What's in your MLOps loop?** Feature/version control + feature store, experiment tracking (MLflow), model registry with stage gates, drift/performance monitoring, scheduled retraining with approval, rollback, and production model governance/lineage.
+36. **Serving latency for ETA — how do you keep it fast and safe?** Precompute/feature-store lookups, lightweight model at the edge of the request, cache, and a **heuristic fallback** if the model/service is unavailable so the order pipeline never blocks.
+37. **How does MCP fit an agentic AI/ML platform?** MCP (Model Context Protocol) standardizes how an agent/LLM calls tools and context sources — expose order/dispatch/forecast capabilities as MCP servers so any orchestrator (Agent Framework, Semantic Kernel, Copilot Studio) can consume them without bespoke integration per tool; guardrails (auth, allow-listing, human-in-the-loop) still apply per server.
 
 ### G. Observability, CI/CD & DevSecOps
 
-35. **What do you monitor for this platform's health?** The golden signals plus domain SLOs: order success rate, dispatch latency, on-time %, consumer lag, DLQ depth, POS/aggregator error rates, p99 latencies — with burn-rate alerting on SLOs.
-36. **Tracing across async hops?** Propagate correlation/trace IDs through Kafka headers; OpenTelemetry + Application Insights/Jaeger to stitch order → POS → dispatch → delivery.
-37. **DevSecOps essentials?** IaC (Bicep/Terraform), pipeline gates (SAST/DAST, dependency/container scanning), secret scanning, signed images, least-privilege, and progressive delivery (blue-green/canary) with automated rollback.
-38. **Safe deploys for a 99.99% platform?** Canary/blue-green, feature flags, schema-compatible migrations (expand→migrate→contract), and automated rollback on SLO regression.
+38. **What do you monitor for this platform's health?** The golden signals plus domain SLOs: order success rate, dispatch latency, on-time %, consumer lag, DLQ depth, POS/aggregator error rates, p99 latencies — with burn-rate alerting on SLOs.
+39. **Tracing across async hops?** Propagate correlation/trace IDs through Kafka headers; OpenTelemetry + Application Insights/Jaeger to stitch order → POS → dispatch → delivery.
+40. **DevSecOps essentials?** IaC (Bicep/Terraform), pipeline gates (SAST/DAST, dependency/container scanning), secret scanning, signed images, least-privilege, and progressive delivery (blue-green/canary) with automated rollback.
+41. **Safe deploys for a 99.99% platform?** Canary/blue-green, feature flags, schema-compatible migrations (expand→migrate→contract), and automated rollback on SLO regression.
 
 ### H. Last-mile domain specifics
 
-39. **Model the order lifecycle.** A state machine: `PLACED → ACCEPTED → PREPARING → READY → DISPATCHED → EN_ROUTE → DELIVERED` (+ `CANCELLED`/`FAILED`), each transition an idempotent, versioned event.
-40. **Rider goes offline mid-delivery — when/how re-dispatch?** Heartbeat/GPS timeout (e.g. ~30s no ping) marks the rider unavailable; re-queue to dispatch with idempotent re-assignment via order correlation ID; guard against double-dispatch.
-41. **Geospatial proximity at scale?** Index riders/stores with **geohash / H3 / S2** (or PostGIS / Redis GEO); generate candidates from the pickup cell + neighbours, then score by true travel-time — separate cheap candidate-gen from expensive scoring.
-42. **Order batching — the trade-off?** One rider, multiple nearby orders within a time window: higher courier efficiency / lower cost vs. risk to individual on-time SLA. Tune by density and promised ETA.
-43. **End-of-day reconciliation across aggregators?** Each aggregator has different settlement cycles and commission structures; reconcile orders↔payouts per channel, flag mismatches, and keep an auditable ledger.
-44. **Designing for Ramadan/iftar surge (orders spike sharply at sunset)?** Forecast-driven pre-scaling (schedule + KEDA), partition/replica headroom, load-shedding/backpressure, graceful degradation, and a war-room runbook — capacity is *predictable*, so plan it, don't autoscale reactively at the peak.
+42. **Model the order lifecycle.** A state machine: `PLACED → ACCEPTED → PREPARING → READY → DISPATCHED → EN_ROUTE → DELIVERED` (+ `CANCELLED`/`FAILED`), each transition an idempotent, versioned event.
+43. **Rider goes offline mid-delivery — when/how re-dispatch?** Heartbeat/GPS timeout (e.g. ~30s no ping) marks the rider unavailable; re-queue to dispatch with idempotent re-assignment via order correlation ID; guard against double-dispatch.
+44. **Geospatial proximity at scale?** Index riders/stores with **geohash / H3 / S2** (or PostGIS / Redis GEO); generate candidates from the pickup cell + neighbours, then score by true travel-time — separate cheap candidate-gen from expensive scoring.
+45. **Order batching — the trade-off?** One rider, multiple nearby orders within a time window: higher courier efficiency / lower cost vs. risk to individual on-time SLA. Tune by density and promised ETA.
+46. **End-of-day reconciliation across aggregators?** Each aggregator has different settlement cycles and commission structures; reconcile orders↔payouts per channel, flag mismatches, and keep an auditable ledger.
+47. **Designing for Ramadan/iftar surge (orders spike sharply at sunset)?** Forecast-driven pre-scaling (schedule + KEDA), partition/replica headroom, load-shedding/backpressure, graceful degradation, and a war-room runbook — capacity is *predictable*, so plan it, don't autoscale reactively at the peak.
 
 ---
 
@@ -1298,16 +1308,16 @@ A focused drill-set mapped directly to the job description's named technologies.
 
 Beyond the rapid-fire bank — questions that probe depth and judgment.
 
-45. **Design idempotent payment capture across retries and partial failures.** Idempotency key per order at the payment service; persist `(key → result)` before calling the PSP; on retry return the stored result; reconcile asynchronously against the PSP's settlement file to catch the "charged but we crashed before recording" case. Never trust the network; always have a reconciliation backstop.
-46. **How do you evolve an event schema consumed by 8 services without downtime?** Backward/forward-compatible changes only (add optional fields, never remove/rename), enforced by Schema Registry; roll consumers before producers for new required reads; use a new topic/version for breaking changes and dual-write during migration, then cut over.
-47. **Exactly-once from Kafka to PostgreSQL — how, really?** Either the **transactional outbox/inbox** (dedupe on a unique message-id in the same DB tx as the write) or Kafka transactions with an idempotent sink; the durable dedup key in Postgres is what actually makes the effect exactly-once.
-48. **Hot partition: one mega-store gets 10× the orders. Fix?** Re-key (composite key like `storeId#bucket`) or use a custom partitioner to spread load; or give that store its own topic/partitions; watch that re-keying doesn't break required per-order ordering.
-49. **Backpressure end-to-end when a downstream slows.** Bounded queues, consumer pause/resume on lag thresholds, reactive backpressure (Reactor/Node streams), and load-shedding at the edge (APIM rate limits / 429) so the slow component degrades gracefully instead of cascading.
-50. **Multi-region active-active for order data — consistency model?** Partition ownership by market/region (each region is the writer for its own orders) to avoid cross-region write conflicts; async replicate for read/DR; reserve global consensus only for truly shared state. Define RTO/RPO explicitly.
-51. **Prevent thundering-herd retries during an outage.** Exponential backoff **with jitter**, circuit breakers, retry budgets/token buckets, and idempotent operations so safe-to-retry doesn't mean retry-storm.
-52. **Tune consumer throughput vs. latency.** `max.poll.records`, batch size, `fetch.min.bytes`/`fetch.max.wait`, async commits, parallel in-partition processing where ordering allows; measure p99 and lag, not just averages.
-53. **Zero-downtime schema migration on a hot Postgres table.** Expand→migrate→contract: add nullable column / new table, dual-write, backfill in batches, switch reads, then drop old — never a blocking `ALTER` on a large hot table; use `CREATE INDEX CONCURRENTLY`.
-54. **Test a distributed system like this before peak.** Load/soak tests at projected peak, **chaos testing** (kill brokers/pods, inject POS latency), DLQ/replay drills, and game-day DR failover rehearsals with the on-call team.
+48. **Design idempotent payment capture across retries and partial failures.** Idempotency key per order at the payment service; persist `(key → result)` before calling the PSP; on retry return the stored result; reconcile asynchronously against the PSP's settlement file to catch the "charged but we crashed before recording" case. Never trust the network; always have a reconciliation backstop.
+49. **How do you evolve an event schema consumed by 8 services without downtime?** Backward/forward-compatible changes only (add optional fields, never remove/rename), enforced by Schema Registry; roll consumers before producers for new required reads; use a new topic/version for breaking changes and dual-write during migration, then cut over.
+50. **Exactly-once from Kafka to PostgreSQL — how, really?** Either the **transactional outbox/inbox** (dedupe on a unique message-id in the same DB tx as the write) or Kafka transactions with an idempotent sink; the durable dedup key in Postgres is what actually makes the effect exactly-once.
+51. **Hot partition: one mega-store gets 10× the orders. Fix?** Re-key (composite key like `storeId#bucket`) or use a custom partitioner to spread load; or give that store its own topic/partitions; watch that re-keying doesn't break required per-order ordering.
+52. **Backpressure end-to-end when a downstream slows.** Bounded queues, consumer pause/resume on lag thresholds, reactive backpressure (Reactor/Node streams), and load-shedding at the edge (APIM rate limits / 429) so the slow component degrades gracefully instead of cascading.
+53. **Multi-region active-active for order data — consistency model?** Partition ownership by market/region (each region is the writer for its own orders) to avoid cross-region write conflicts; async replicate for read/DR; reserve global consensus only for truly shared state. Define RTO/RPO explicitly.
+54. **Prevent thundering-herd retries during an outage.** Exponential backoff **with jitter**, circuit breakers, retry budgets/token buckets, and idempotent operations so safe-to-retry doesn't mean retry-storm.
+55. **Tune consumer throughput vs. latency.** `max.poll.records`, batch size, `fetch.min.bytes`/`fetch.max.wait`, async commits, parallel in-partition processing where ordering allows; measure p99 and lag, not just averages.
+56. **Zero-downtime schema migration on a hot Postgres table.** Expand→migrate→contract: add nullable column / new table, dual-write, backfill in batches, switch reads, then drop old — never a blocking `ALTER` on a large hot table; use `CREATE INDEX CONCURRENTLY`.
+57. **Test a distributed system like this before peak.** Load/soak tests at projected peak, **chaos testing** (kill brokers/pods, inject POS latency), DLQ/replay drills, and game-day DR failover rehearsals with the on-call team.
 
 ---
 
@@ -1317,54 +1327,54 @@ These are "what would you do" prompts. The interviewer wants your **structured a
 
 ### Production incidents / on-call
 
-55. **"It's 8:30 PM on a Friday. Orders are being accepted but customers aren't getting delivery updates, and dispatch is lagging. Walk me through your response."**
+58. **"It's 8:30 PM on a Friday. Orders are being accepted but customers aren't getting delivery updates, and dispatch is lagging. Walk me through your response."**
 *Approach:* Declare an incident and assume command; check the dashboards first (consumer lag on `riders.location`/`orders.status`, DLQ depth, dispatch latency, error rates). Most likely a consumer group stalled or lag exploded under peak. **Mitigate before root-cause:** scale consumers/pods, pause noisy producers if needed, fail the ETA service over to its heuristic fallback so customers still see *an* estimate. Communicate to Ops/leadership with impact + ETA. Once stable, root-cause (poison message? a slow downstream? a bad deploy?), then a blameless postmortem with a systemic fix (e.g. separate location topic, autoscale-on-lag, DLQ). *Good signals:* mitigate-first instinct, dashboards before guesses, clear comms. *Red flags:* debugging root cause while customers bleed; no comms; blaming a person.
 
-56. **"Customers report being charged twice for one order. What now?"**
+59. **"Customers report being charged twice for one order. What now?"**
 *Approach:* Severity-1 (money + trust). Immediately quantify blast radius (how many, since when — correlate to a deploy/retry storm); stop the bleeding (feature-flag off the suspect path, disable aggressive retries); make customers whole (automated refunds + proactive comms). Root-cause is almost always a non-idempotent payment path or a retry without an idempotency key. Fix: idempotency key + inbox dedup + reconciliation against the PSP settlement file. *Red flags:* treating it as low priority; fixing code before refunding customers.
 
-57. **"A deploy went out 20 minutes ago and error rates are climbing. What do you do?"**
+60. **"A deploy went out 20 minutes ago and error rates are climbing. What do you do?"**
 *Approach:* Roll back first (or flip the feature flag) — restore service, investigate after. The recent deploy is the prime suspect; reversibility is your friend. Then diff the change, reproduce in staging, add a regression test, and tighten the canary/automated-rollback gate so it catches it next time. *Red flags:* trying to hot-fix forward under pressure instead of rolling back.
 
-58. **"Kafka consumer lag is steadily rising on the order-status topic and not recovering. Diagnose."**
+61. **"Kafka consumer lag is steadily rising on the order-status topic and not recovering. Diagnose."**
 *Approach:* Is it ingress up (real surge) or egress down (slow/stuck consumers)? Check per-partition lag (one stuck partition = poison message or a hot key), consumer CPU/GC, downstream latency (DB/3rd-party), and rebalance storms. Mitigate: route poison messages to DLQ, scale consumers up to partition count, add partitions if structurally under-provisioned, fix the slow downstream. *Red flags:* "just add more consumers" beyond partition count; ignoring the poison-message/hot-partition possibility.
 
-59. **"The Oracle Simphony POS integration for one brand starts timing out. Orders are piling up. What happens to the platform?"**
+62. **"The Oracle Simphony POS integration for one brand starts timing out. Orders are piling up. What happens to the platform?"**
 *Approach:* The bulkhead/circuit-breaker should already isolate it so *only that brand's* fulfilment is affected, not global order intake. Orders queue durably (don't drop them); the circuit opens to stop hammering the POS; kitchens get an SMS/printer fallback; when POS recovers, drain the queue idempotently (no duplicate tickets). Comms to that brand's ops. *Red flags:* a synchronous design where one POS outage stalls everything; dropping orders.
 
 ### Scaling / capacity
 
-60. **"Marketing launches a flash 50%-off promo at noon tomorrow without warning engineering. You find out at 9 AM. What do you do?"**
+63. **"Marketing launches a flash 50%-off promo at noon tomorrow without warning engineering. You find out at 9 AM. What do you do?"**
 *Approach:* Quantify expected multiplier from past promos; pre-scale now (AKS node pools, consumer/partition headroom, DB connections/replicas, PSP rate limits); set up a war room and dashboards; prepare load-shedding/graceful-degradation switches; align with Ops on rider capacity. Then the *organizational* fix: a launch-readiness checklist so Product/Marketing loop engineering in early. *Red flags:* only a tech answer with no process fix; assuming autoscaling alone handles an unforecasted spike.
 
-61. **"At peak you hit the Postgres connection limit and everything stalls. Immediate and long-term fix?"**
+64. **"At peak you hit the Postgres connection limit and everything stalls. Immediate and long-term fix?"**
 *Approach:* Immediate: PgBouncer/connection pooling, lower per-pod pool sizes, shed load. Long-term: read replicas for reporting, cache hot reads, async/event-driven where you're over-using sync DB calls, and partition/scale the hot tables. *Red flags:* "raise max_connections" as the only answer (it makes contention worse).
 
 ### Data / ML
 
-62. **"On-time delivery % quietly dropped 8% over two weeks. No incident fired. Where do you look?"**
+65. **"On-time delivery % quietly dropped 8% over two weeks. No incident fired. Where do you look?"**
 *Approach:* Likely silent **model/data drift** or a data-pipeline change, not an outage. Check ETA prediction error (MAE) and dispatch-decision metrics over the window; look for feature drift (new store, traffic pattern, a broken feature in the pipeline), label leakage regressions, or an upstream schema change. Fix the data/model, add drift + business-metric alerting so it fires next time. *Good signals:* knowing models fail *silently*; monitoring business metrics, not just infra. *Red flags:* assuming it's purely an infra problem.
 
-63. **"Your ETA predictions are systematically 10 minutes optimistic during lunch. How do you investigate and fix?"**
+66. **"Your ETA predictions are systematically 10 minutes optimistic during lunch. How do you investigate and fix?"**
 *Approach:* Decompose ETA (prep vs. wait vs. travel) and find which stage is biased — likely prep-time underestimated under kitchen load, or travel-time ignoring lunch traffic. Check for label leakage and missing load/traffic features; retrain with the right features; validate with rolling-origin backtesting; A/B before full rollout; keep the heuristic fallback. *Red flags:* tweaking the model blindly without decomposing the error.
 
 ### Integration / multi-tenant
 
-64. **"A new market launch (e.g. KFC in a new country) must go live in 8 weeks on the same platform. How do you approach it?"**
+67. **"A new market launch (e.g. KFC in a new country) must go live in 8 weeks on the same platform. How do you approach it?"**
 *Approach:* Treat it as configuration/multi-tenancy, not a fork: per-market config (currency, language/Arabic, tax, aggregators, data-residency region), brand/country isolation in data, and reuse the multi-brand app platform. Plan data residency (UAE PDPL-style), aggregator onboarding via the adapter layer, load expectations, and a phased rollout (one city → scale). *Red flags:* proposing a separate codebase per market; ignoring data residency.
 
-65. **"Talabat changes their webhook contract with little notice and orders from that channel start failing. How is your platform protected, and how do you respond?"**
+68. **"Talabat changes their webhook contract with little notice and orders from that channel start failing. How is your platform protected, and how do you respond?"**
 *Approach:* The anti-corruption/adapter layer means only that one adapter breaks, not the core; failures go to a DLQ, not lost. Respond: detect via adapter error alerts, hot-fix the adapter mapping, replay the DLQ, and add contract tests + schema monitoring on partner APIs. Longer term, push for versioned partner contracts. *Red flags:* aggregator quirks leaking into core domain logic; dropping failed orders.
 
 ### Reliability / DR / cost
 
-66. **"A whole Azure region (your primary) goes down during dinner peak. What happens?"**
+69. **"A whole Azure region (your primary) goes down during dinner peak. What happens?"**
 *Approach:* This is where the 99.99% story is tested. Multi-AZ shouldn't be enough for a region loss — you need a tested **DR plan**: traffic fails over to the secondary region (active-active per market, or active-passive with replicated Kafka/DB), with defined RTO/RPO and DNS/Traffic-Manager failover. Be honest about data-loss windows (RPO) and degraded modes. *Good signals:* knowing AZ ≠ region resilience; having rehearsed failover. *Red flags:* assuming "it's in the cloud so it's fine."
 
-67. **"Finance says the platform's cloud bill doubled this quarter with flat order volume. Lead the investigation."**
+70. **"Finance says the platform's cloud bill doubled this quarter with flat order volume. Lead the investigation."**
 *Approach:* FinOps triage: break cost down by service (AKS nodes, Kafka, DB, Data Lake, egress); look for over-provisioned/un-rightsized node pools, runaway log/telemetry ingestion, missing autoscale-down, untiered Data Lake storage, or cross-region egress. Tie cost to a per-order unit metric so regressions are visible, and set budgets/alerts. *Red flags:* no cost-per-order framing; guessing without a breakdown.
 
-68. **"Two of your senior engineers are blocked, deadlocked on REST vs. event-driven for a new service, and the deadline is slipping. As EM, what do you do?"**
+71. **"Two of your senior engineers are blocked, deadlocked on REST vs. event-driven for a new service, and the deadline is slipping. As EM, what do you do?"**
 *Approach:* Classify the decision (reversible? then bias to action and time-box). Have both write the options + trade-offs against agreed criteria (latency, resilience, operability, time-to-market); facilitate a short design review; if still tied, make the call as DRI, document it in an ADR with a revisit date, and get explicit disagree-and-commit. Unblock the team today. *Red flags:* letting it fester; deciding by seniority/volume instead of criteria.
 
 ---
@@ -1372,10 +1382,10 @@ These are "what would you do" prompts. The interviewer wants your **structured a
 ## Sources & further reading
 
 
-- **Event-driven / Kafka:** Confluent docs and *Designing Event-Driven Systems* (Stopford); Kafka exactly-once semantics; the **transactional outbox** and **saga** patterns (microservices.io).
+- **Event-driven / Kafka:** Confluent docs and *Designing Event-Driven Systems* (Stopford); Kafka exactly-once semantics; the **transactional outbox** and **saga** patterns (microservices.io); **Apache Kafka 4.0 / KRaft** release notes (ZooKeeper removal, KIP-500).
 - **System design:** *Designing Data-Intensive Applications* (Kleppmann); the System Design Primer; Uber/DoorDash/Careem engineering blogs on dispatch, ETA and geospatial indexing (H3).
-- **Azure:** Microsoft Learn — AKS, API Management, Azure Database for PostgreSQL Flexible Server, ADLS Gen2, Azure ML; Azure Well-Architected Framework (Reliability & Operational Excellence pillars).
-- **AI/ML:** NeuralProphet / Prophet docs; XGBoost and scikit-learn docs; MLOps guidance (Azure ML, Google's MLOps maturity); drift-monitoring patterns.
+- **Azure:** Microsoft Learn — AKS (incl. **AKS Automatic**), API Management, Azure Database for PostgreSQL Flexible Server, ADLS Gen2, Azure ML; Azure Well-Architected Framework (Reliability & Operational Excellence pillars).
+- **AI/ML & agentic:** NeuralProphet / Prophet docs; XGBoost and scikit-learn docs; MLOps guidance (Azure ML, Google's MLOps maturity); drift-monitoring patterns; **Model Context Protocol (MCP)** spec (modelcontextprotocol.io) and its adoption in Azure AI Foundry / Semantic Kernel.
 - **Leadership:** *The Manager's Path* (Fournier); *An Elegant Puzzle* (Larson); Amazon-style behavioral / STAR; SRE error-budget practice (Google SRE book).
 - **UAE expat comp & cost-of-living (Round 1 playbook, 2025 figures):** market salary benchmarks and package norms — Naukrigulf (Senior EM / Senior Solution Architect UAE), Labeeb UAE Salary Insights 2025/26, Indeed UAE, Levels.fyi, RFS HR salary benchmarking; rent — Bayut/MyBayut Dubai Rental Market Report 2025, DubaiBeat, Clemenceau/DDA/Amary rent guides; schooling — GEMS Education fees-by-grade and KHDA-based curriculum fee guides; relocation/package — JobXDubai Relocation Allowance Guide 2025, 360 Global Relocations, salary.ae, Housearch, HZLegal (DIFC expat clauses); setup & monthly run-rate — Dubai cost-of-living/setup estimates (2024–25); **Sharjah rent, schooling & commute** — Bayut/dubizzle Sharjah 2-/3-bed listings, Property Finder Sharjah, Sands of Wealth Sharjah rents 2026, Sharjah Indian School / GEMS Millennium / Ambassador SPEA fee structures 2025–26, Sharjah–Dubai commute guides (SRTA). **All AED figures are tax-free 2025 market estimates for negotiation, not an offer; Abu Dhabi base typically 5–8% higher, Sharjah rents/schooling run 30–60% below Dubai, and free-zone/mainland entitlements differ.**
 - **MENA / market context:** Americana Restaurants investor materials and the UAE delivery-aggregator landscape (Talabat, Deliveroo, Careem, Noon); UAE PDPL for data residency. See the `/patterns` page's **UAE 🇦🇪** section for regional loop specifics. Key public figures used above:
