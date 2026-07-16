@@ -8,210 +8,601 @@ A complete, round-by-round preparation guide for a **Solutions Architect** role 
 
 ## Context: Emirates Group IT & the aviation-tech landscape
 
-**Who Emirates Group is.** Emirates Group is the Dubai Government-owned aviation conglomerate comprising **Emirates airline** (the world's largest international carrier by passenger-kilometres, ~250+ aircraft, 140+ destinations) and **dnata** (ground handling, cargo, catering, travel services across 35+ countries). Emirates Group IT is one of the largest in-house technology functions in the region, running everything from customer-facing digital channels to airport operations, crew systems, revenue management, and cargo logistics — at 24/7, mission-critical availability.
+**Who Emirates Group is.** Emirates Group is the Dubai Government-owned aviation conglomerate comprising **Emirates airline**, a full-service mega-carrier operating through Dubai, and **dnata**, spanning ground handling, cargo, catering and travel services. Emirates Group IT therefore runs business-critical platforms for passenger retailing, airport operations, loyalty, cargo, crew, finance, data and AI at 24/7 aviation scale.
 
-**Why this JD reads the way it does.** The language — *"Agile Release Trains (ARTs)"*, *"architecture runway"*, *"architectural intent"*, *"ADRs"*, *"enterprise architecture views"*, *"Teams of Teams"* — is textbook **SAFe (Scaled Agile Framework)** vocabulary. Emirates Group IT organizes delivery into ARTs aligned to business domains (e.g., Passenger Experience, SkyCargo, Airport Operations, Corporate Platforms), each with its own **Solution Architect** who owns the architecture runway (the near-term, ready-to-build architecture backlog) and governs consistency across teams. A **Solutions Architect — SkyCargo** posting is one concrete example of this pattern publicly advertised by Emirates Group.
+**Why this JD reads the way it does.** The language — *Agile Release Trains*, *architecture runway*, *architectural intent*, *ADRs*, *enterprise architecture views* and *Teams of Teams* — is SAFe vocabulary. A staff/principal Solutions Architect is expected to shape portfolio architecture, not merely draw a service diagram: clarify NFRs, make trade-offs visible, prepare runway one or two PIs ahead, and align teams that do not report to them.
 
-**The platform landscape you'll be expected to reason about:**
+**Public platform context you should preserve accurately.** Emirates uses **Amadeus Altéa** as the PSS context: Reservation/RES, Inventory/INV and Departure Control/DCS, with EDIFACT/XML/IATA NDC style interfaces. The right design pattern is an **anti-corruption layer** and orchestration around Altéa, not a replacement. **Emirates Skywards** is a large loyalty ecosystem (~30M members) where event-driven microservices, ledgering and partner settlement are natural patterns. **SkyCargo / OneCargo**, publicly co-developed with **IBS Software**, maps to cargo booking, warehouse, ULD tracking, compliance and IATA **ONE Record** partner integration. Cloud posture is **hybrid**: Azure for core digital/AI patterns such as AKS, Azure SQL/Cosmos, Azure AI, Entra ID and Azure DevOps, with AWS present in some cargo/loyalty contexts. The staff answer is “right cloud per workload, governed by a placement ADR,” not “everything on my favorite cloud.”
 
-1. **Passenger Service System (PSS).** Emirates runs on **Amadeus Altéa** — a multi-tenant, SOA-based PSS with three core modules: **Reservation (RES)** for booking/ticketing, **Inventory (INV)** for schedules/seat availability/overbooking, and **Departure Control (DCS)** for check-in/boarding/load planning. Altéa exposes EDIFACT, XML and IATA **NDC (New Distribution Capability)** interfaces, so most Emirates-built systems are *consumers* or *orchestrators* around Altéa, not replacements for it.
-2. **Emirates Skywards.** The loyalty program (~30M+ members) runs as **microservices** — member management, accrual/redemption, tier management, partner-airline mileage exchange — behind an **API gateway**, with real-time event streaming (Kafka-class) for instant accrual/redemption and a security layer (OAuth2/OIDC, SSO) across app, web and partner channels.
-3. **SkyCargo / OneCargo.** Emirates SkyCargo's freight platform, **co-developed with IBS Software**, is a cloud-native, modular replacement for the legacy cargo mainframe — decomposed into booking, warehouse management, revenue accounting, ULD (Unit Load Device) tracking, and customs/compliance services, integrating with ground handling agents, partner airlines, and customs authorities via REST/gRPC and IATA **ONE Record** data models.
-4. **Cloud strategy — hybrid, not single-vendor.** Emirates has publicly partnered with **Microsoft Azure** for core digital transformation (AKS, Azure SQL/Cosmos DB, Azure AI/ML, Azure DevOps, Entra ID) and has also run cargo/loyalty workloads on **AWS** (auto-scaling, multi-AZ). Expect the real answer to "which cloud" to be **"depends on the domain and workload, governed by a cloud placement policy,"** not a single-cloud stance — a good architecture answer names this explicitly as a trade-off Emirates has actually made.
-5. **Governance stack.** Public postings and the region's enterprise-IT norms point to **TOGAF** (ADM, Architecture Repository, Enterprise Continuum) for the EA method, **ArchiMate** or **C4** for modelling, and **SAFe** for portfolio/program delivery — i.e. exactly the "ArchiMate, C4, UML" + "SAFe" + "well-architected framework" combination named in the JD.
-6. **Regulatory context.** UAE data residency and sector guidance (Dubai Government / TDRA cloud policies), PCI-DSS (payments), IATA security standards, and GDPR-equivalent handling for EU passengers all shape architecture decisions — expect "where does this data live and why" questions.
+**Governance and regulation.** Use **TOGAF** for enterprise method, **ArchiMate/C4/UML** for views, **SAFe** for delivery, ADRs for decision records and Well-Architected reviews for assurance. UAE PDPL/TDRA cloud policy, PCI-DSS, GDPR for EU passengers and IATA security shape data placement, encryption, access, audit evidence and DR decisions.
 
-**Why a Microsoft Azure/GenAI architect profile fits.** Emirates Group IT's stated direction — Azure-first cloud-native platforms, AI/ML for personalization and operations (dynamic pricing, crew/catering optimization, predictive maintenance), event-driven integration, and enterprise governance — maps directly onto an Azure Solutions Architect background with production RAG/agentic delivery, Well-Architected reviews, and multi-team technical leadership.
-
-**UAE hiring loop context.** Emirates Group interview loops for architect-level roles typically run: **resume shortlist → recruiter/HR screen → 1–2 technical/architecture rounds (scenario + whiteboard) → managerial/behavioral → final business/leadership round**, over **3–6 weeks**. Comp is **tax-free AED**; expect discussion of relocation, visa sponsorship, schooling, and housing allowances rather than just base salary — this repo's own résumé already states "Open to relocation to the UAE," which is a strong opener for this exact conversation.
+**Why the candidate profile maps well.** The candidate has 14 years as a Microsoft Technical Lead/Architect with AZ-305, AI-102, AZ-204, AZ-104 and AZ-400; production GenAI/RAG/multi-agent experience; a connected-vehicle platform at **20M+ vehicles and ~2M telemetry messages/min** with 98-99% SLA expectations; and a UAE government data-sovereignty engagement involving Informatica-to-SQL modernization and Microsoft Purview. Those are strong transfer stories for aviation-scale event processing, regulated data governance and Azure-first AI/platform architecture.
 
 ---
 
 ## How to use this guide
 
-Each round below has the same shape:
+Use each section as a spoken interview answer, not a memorized script. Start every design answer by driving requirements: traffic, regions, latency, RTO/RPO, data classification, consistency and what cannot fail. Then move through architecture, data/consistency, capacity, resilience, trade-offs and follow-up questions.
 
-- **What they're testing** — the signal the interviewer is calibrating.
-- **Questions** — realistic prompts, each with a **strong-answer skeleton**, **key points to hit**, and **red flags** that fail the round.
-
-Practice out loud. For system design, **drive the requirements yourself** (peak transactions/sec, regions, SLA, consistency needs) before drawing boxes. For architecture-leadership questions, anchor answers in **ADRs, trade-offs, and governance**, not just technology choices. For behavioral, use **STAR** (Situation, Task, Action, Result) with a quantified result.
+For leadership rounds, answer with artifacts: ADRs, C4 views, architecture runway enablers, exception registers, cost dashboards, threat models, runbooks and Well-Architected findings. For behavioral rounds, use STAR and quantify scale. Repeatedly state that public vendor facts are context; the proposed designs are defensible industry patterns, not claims about Emirates internals.
 
 ---
 
 ## Round 1 · Recruiter / HR screen
 
-**What they're testing:** Is your architecture experience real and at the right altitude (enterprise/portfolio vs single-project)? Are location, visa, notice period and comp aligned? Can you tell a crisp, senior-sounding story in 90 seconds?
+**What they're testing:** Is your experience at enterprise/portfolio altitude, and are relocation, notice and compensation aligned?
 
-**Q: Walk me through your background in 90 seconds, architect-level.**
-- *Strong-answer skeleton:* 14 years → progression from developer to Technical Lead/Architect at Microsoft → own end-to-end architecture strategy, technology selection, delivery risk and cost across Fortune 500 + government engagements → GenAI/Azure specialization with production RAG and multi-agent systems → led/influenced teams from 6 to 40+ engineers → AZ-305 (Solutions Architect Expert) plus AI-102/AZ-204/AZ-104/AZ-400.
-- **Key points:** Ownership language ("I own," not "I contributed to"), quantified scale (invoices/day, documents, vehicles, engineers), a named certification that maps directly to the JD (AZ-305).
-- **Red flags:** Talking only about code you wrote; no mention of governance, stakeholders, or trade-offs; can't name a scale metric.
+### Q: Walk me through your background in 90 seconds, architect-level.
 
-**Q: Why Emirates / why UAE?**
-- *Strong-answer skeleton:* Already delivered a UAE Government data-sovereignty/governance engagement (Informatica → SQL + Purview, 2 government entities) — genuine regional exposure, not a cold pivot. Interest in aviation/logistics-scale distributed systems and Emirates' documented Azure-first cloud strategy. Openness to relocation already stated.
-- **Key points:** Cite the actual UAE project; connect personal specialization (event-driven, AI platform design) to Emirates' stated direction; be concrete about relocation readiness (visa sponsorship required, timeline).
-- **Red flags:** Generic "I love travel/aviation" with no technical hook; unclear on relocation logistics.
+**Answer:** I have 14 years of experience progressing from hands-on engineering into Technical Lead and Architect roles at Microsoft, owning solution strategy, technology selection, NFRs, delivery risk, security, cost and stakeholder alignment. My strongest areas are Azure cloud-native architecture, event-driven platforms, enterprise integration and production AI, including RAG and multi-agent systems. I have led teams from small engineering pods to 40+ engineers and hold AZ-305, AI-102, AZ-204, AZ-104 and AZ-400.
 
-**Q: What's your target compensation and notice period?**
-- *Strong-answer skeleton:* State a tax-free AED band researched for Solutions Architect level in Dubai, note current notice period, and ask about the relocation/housing package structure explicitly (a normal ask in UAE hiring).
-- **Key points:** Research-backed number, not a guess; confidence discussing allowances (housing, schooling, flights) as part of total comp.
-- **Red flags:** Refusing to give a number; anchoring only on home-country comp without adjusting for tax-free AED and relocation costs.
+The scale is relevant to Emirates. On a connected-vehicle platform, the architecture supported **20M+ vehicles** and about **2M telemetry messages per minute** with 98-99% SLA expectations across regions. I also delivered a UAE government data-sovereignty and governance engagement using SQL and Purview-style controls. That maps well to Emirates' regulated, high-throughput passenger, cargo, loyalty and AI landscape.
+
+**Key points:** ownership language, quantified scale, regulated delivery, Azure/AI credentials. **Red flags:** code-only story, no governance, no numbers.
+
+### Q: Why Emirates / why UAE?
+
+**Answer:** Emirates is compelling because it combines digital commerce, logistics, real-time operations, loyalty and regulated data at global scale. Those are the same architectural muscles I have used in connected vehicles, AI platforms and government data governance: event ingestion, resilience, partner integration, data sovereignty and cloud operating models.
+
+The UAE is not a random pivot. I already have UAE government data-sovereignty exposure, and Emirates' public Azure/hybrid direction fits my Microsoft architecture background. I would be clear that I am open to Dubai relocation, need the normal visa sponsorship process, and can discuss notice period and package structure realistically.
+
+**Key points:** UAE proof, aviation/logistics technical hook, relocation readiness. **Red flags:** generic travel enthusiasm, unclear relocation.
+
+### Q: What's your target compensation and notice period?
+
+**Answer:** Give a researched tax-free AED package range for a senior/staff Solutions Architect in Dubai and discuss total package: base, bonus, housing, schooling if relevant, flights, medical and relocation. Phrase it as: “I am targeting a competitive AED package for the scope; I am flexible depending on total benefits and portfolio responsibility.”
+
+For notice, be exact: “My notice period is X, and I can start relocation paperwork immediately after offer acceptance.” Confidence matters; UAE packages often include allowances, so asking about them is professional.
+
+**Key points:** AED total package, allowances, clear notice. **Red flags:** refusing a range, home-country comp logic only.
 
 ---
 
 ## Round 2 · Hiring manager (architecture scope & fit)
 
-**What they're testing:** Can you operate at ART/portfolio scope, not just project scope? Do you understand escalation, governance, and how architecture intent gets enforced across teams you don't manage?
+**What they're testing:** Can you operate at ART/portfolio scope and govern architecture through influence?
 
-**Q: Describe the broadest architectural scope you've owned — how many teams, portfolios, or ARTs did your decisions touch?**
-- *Strong-answer skeleton:* Reference the connected-vehicle platform (20M+ vehicles, ~2M telemetry msgs/min, EMEA/Russia/Americas/Asia) — architecture decisions there ripple across regional platform teams, not one project; SLA ownership (98–99%) is a portfolio-level commitment, not a team-level one. Pair with the UAE government marketplace work, where architecture had to satisfy *two* separate government entities' governance requirements simultaneously.
-- **Key points:** Multi-team blast radius, SLA/NFR ownership at the platform level, working across regulatory/organizational boundaries.
-- **Red flags:** Every example is single-team/single-project; no mention of a decision that had to be reconciled across conflicting stakeholder requirements.
+### Q: Describe the broadest architectural scope you've owned — how many teams, portfolios, or ARTs did your decisions touch?
 
-**Q: How do you keep 5–10 teams building consistently with your architectural intent when you don't manage them?**
-- *Strong-answer skeleton:* Written artifacts first (ADRs/RFCs), not verbal alignment; a lightweight architecture review gate at design time, not just at release; a small set of non-negotiable NFRs (security, observability, cost tagging) enforced via templates/golden paths rather than manual review of everything; escalation path defined *before* it's needed, so an architecture disagreement has a known resolution owner (Enterprise Architect, ART lead).
-- **Key points:** Artifact-driven governance, golden paths over gatekeeping, pre-defined escalation.
-- **Red flags:** "I just talk to people a lot" with no artifact or repeatable mechanism; describes pure command-and-control review.
+**Answer:** The connected-vehicle platform is the closest scale story: **20M+ vehicles**, **~2M telemetry messages/min**, multiple regions and downstream consumers. Decisions about partitioning, ingestion backpressure, schema evolution, observability and SLA targets affected many teams, not a single service. That is the same type of blast radius I would expect in Emirates passenger, cargo or loyalty domains.
 
-**Q: Tell me about a time your architecture and another architect's architecture conflicted. What happened?**
-- *Strong-answer skeleton:* STAR — name the actual trade-off (e.g., in-flight document processing without persistent storage vs. another team's audit-log requirement on the automotive invoice project), how it was resolved (a documented decision satisfying both: ephemeral processing + compliant audit trail via structured logging, not raw document storage), and what changed afterward (became the template pattern for future document-processing services).
-- **Key points:** Specific technical conflict, a documented resolution, a durable artifact/pattern that outlived the original disagreement.
-- **Red flags:** Vague "we talked it through"; no lasting artifact; blames the other architect.
+A second example is the UAE government data-sovereignty program, where the architecture had to satisfy multiple entities and compliance expectations. That maps to Emirates because a Solutions Architect must reconcile business speed with UAE PDPL/TDRA, GDPR, PCI-DSS, IATA security, data lineage and operational continuity.
+
+**Key points:** multi-team blast radius, NFR ownership, regulatory boundaries. **Red flags:** only single-team examples.
+
+### Q: How do you keep 5–10 teams building consistently with your architectural intent when you don't manage them?
+
+**Answer:** I use artifacts and paved roads. Architecture intent is written as ADRs/RFCs with C4 views, NFRs, decision consequences and security/cost implications. Then I provide golden paths: API templates, CI/CD checks, observability libraries, threat-model templates, cost tags and reference deployments. A lightweight review happens early for high-risk changes; routine standards are enforced through automation.
+
+I would align with Product, RTEs and Enterprise Architecture during PI planning, so runway items are visible and funded. Deviations are allowed but recorded with owner, expiry and remediation. That is governance as acceleration, not command-and-control.
+
+**Key points:** ADRs, golden paths, automated controls, exception register. **Red flags:** “I talk to people,” no repeatable mechanism.
+
+### Q: Tell me about a time your architecture and another architect's architecture conflicted. What happened?
+
+**Answer:** A good example is a regulated document/intelligence platform where one view preferred retaining raw documents for audit and another minimized storage for privacy/compliance. The trade-off was real: auditability versus data minimization. I would resolve it through an ADR: raw documents are processed ephemerally unless policy requires retention; extracted fields, hashes, model version, confidence scores and audit logs are retained; access to raw content is separately controlled.
+
+The result is a reusable pattern for Emirates-style cargo customs or passenger document verification: preserve evidence without expanding sensitive-data blast radius. The point is not “my design won”; it is that the decision was explicit, reviewed and reusable.
+
+**Key points:** concrete trade-off, documented resolution, durable pattern. **Red flags:** blame, no artifact.
 
 ---
 
 ## Round 3 · System design (aviation/logistics domain)
 
-Five cases mapped to Emirates' actual domains. Always **gather requirements first**: peak transactions/sec, regions/latency budget, consistency needs (strong vs eventual), and failure mode tolerance (can we lose a booking? can we double-book a seat?).
-
 ### Case 1 — Reservation & inventory around a PSS you don't own (Altéa-style)
-Design an orchestration layer that lets Emirates' own digital channels (app, web, contact centre) book and manage trips against a third-party PSS (Amadeus Altéa) without becoming tightly coupled to it.
-- **Strong-answer skeleton:** Anti-corruption layer between Emirates channels and Altéa's EDIFACT/XML/NDC interfaces; own canonical booking domain model so a future PSS migration doesn't ripple into every channel; async event stream (booking created/changed/cancelled) fan-out to Skywards accrual, notifications, and analytics; idempotent writes back to Altéa (booking references, not raw retries) to avoid duplicate PNRs; cache read-heavy inventory/availability queries with a short TTL and a "confirm at PSS" step before payment capture.
-- **Key points:** Anti-corruption layer, canonical domain model, idempotency at the PSS boundary, event-driven fan-out, cache-then-confirm for availability.
-- **Follow-ups:** How do you handle a PSS outage during peak booking (e.g., a sale)? (Answer: read-through cache serves availability in degraded mode; writes queue with clear customer messaging; no silent double-booking.)
-- **Red flags:** Proposes replacing Altéa; no idempotency story; treats PSS integration as "just call the API."
+
+Design an orchestration layer for Emirates channels around a third-party PSS such as Altéa.
+
+**Requirements & scale** — Assume global web/app/contact-centre traffic, **5,000-10,000 availability/search requests/sec** during campaigns, **100-300 booking attempts/sec** at peak, p95 search under 300-500 ms when cached, and zero tolerance for duplicate PNRs or double-booking. RTO for orchestration is 15-30 minutes; RPO for confirmed booking state is effectively zero because the PSS remains source of truth.
+
+**Architecture**
+```text
+[Web/App/Contact Centre]
+        -> [Front Door/WAF]
+        -> [APIM: auth, quotas, versions]
+        -> [Booking Orchestration on AKS]
+              |-> [Redis/Cosmos short-TTL availability cache]
+              |-> [Canonical booking/request store + idempotency]
+              |-> [PSS Anti-Corruption Layer]
+                       -> [Altéa RES/INV/DCS via EDIFACT/XML/NDC]
+              |-> [Outbox/Event Hubs]
+                       -> [Skywards, notifications, analytics]
+```
+
+**Data & consistency** — Emirates owns the canonical channel model, request state, audit and idempotency mapping; Altéa owns PNR, inventory and DCS truth. Availability cache is only a shopping hint. Before payment capture and final confirmation, the service performs a confirm-at-PSS step. Strong consistency applies at PSS and payment boundaries; events to loyalty/analytics are eventual and idempotent.
+
+**Scale & capacity** — A 30-second cache keyed by route/date/fare family can absorb repeated shopping traffic. If 5% of 10,000 searches/sec become booking attempts, design internal workers for hundreds/sec, but respect PSS quotas as the real bottleneck. Partition events by booking reference so all changes to one booking are ordered.
+
+**Failure modes & resilience** — If the PSS is degraded, continue cached shopping with clear “availability confirmed at checkout” messaging and pause or queue unsafe booking commits. Use circuit breakers, bulkheads per PSS adapter, exponential backoff and reconciliation for ambiguous booking/payment states. Reads can be active-active; writes may be active-passive or single-writer because the vendor is authority.
+
+**Trade-offs & alternatives** — Direct channel-to-PSS integration is cheaper but tightly couples every channel to vendor formats and failure modes. Rebuilding inventory locally is unsafe and expensive. The anti-corruption layer costs more and adds latency, but gives migration optionality, consistent observability, idempotency and channel autonomy.
+
+**Follow-up answers** — During a peak sale outage, serve cached search, protect the PSS with throttles, stop final commits if confirmation cannot be obtained, do not capture payment without a booking, and reconcile idempotency keys to PSS references after recovery. Customer messaging must be explicit; silent double-booking is never acceptable.
+
+**Key points:** anti-corruption layer, canonical model, idempotency, cache-then-confirm. **Red flags:** replacing Altéa, caching as truth, blind retries.
 
 ### Case 2 — Emirates Skywards accrual/redemption at scale
-Design mileage accrual and redemption so a flight landing triggers accurate, timely miles credit for 30M+ members, including partner-airline mileage exchange.
-- **Strong-answer skeleton:** Event-driven: flight-completion event → accrual calculation service (fare class, tier multiplier, partner rules) → ledger write (append-only, auditable) → member balance projection (read model) updated async; redemption is the harder path — needs strong consistency on the ledger (no double-spend of miles) via a transactional outbox or optimistic locking; partner-airline exchange goes through a settlement/reconciliation batch, not real-time, because partner systems aren't real-time.
-- **Key points:** Append-only ledger + CQRS-style read projection, strong consistency specifically for redemption (not accrual), partner settlement as an async batch boundary.
-- **Follow-ups:** A member disputes a missing accrual from 3 weeks ago — how do you investigate? (Ledger replay/audit trail, not "look at current balance.")
-- **Red flags:** Single mutable balance column with no audit trail; treats accrual and redemption as symmetric consistency problems (they aren't).
+
+**Requirements & scale** — Assume **30M members**, large arrival-bank bursts, accrual visible within minutes and redemption p95 <500 ms. Accrual is eventually consistent; redemption must prevent double-spend. Ledger RPO is near-zero and audit retention is long.
+
+**Architecture**
+```text
+[Flight/partner completion events]
+        -> [Event Hub/Kafka]
+        -> [Accrual rules service]
+        -> [Ledger service]
+              -> [Append-only ledger DB]
+              -> [Balance projection/read model]
+              -> [Outbox: miles-credited/debited]
+                    -> [notifications, campaigns, partner settlement]
+[Redemption API] -> [Ledger transaction/optimistic lock] -> [commerce/PSS flow]
+```
+
+**Data & consistency** — Use an append-only ledger: member, source event, ticket/flight/partner reference, points delta, rule version, effective time, posted time, status and correlation ID. Current balance is a projection, not the only truth. Accrual can be replayed and corrected; redemption requires atomic check-and-debit or reservation semantics with optimistic concurrency on member/version. Partner exchange is a saga with pending/reserved/confirmed/compensated states.
+
+**Scale & capacity** — Hundreds of thousands of daily accrual entries are straightforward, but years of audit history reach hundreds of GB or TB. Partition by member_id and time; partition event streams by member_id for ordered balance updates. Use monthly snapshots to speed “balance as of date” queries while preserving the ledger.
+
+**Failure modes & resilience** — Duplicate events are blocked by unique `(member_id, source_event_id, type)`. If rules fail, events remain in the stream. If partner APIs fail, miles remain pending/reserved with reconciliation. Multi-zone ledger storage and restore testing are more important than low-latency vanity.
+
+**Trade-offs & alternatives** — A mutable balance column is simple but fails audit and disputes. Full event sourcing for every loyalty attribute may be overkill; use ledger/event sourcing for value movement and simpler CRUD for preferences. Azure SQL/PostgreSQL may fit transactional ledger; Cosmos fits high-scale partitioned read/member documents if the partition key is sound.
+
+**Follow-up answers** — For a missing accrual dispute, trace ticket, coupon, flight event, member ID, rules version, rejected-event table, ledger and projection lag. If correction is needed, post an adjustment ledger entry with reason and approver; never overwrite balance silently.
+
+**Key points:** append-only ledger, CQRS projection, redemption strong consistency, partner settlement. **Red flags:** mutable balance only.
 
 ### Case 3 — SkyCargo booking & ULD tracking (OneCargo-style)
-Design a cargo booking + Unit Load Device (ULD, i.e. cargo container/pallet) tracking platform integrating airline systems, ground handling agents, and customs.
-- **Strong-answer skeleton:** Domain-decompose into booking, warehouse/ground-handling, ULD tracking, revenue accounting, and customs/compliance as separate bounded contexts/services; ULD tracking is an IoT/event-ingestion problem (scan events at each handling point) feeding a real-time location/state model; customs/compliance is a regulated, audit-heavy service that should be isolated so a customs-system change doesn't require redeploying booking; use an industry data standard (IATA ONE Record) at integration boundaries so partner airlines/GHAs aren't forced onto Emirates-specific formats.
-- **Key points:** Bounded contexts per cargo function, IoT-style event ingestion for ULD state, isolate regulated/compliance services, standards-based integration (ONE Record) at partner boundaries.
-- **Follow-ups:** A ULD scan event arrives out of order (network delay at a remote airport) — how does your state model stay correct? (Event timestamp + last-writer-wins per ULD with reconciliation window, not naive "latest message wins.")
-- **Red flags:** One monolithic cargo service; no answer for out-of-order events; ignores customs/compliance isolation.
+
+**Requirements & scale** — Assume cargo bookings across hubs, partner/GHA integrations, and **10,000-50,000 scan events/min** globally. ULD tracking can be seconds-to-minutes eventual; customs/compliance decisions need auditability and controlled state. Operational dashboards target 99.9% availability.
+
+**Architecture**
+```text
+[Customers/forwarders] -> [Cargo APIM/B2B gateway] -> [Booking service]
+                                                        |-> [capacity/rate]
+                                                        |-> [warehouse]
+                                                        |-> [customs/compliance]
+                                                        |-> [revenue accounting]
+[GHA scanners/IoT gateways] -> [IoT/Event Hubs] -> [ULD event processor]
+                                             -> [ULD state projection + ops dashboard]
+[Partner adapters] <-> [IATA ONE Record-shaped contracts]
+```
+
+**Data & consistency** — Booking owns airway bill/shipment booking; ULD tracking owns scan events and current ULD state; customs owns declarations, holds and clearance. Scan events are immutable: uld_id, event_id, location, occurred_at, received_at, source, sequence and confidence. The current state is a projection. Strong consistency is needed for booking/capacity commit and customs release; dashboards can be eventually consistent with staleness indicators.
+
+**Scale & capacity** — 50,000 events/min is ~833/sec; at ~1 KB/event, raw volume is ~72 GB/day before compression/indexes. Partition by uld_id or shipment_id to maintain order per ULD. Keep recent operational state in a fast store and historical events in a data lake.
+
+**Failure modes & resilience** — Remote airports may buffer scans offline and upload later. Handle out-of-order events by event time and reconciliation windows, not receive time. Partner/customs outages move shipments to pending/held queues rather than blocking all booking. Use circuit breakers and dead-letter queues.
+
+**Trade-offs & alternatives** — A monolith is simpler initially but couples customs, booking and warehouse release cycles. Synchronous partner calls for every event are fragile. Event-driven bounded contexts cost more to operate but support replay, audit and partner isolation.
+
+**Follow-up answers** — If a ULD scan arrives late, recompute projection if within the reconciliation window; if it conflicts with lifecycle rules, flag an exception. Never “latest received wins” for physical logistics.
+
+**Key points:** bounded contexts, ONE Record, immutable events, out-of-order handling. **Red flags:** monolith, no customs isolation.
 
 ### Case 4 — Irregular operations (IRROPS): rebooking at scale during a disruption
-A sandstorm closes DXB for six hours. Design the system that rebooks/reaccommodates tens of thousands of affected passengers.
-- **Strong-answer skeleton:** This is a burst-load, priority-queueing problem, not a steady-state one — expect 100x normal rebooking volume in minutes; auto-rebooking rules engine (tier priority, connection risk, fare rules) generates candidate itineraries against live inventory, falling back to human agents for edge cases; explicitly design for graceful degradation (batch processing + queue-depth-driven customer communication) rather than assuming real-time for every passenger; multi-region failover matters here because DXB itself may be degraded — decision support tooling should run out of a secondary region.
-- **Key points:** Burst/priority-queue design, rules engine + human fallback, explicit degraded-mode UX, geographic failover for tooling (not just data).
-- **Follow-ups:** How do you prevent the rebooking engine from creating new double-bookings while racing thousands of other rebookings for the same seats? (Optimistic concurrency + PSS as the single source of truth for seat state — ties back to Case 1's idempotency point.)
-- **Red flags:** Assumes normal-load architecture scales linearly; no fallback to human agents; forgets tooling itself needs to survive the outage.
+
+**Requirements & scale** — A six-hour DXB closure could affect **50,000-150,000 passengers** and create 100x normal rebooking demand. The goal is prioritized, safe recovery, not instant rebooking for everyone. Decision-support RTO should be <30 minutes; final seat assignment must be strongly consistent at the PSS.
+
+**Architecture**
+```text
+[Ops disruption feed]
+   -> [Affected passenger graph: PNR, connections, tier, SSRs]
+   -> [Priority queue: tier, risk, special needs, fare rules]
+   -> [Rules/optimization engine]
+         |-> [PSS live inventory confirm]
+         |-> [hotel/transport adapters]
+         |-> [human agent workbench]
+   -> [notifications: app/SMS/email/contact centre]
+```
+
+**Data & consistency** — Disruption work items track passenger group, original itinerary, candidates, priority, status and audit. The PSS owns final itinerary and inventory. Use a saga: propose itinerary, reserve/confirm in PSS, update work item, notify; compensate on failure.
+
+**Scale & capacity** — Rebooking 100,000 passengers in two hours needs ~14 final passenger decisions/sec, but candidate evaluation may need hundreds/sec. Partition queues by disruption event and priority. Cache schedules/minimum connection data; confirm inventory live.
+
+**Failure modes & resilience** — If automation cannot safely confirm, degrade to ranked suggestions for human agents. If notifications overload, prioritize confirmed changes and vulnerable/high-tier passengers. Run tooling in a secondary region because local disruption may coincide with operational stress.
+
+**Trade-offs & alternatives** — Fully automated rebooking is unsafe for edge cases like visas, groups and special services. Manual-only cannot scale. Use automation for high-confidence cases and human workflow for exceptions.
+
+**Follow-up answers** — Prevent double-booking by treating PSS commit as the only truth. Parallel engines may generate candidates, but final confirmation uses idempotency and optimistic concurrency; losers recompute.
+
+**Key points:** burst queues, rules + human fallback, saga, degraded UX. **Red flags:** normal-load assumptions.
 
 ### Case 5 — Multi-region data residency & DR across UAE, EU and other jurisdictions
-Emirates operates in the UAE (home jurisdiction), the EU (GDPR), and other markets with local data-residency rules. Design the data architecture.
-- **Strong-answer skeleton:** Regional data residency isn't solved by "put everything in one Azure region" — it requires a data-classification model (what's PII, what's regulated, what's operational telemetry) with per-classification placement rules; UAE-resident systems for local regulatory data, EU-resident processing for GDPR subjects, with a clear cross-border transfer mechanism (standard contractual clauses / adequacy) only where genuinely needed; active-active or active-passive DR per region depending on RTO/RPO, not a single global DR story.
-- **Key points:** Data classification drives placement (not a single global answer), explicit cross-border transfer justification, DR strategy varies by criticality tier.
-- **Follow-ups:** How would you prove compliance to an auditor? (Data lineage/governance tooling — e.g., Microsoft Purview-class catalog — not a manual spreadsheet.)
-- **Red flags:** "We'll just replicate everything everywhere"; no data classification step; unaware that GDPR and UAE PDPL have different obligations.
+
+**Requirements & scale** — Classify systems by data and criticality: booking RTO 15-30 minutes, ledger/payment RPO near-zero, analytics RTO hours. UAE PDPL/TDRA, GDPR, PCI and IATA security mean not all data can be globally replicated.
+
+**Architecture**
+```text
+[Regional operational systems]
+      -> [classification policy: PII, PCI, loyalty, telemetry, anonymized]
+            |-> [UAE resident stores]
+            |-> [EU resident stores]
+            |-> [tokenized/global views]
+      -> [CDC/events with policy filters]
+      -> [regional lakes + Purview catalog]
+      -> [approved analytics/AI workspaces]
+```
+
+**Data & consistency** — Classification drives placement. Raw PII and PCI stay in approved regional stores; global products receive tokenized, minimized or aggregated data only with lawful basis. Strong consistency stays inside regional operational stores; cross-region data products are eventually consistent and governed.
+
+**Scale & capacity** — Partition data by domain, region, subject jurisdiction and date. Use lifecycle policies to avoid replicating raw data forever. Policy enforcement at ingestion prevents later cleanup problems.
+
+**Failure modes & resilience** — Fail over only to legally approved regions. If catalog/policy tooling is down, deny new high-risk movement rather than allow uncontrolled export. DR varies: active-active for stateless apps, active-passive for regulated stores, backup/restore for analytics.
+
+**Trade-offs & alternatives** — Replicating everything everywhere improves recovery but violates minimization and increases breach blast radius. Fully isolating every country blocks global operations. The balanced design is regional ownership plus governed cross-border data products.
+
+**Follow-up answers** — Prove compliance with Purview lineage, classification reports, access logs, storage region inventory, encryption/key evidence, DLP alerts and approved transfer records. Manual spreadsheets are not sufficient.
+
+**Key points:** classification-driven placement, lawful transfer, Purview evidence. **Red flags:** global raw replication.
 
 ---
 
 ## Round 4 · Coding / technical deep-dive
 
-**What they're testing:** Can you go from architecture diagram to real implementation trade-offs? Comfort in the JD's actual stack (Java, cloud-native, event-driven, APIs).
+**What they're testing:** Can you translate diagrams into correct idempotency, transaction, retry, versioning and locking patterns?
 
-- **Idempotent event consumer.** Implement a Kafka/Service-Bus consumer that processes a "flight completed" event exactly-once from the accrual service's point of view, given at-least-once delivery. *(Answer: idempotency key = flight+passenger+event-type stored with a unique constraint, or an outbox pattern with a processed-events table.)*
-- **API versioning across an ART.** Five teams consume your booking API. You need a breaking change. How do you version and migrate without a synchronized "big bang" release? *(Answer: additive-first, deprecation window with telemetry on old-version usage, contract testing, and a documented ADR for the sunset date.)*
-- **Circuit breaker around a flaky partner system.** Ground handling agent APIs are unreliable at some airports. Implement/describe a circuit breaker + fallback for ULD status updates. *(Answer: breaker with half-open probing, fallback to last-known-state with a staleness flag surfaced to operators, not a silent stale read.)*
-- **Concurrency control for seat/ULD assignment.** Two rebooking requests race for the same seat. Walk through optimistic vs pessimistic locking trade-offs and pick one with justification.
-- **Data modelling for an append-only ledger** (Skywards miles) — schema sketch, and how you'd answer "what was my balance on March 3rd?" from it.
+### Idempotent event consumer with processed-events and outbox
+
+At-least-once delivery means duplicates are expected. Exactly-once business behavior is created by idempotency keys and transactional writes.
+
+```csharp
+public sealed record FlightCompletedEvent(
+    string EventId, string FlightNumber, string TicketNumber,
+    string MemberId, DateTimeOffset CompletedAt, string FareClass);
+
+public sealed class AccrualConsumer
+{
+    private readonly SkywardsDbContext _db;
+    private readonly IMilesCalculator _calculator;
+
+    public async Task HandleAsync(FlightCompletedEvent e, CancellationToken ct)
+    {
+        var key = $"flight-completed:{e.EventId}:{e.MemberId}";
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+        if (await _db.ProcessedEvents.AnyAsync(x => x.IdempotencyKey == key, ct))
+        {
+            await tx.CommitAsync(ct);
+            return;
+        }
+
+        var miles = await _calculator.CalculateAsync(e.MemberId, e.FlightNumber, e.FareClass, ct);
+        _db.LedgerEntries.Add(new LedgerEntry {
+            Id = Guid.NewGuid(), MemberId = e.MemberId, SourceEventId = e.EventId,
+            PointsDelta = miles, Type = "ACCRUAL", EffectiveAt = e.CompletedAt,
+            PostedAt = DateTimeOffset.UtcNow, RuleVersion = _calculator.RuleVersion
+        });
+        _db.ProcessedEvents.Add(new ProcessedEvent { IdempotencyKey = key, ProcessedAt = DateTimeOffset.UtcNow });
+        _db.OutboxMessages.Add(new OutboxMessage {
+            Id = Guid.NewGuid(), Topic = "skywards.miles-credited",
+            PayloadJson = JsonSerializer.Serialize(new { e.MemberId, Miles = miles, e.FlightNumber }),
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+
+        await _db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+    }
+}
+```
+
+```sql
+CREATE TABLE processed_events (
+  idempotency_key varchar(200) PRIMARY KEY,
+  processed_at datetime2 NOT NULL
+);
+CREATE UNIQUE INDEX ux_ledger_source
+ON ledger_entries(member_id, source_event_id, type);
+```
+
+An outbox publisher later sends unsent messages. If publishing fails, ledger correctness is preserved and publication retries safely.
+
+### API versioning across an ART
+
+Use additive changes first. For a breaking booking API change, publish v2 in APIM while v1 remains supported for a defined deprecation window. Add consumer contract tests, telemetry on v1 usage, a sunset date and an ADR naming consumers, risks and migration plan. The migration ends when old-version usage is zero or exceptions are approved.
+
+### Circuit breaker around a flaky partner system
+
+```python
+import time
+from enum import Enum
+
+class State(Enum): CLOSED="closed"; OPEN="open"; HALF_OPEN="half_open"
+
+class CircuitBreaker:
+    def __init__(self, threshold=5, reset_after=30):
+        self.threshold, self.reset_after = threshold, reset_after
+        self.failures, self.opened_at, self.state = 0, None, State.CLOSED
+    def allow_call(self):
+        if self.state == State.CLOSED: return True
+        if time.time() - self.opened_at >= self.reset_after:
+            self.state = State.HALF_OPEN; return True
+        return False
+    def success(self):
+        self.failures, self.opened_at, self.state = 0, None, State.CLOSED
+    def failure(self):
+        self.failures += 1
+        if self.failures >= self.threshold:
+            self.state, self.opened_at = State.OPEN, time.time()
+
+def get_uld_status(uld_id, partner, cache, breaker):
+    if not breaker.allow_call():
+        return {"status": cache.get(uld_id), "stale": True, "source": "cache"}
+    try:
+        status = partner.fetch_uld_status(uld_id, timeout_seconds=2)
+        cache.set(uld_id, status, ttl_seconds=900)
+        breaker.success()
+        return {"status": status, "stale": False, "source": "partner"}
+    except Exception:
+        breaker.failure()
+        return {"status": cache.get(uld_id), "stale": True, "source": "cache"}
+```
+
+The fallback exposes staleness to operators. It avoids retry storms and uses half-open probes to recover gradually.
+
+### Concurrency control for seat/ULD assignment
+
+```sql
+UPDATE seat_holds
+SET status = 'CONFIRMING', version = version + 1
+WHERE flight_id = @flight_id
+  AND seat_number = @seat_number
+  AND status = 'AVAILABLE'
+  AND version = @expected_version;
+```
+
+If one row is updated, call the PSS with the same idempotency key. If the PSS confirms, mark confirmed with PSS reference; if it rejects, release and recompute. Optimistic locking is preferred for high-scale rebooking because pessimistic distributed locks reduce availability and can deadlock. For ULD assignment, use `uld_id + version` or a short-lived lease if conflict rates are high.
+
+### Data modelling for an append-only ledger
+
+```sql
+CREATE TABLE skywards_ledger (
+  ledger_id bigint identity primary key,
+  member_id varchar(50) not null,
+  entry_type varchar(30) not null,
+  points_delta int not null,
+  source_system varchar(50) not null,
+  source_reference varchar(100) not null,
+  effective_at datetime2 not null,
+  posted_at datetime2 not null,
+  rule_version varchar(30) not null,
+  status varchar(20) not null,
+  correlation_id varchar(100) not null
+);
+CREATE INDEX ix_ledger_member_effective ON skywards_ledger(member_id, effective_at, ledger_id);
+
+SELECT COALESCE(SUM(points_delta), 0) AS balance_as_of
+FROM skywards_ledger
+WHERE member_id = @member_id
+  AND status = 'POSTED'
+  AND effective_at <= @as_of;
+```
+
+For scale, maintain monthly/member snapshots and replay later entries. Corrections are new entries, never destructive updates.
 
 ---
 
 ## Round 5 · Cloud & data architecture (Azure / hybrid)
 
-**What they're testing:** Real Azure depth mapped to Emirates' hybrid-cloud reality, not "read the docs" answers.
+**What they're testing:** Azure depth, hybrid-cloud judgment, cost/security/regulatory awareness and operating model maturity.
 
-- **AKS for a multi-tenant ART landscape.** How do you structure namespaces/clusters so five ARTs share infrastructure without stepping on each other's blast radius or cost allocation?
-- **APIM as the enterprise integration front door.** How would you use Azure API Management to expose booking/cargo/loyalty APIs to partners (other airlines, GHAs, aggregators) with per-partner rate limiting, versioning, and NDC/ONE-Record-shaped payload validation?
-- **Data Lake + governance.** Design the data platform feeding revenue management, crew optimization, and customer personalization from operational systems, with lineage and access control (Purview-class) satisfying multi-jurisdiction compliance.
-- **Hybrid/multi-cloud reality.** Emirates runs Azure for core digital/AI and has cargo/loyalty workloads on AWS. How do you architect for "the right cloud per workload" without ending up with an unmanageable multi-cloud mess? *(Answer: a documented cloud-placement policy — data residency, existing vendor integration, workload shape — captured as an ADR, plus a shared platform layer for identity/observability/cost-tagging that's cloud-agnostic.)*
-- **Well-Architected review.** Walk through applying the Azure Well-Architected Framework's five pillars (reliability, security, cost, operational excellence, performance) to the reservation-orchestration service from Case 1.
+### AKS for a multi-tenant ART landscape
+
+**Requirements & scale** — Five ARTs may share 50-100 services with different traffic, criticality and release cadences. The platform must isolate blast radius, enforce security, allocate cost and support independent delivery.
+
+**Architecture**
+```text
+[Enterprise landing zone]
+   |-> [Shared AKS cluster: standard workloads]
+   |       namespaces per ART, quotas, network policy, workload identity
+   |-> [Dedicated AKS cluster: PCI/critical booking workloads]
+   |       stricter blast radius and change windows
+   |-> [Shared services: ACR, Key Vault, Monitor, Defender, Policy, APIM]
+```
+
+**Data & consistency** — AKS is not the data boundary. Data classification decides whether a workload can share infrastructure. Secrets come from Key Vault and Workload Identity, not long-lived Kubernetes secrets. Network policies prevent namespace lateral movement.
+
+**Scale & capacity** — Use HPA/KEDA, node pools by workload class, namespace quotas and mandatory labels: ART, service, environment, owner, cost center. Export usage to Cost Management/FinOps dashboards. Critical services may need reserved capacity; batch/worker services can scale to zero or use spot where safe.
+
+**Failure modes & resilience** — Noisy neighbors, bad cluster upgrades and shared ingress failures are real risks. Shared clusters are cheaper but increase blast radius; cluster-per-ART improves isolation but increases cost, drift and operational burden. The balanced design is shared clusters for standard workloads and dedicated clusters for PCI/mission-critical/regulatory domains.
+
+**Trade-offs & alternatives** — Namespace-per-ART is cost-efficient but weaker isolation. Cluster-per-ART is safer but expensive. Serverless may fit bursty simple workloads, but long-running adapters and complex networking often favor AKS.
+
+**Follow-up answers** — If one ART needs a risky platform change, isolate through a separate ingress/node pool/cluster or staged rollout. Do not impose one ART's risk on all tenants.
+
+### APIM as the enterprise integration front door
+
+**Requirements & scale** — Expose booking, cargo and loyalty APIs to partners, channels and internal teams with OAuth/OIDC, per-partner quotas, versioning, schema validation, correlation IDs and audit. Design for thousands of calls/sec in peaks and controlled B2B traffic.
+
+**Architecture**
+```text
+[Partners/channels]
+   -> [Front Door/WAF]
+   -> [Azure API Management]
+        products, subscriptions, quotas, versions, validation, transformations
+   -> [Booking APIs | Cargo ONE Record adapters | Skywards partner APIs]
+```
+
+**Data & consistency** — APIM owns contracts and policy, not business state. It validates NDC/ONE Record-shaped payloads, masks sensitive logs and propagates correlation IDs. Business commits remain in domain services.
+
+**Scale & capacity** — Regional APIM instances behind Front Door improve latency and resilience. Use products/subscriptions to isolate partner traffic. Cache only safe reference data, not booking commit responses.
+
+**Failure modes & resilience** — Misbehaving partners are throttled without harming others. Backend degradation should produce controlled errors and retry-after responses. APIM policy is code and must deploy through CI/CD rings.
+
+**Trade-offs & alternatives** — Direct integration is cheaper but creates inconsistent auth and versioning. Service mesh helps east-west traffic but does not replace partner API product management. APIM adds cost and latency but gives governance and partner isolation.
+
+**Follow-up answers** — Breaking changes use parallel v1/v2 products, contract tests, telemetry and deprecation windows. Exceptions are documented in ADRs.
+
+### Data Lake + governance
+
+**Requirements & scale** — Feed revenue management, crew optimization, personalization and AI from operational systems while satisfying UAE/EU/PCI obligations. Expect TB-scale history, mixed batch/streaming, and audit-grade lineage.
+
+**Architecture**
+```text
+[Operational systems: booking, loyalty, cargo, crew, payments]
+        -> [CDC/events + batch ingestion]
+        -> [Bronze raw zone by region/classification]
+        -> [Silver conformed data products]
+        -> [Gold analytics/AI features]
+[Purview/catalog] <-> classification, lineage, owners, access approvals
+```
+
+**Data & consistency** — Operational systems remain sources of truth. Lake zones have data contracts, schema quality gates and classification labels. EU passenger data remains in EU-approved stores unless minimized/tokenized under approved transfer. PII access is RBAC/ABAC-controlled.
+
+**Scale & capacity** — Partition by date, region, domain and classification. Use streaming only for low-latency use cases; batch is cheaper for planning and training. Lifecycle raw data to reduce cost and risk.
+
+**Failure modes & resilience** — Schema drift or bad data can poison ML. Use schema registry, quality checks, quarantine zones, freshness indicators and lineage-based rollback. If access policy fails, fail closed and require governed access workflow.
+
+**Trade-offs & alternatives** — A single global lake is simple but risky for residency. Fully isolated lakes reduce risk but fragment analytics. Federated domain-owned data products with central catalog is the staff-level compromise.
+
+**Follow-up answers** — Auditor evidence should be generated by architecture: Purview lineage, access logs, storage region inventory, classification, DLP and approval records. This is a direct place to cite the candidate's Purview/UAE governance work.
+
+### Hybrid/multi-cloud reality
+
+**Requirements & scale** — Azure for core digital/AI and AWS for some cargo/loyalty is plausible public context. The goal is governed placement, not cloud-agnostic fantasy.
+
+**Architecture**
+```text
+[Cloud placement policy]
+   data residency | latency | vendor adjacency | managed service fit | skills | cost | exit strategy
+        |-> [Azure landing zones: AKS, Azure AI, SQL/Cosmos, Entra, DevOps]
+        |-> [AWS landing zones: selected cargo/loyalty workloads]
+        -> [Common controls: identity federation, observability, tagging, security baselines, ADRs]
+```
+
+**Data & consistency** — Each workload has one system-of-record decision. Cross-cloud replication is explicit, classified and minimized. Normalize identity, logging schema, tags, incident process and cost reporting.
+
+**Scale & capacity** — Do not make every service portable at the cost of losing managed-service value. Standardize the control plane, not the entire data plane. Include egress and latency in ADRs.
+
+**Failure modes & resilience** — Multi-cloud reduces some vendor concentration risk but increases IAM, networking, secrets, cost and ownership complexity. Landing-zone standards and a platform council are mandatory.
+
+**Trade-offs & alternatives** — Single-cloud is simpler; full cloud-agnostic abstraction becomes least-common-denominator. Right-cloud-per-workload with shared governance is the realistic answer.
+
+**Follow-up answers** — Every major workload gets a cloud-placement ADR: candidate clouds, data class, managed services, DR, cost, team skills and exit plan.
+
+### Well-Architected review
+
+**Requirements & scale** — Review the reservation orchestration service against explicit SLOs: search p95, booking-confirmation p95, PSS adapter error budget, RTO/RPO, PSS quota ceilings, PCI scope and cost per confirmed booking. The output must be a risk/action register, not a generic maturity score.
+
+**Architecture**
+```text
+[Well-Architected review]
+   |-> reliability tests: PSS outage, regional failover, retry storm
+   |-> security review: identity, secrets, PCI boundary, threat model
+   |-> cost review: AKS/APIM/cache/telemetry unit cost
+   |-> operations review: runbooks, dashboards, release rings
+   |-> performance review: cache hit rate, partitioning, vendor quotas
+        -> [prioritized backlog + ADR/runway items]
+```
+
+**Data & consistency** — The review checks whether cached availability is clearly separated from PSS-confirmed booking truth, whether payment/PSS ambiguity has a reconciliation model, and whether outbox events are idempotent. It also verifies that logs do not leak PCI/PII and that audit events are retained according to policy.
+
+**Scale & capacity** — Load tests should model flash-sale read traffic, booking-write peaks and PSS rate limits. Cost analysis should include APIM calls, AKS node utilization, Redis hit ratio, Event Hubs throughput units, Cosmos RU/s if used, and telemetry volume.
+
+**Failure modes & resilience** — Test PSS outage, APIM policy failure, cache outage, regional failover, Event Hubs backlog, payment timeout and identity-provider blips. Each failure needs an expected degraded behavior and runbook.
+
+**Trade-offs & alternatives** — Active-active everywhere may be too expensive and misleading if PSS writes are single-authority. Conversely, single-region orchestration may be cheaper but weak for global resilience. The review should recommend the least-cost design that still satisfies business RTO/RPO and correctness.
+
+**Follow-up answers** — For PI planning, convert findings into enabler work: circuit breakers, reconciliation automation, cost tagging, dashboard gaps, DR test automation and ADR updates, each with owner and due date.
 
 ---
 
 ## Round 5B · Full-stack reference architecture (edge → database)
 
-Walk end-to-end through a passenger-facing booking flow, naming the component, its purpose, the trade-off, a lower-cost alternative, and single- vs multi-region considerations at each layer:
+**Requirements & scale** — Passenger booking needs global latency, high read/search throughput, lower but critical writes, PCI isolation and graceful degradation. Search can be eventual; booking/payment commits must be correct. Size for thousands of reads/sec and hundreds of writes/sec during peaks.
 
-1. **Edge/CDN** — Azure Front Door / CDN for static app assets and DDoS protection at the edge; trade-off: added latency hop for cache misses; lower-cost alt: App Gateway alone for smaller scale.
-2. **API Gateway (APIM)** — auth, rate limiting, partner-facing contract versioning; trade-off: another hop + cost per call; multi-region: regional APIM instances with Front Door routing by geography.
-3. **Booking orchestration service (AKS)** — the anti-corruption layer from Case 1; trade-off: added complexity vs calling Altéa directly; multi-region: active-active read, active-passive write (PSS is often the single write authority).
-4. **Event backbone (Event Hubs/Kafka-class)** — fan-out to Skywards, notifications, analytics; trade-off: eventual consistency for downstream systems; lower-cost alt: Service Bus topics for lower-throughput domains.
-5. **Ledger/OLTP store (Azure SQL/Cosmos DB)** — strong consistency for redemption; trade-off: Cosmos DB's tunable consistency needs a deliberate choice, not a default.
-6. **Data Lake + Purview** — analytics/AI training data with lineage; trade-off: freshness lag vs operational stores.
-7. **Identity (Entra ID / Workload Identity Federation)** — service-to-service auth without embedded secrets; trade-off: added IdP dependency; multi-region: token caching to survive a transient IdP blip.
-8. **Observability (Azure Monitor / App Insights + a business-metric layer like Kusto/ADX)** — SLA/SLO tracking; trade-off: telemetry volume cost at 24/7 global scale.
+**Architecture**
+```text
+[Browser/mobile]
+ -> [Azure Front Door/CDN/WAF/DDoS]
+ -> [APIM: auth, quotas, versioning]
+ -> [Booking BFF/API on AKS]
+      |-> [Redis availability cache]
+      |-> [Booking orchestration]
+             |-> [PSS adapter / Altéa RES+INV]
+             |-> [Payment provider / PCI boundary]
+             |-> [Canonical request store]
+      |-> [Outbox -> Event Hubs]
+             |-> [Skywards, notifications, data lake/Purview]
+[Entra workload identity] + [Azure Monitor/App Insights/ADX]
+```
+
+**Data & consistency** — Search results are cached hints. Booking confirmation is strong at PSS commit. Payment is a saga: authorize, confirm PSS, capture; on failure, void or reconcile. Events to loyalty and analytics are eventual and idempotent.
+
+**Scale & capacity** — Edge/CDN absorbs static and cacheable content. APIM quotas protect downstream. AKS scales BFF, orchestration and adapter workers separately. Redis reduces repeated search traffic. Event partitions use booking reference to preserve order. Cosmos is suitable for distributed read/session models; Azure SQL is suitable for transactional request/idempotency state.
+
+**Failure modes & resilience** — Front Door routes around regional front-end failures. APIM policy mistakes must be caught by CI/CD and staged rollout. PSS degradation triggers controlled checkout degradation. Payment/PSS ambiguity goes to reconciliation queues. Data lake failure must not block booking. Observability outages should alert but not stop customer traffic.
+
+**Trade-offs & alternatives** — Serverless can lower cost for spiky simple flows but may be harder for long-running sagas and complex adapters. Direct PSS calls are cheaper but fragile. Multi-region is appropriate for edge/stateless/read paths; write paths may be active-passive because the PSS is authority.
+
+**Follow-up answers** — “Active-active” means active-active front door, stateless APIs and reads; it does not mean inventing multi-master booking inventory if the PSS is single authority.
 
 ---
 
 ## Real-world case studies — how airlines & partners actually solve this
 
-- **Emirates + Microsoft Azure.** Public partnership for cloud migration of digital/AI workloads — AKS, Azure SQL/Cosmos DB, Azure AI/ML, Azure DevOps, Entra ID — framed around scalability, disaster recovery, and AI-driven personalization.
-- **Emirates SkyCargo + IBS Software (OneCargo).** A ground-up, cloud-native replacement of a legacy cargo mainframe, decomposed into booking/warehouse/ULD/compliance microservices on standards-based (IATA ONE Record) integration — the reference pattern for "how do you modernize a regulated legacy system without a big-bang rewrite."
-- **Amadeus Altéa (industry-wide PSS).** Multi-tenant SOA serving dozens of airlines including Emirates; the canonical example of "don't rebuild what a specialized vendor already does at scale — build the orchestration layer around it."
-- **Other carriers.** Delta and Qantas have both published on modernizing IRROPS/rebooking with rules engines + ML-ranked itinerary suggestions; Lufthansa Group's API-first "NDC-first" distribution strategy mirrors the partner-integration pattern in Case 3. Use these as "here's how the industry solves this class of problem" evidence, not as claims about Emirates' internals.
+- **Emirates + Microsoft Azure.** Public partnership context supports Azure-first digital/AI discussion: AKS, SQL/Cosmos, Azure AI, DevOps and Entra. Use it to justify Azure fluency, not to claim internal topology.
+- **Emirates SkyCargo + IBS Software (OneCargo).** A credible modernization pattern: modular cargo domains and standards-based integration rather than reckless big-bang replacement. Use it for bounded contexts, partner APIs and ONE Record.
+- **Amadeus Altéa.** The canonical example of specialized vendor PSS: orchestrate around it with anti-corruption layers, idempotency and source-of-truth boundaries.
+- **Industry IRROPS patterns.** Airlines commonly combine rules engines, optimization, human workbenches and customer notification during disruption. Use as industry analogy, not Emirates-specific claim.
+- **Candidate mapping.** Connected vehicles map to telemetry/cargo events; UAE government governance maps to PDPL/GDPR/Purview; production RAG/agents map to customer assistants and document intelligence.
 
 ---
 
 ## Round 6 · AI/ML & MLOps (aviation-specific)
 
-**What they're testing:** Can you connect your production GenAI/RAG background to aviation's actual AI use cases?
+**What they're testing:** Can you apply production AI responsibly to aviation, not just demo GenAI?
 
-- **Dynamic pricing / revenue management.** How would you architect a system that recommends fare adjustments in near-real-time based on demand signals, without a human-in-the-loop pricing error causing revenue loss? *(Guardrails: bounded adjustment ranges, human approval above a threshold, full audit trail — same governance instinct as your LLM cost-governance/model-governance experience.)*
-- **Predictive maintenance.** Aircraft sensor telemetry → failure prediction. Map this to your connected-vehicle telemetry experience (2M msgs/min) — same ingestion/streaming shape, different label (maintenance event vs incident).
-- **Document intelligence for cargo/customs.** Directly maps to your invoice-intelligence and procurement-RAG delivery — customs paperwork (AWBs, certificates) is a document-extraction + compliance-validation problem.
-- **Customer-facing GenAI (chat/voice assistants for booking, disruption self-service).** RAG over policy/fare-rules documents with strict grounding (no hallucinated fare rules) — connect to your fine-tuning-vs-RAG trade-off experience.
-- **MLOps governance at enterprise scale.** Model versioning, drift monitoring, rollback, and a clear owner for "who approves a pricing/rebooking model going to production" — this is exactly the ADR/governance muscle the JD is testing for, applied to ML models specifically.
+**Dynamic pricing / revenue management.** Treat ML as a recommendation engine, not an uncontrolled fare setter. Demand signals, search traffic, booking velocity, seasonality, inventory and approved competitive signals feed feature pipelines. Guardrails bound changes by route/fare class, require human approval above thresholds, log model version/features/approver and support rollback. This maps to the candidate's model-governance and cost-governance instincts.
+
+**Predictive maintenance.** Architecturally similar to connected-vehicle telemetry: high-volume time-series ingestion, partition by asset, feature extraction, anomaly scoring, work-order integration and drift monitoring. The aviation difference is safety and maintenance-procedure governance. Models support engineering decisions; they do not bypass approved maintenance processes.
+
+**Document intelligence for cargo/customs.** Airway bills, certificates, invoices and dangerous-goods documents are OCR/extraction plus compliance validation. Use Document Intelligence, confidence thresholds, human review and audit logs with model version and extracted fields. Retain raw documents only as policy allows. This directly maps to invoice-intelligence, procurement RAG and Purview experience.
+
+**Customer-facing GenAI.** Use RAG over approved fare rules, refund policy and disruption documents with citations, not unconstrained model memory. Tool calls are authorized, deterministic and auditable. Guardrails include retrieval filters, prompt-injection defenses, confidence thresholds, red-team tests, human escalation and transcript/model-version logging. A hallucinated refund answer is an incident.
+
+**MLOps governance at enterprise scale.** Models need owners, risk tiers, approval gates, model registry, evaluation harness, drift monitoring, data-quality contracts, rollback and Responsible AI review. These become architecture runway items so teams can ship AI safely rather than reinvent controls.
 
 ---
 
 ## Round 7 · Architecture leadership (ARTs, runway, governance)
 
-**What they're testing:** Direct evidence you can operate the SAFe/ART machinery named in the JD, not just system design skill.
+**What they're testing:** Can you operate the SAFe/ART machinery in the JD?
 
-- **Architecture runway.** How do you decide what goes on the runway 1–2 program increments ahead vs what's too speculative to build yet?
-- **ADR discipline.** Walk through your process for writing an ADR — what triggers one, who reviews it, how deviations get tracked and eventually reconciled with Enterprise Architecture.
-- **Technical debt as an enabler.** How do you get technical-debt remediation prioritized against feature work inside a Program Backlog when you don't own the backlog?
-- **Vendor/PoC governance.** Describe running a PoC to validate a new technology (e.g., a new agent framework or vector store) and how you converted the result into a go/no-go architecture decision, not just a demo.
-- **Cross-ART consistency without authority.** Two ARTs building complementary features chose incompatible integration patterns. How do you reconcile it after the fact?
+**Architecture runway.** Runway contains enablers needed in the next one or two PIs: identity patterns, API contracts, observability, PSS adapter hardening, data-model changes, platform upgrades and risk-reduction spikes. If no committed feature depends on it, keep it as exploration, not production runway. In PI planning, make runway visible as enabler features with acceptance criteria.
+
+**ADR discipline.** Write ADRs for decisions that are hard to reverse, cross team boundaries, affect NFRs, change standards, create compliance/security impact or intentionally deviate from reference architecture. Include context, options, decision, consequences, cost, security/compliance, owner and review date. Deviations need expiry and remediation.
+
+**Technical debt as an enabler.** Translate debt into business risk: incident probability, lead-time drag, cloud waste, security exposure or blocked features. “Add circuit breaker to PSS adapter” is not cleanup; it is flash-sale resilience. Put it in the Program Backlog as an enabler with measurable outcome.
+
+**Vendor/PoC governance.** A PoC answers a decision question. Define success criteria upfront: latency, security, data residency, cost, operations, integration, failure modes and exit strategy. Use representative data and load. The output is an ADR: adopt, reject or defer.
+
+**Cross-ART consistency without authority.** Map actual contracts and pain, define a target pattern, stop further divergence and migrate high-risk paths first using adapters/strangler layers. Do not force an immediate rewrite unless risk demands it. Durable artifacts are ADRs, API standards, diagrams and review checklists.
 
 ---
 
 ## Round 8 · Behavioral / STAR
 
-- Tell me about a time you delivered under significant ambiguity (mirrors the UAE government data-sovereignty engagement — unclear initial requirements across two entities).
-- Describe a time your architectural recommendation was rejected by leadership. What did you do?
-- Tell me about mentoring a team through a difficult technical transition (mirrors your AI Apprentice/Mastery programme and Python skilling work).
-- Describe managing conflicting priorities across multiple concurrent client engagements (mirrors running Fortune 500 + government engagements in parallel).
-- Tell me about a production incident you owned end-to-end, including the postmortem and what changed afterward (mirrors your SLA/telemetry ownership on the connected-vehicle platform).
+- **Tell me about a time you delivered under significant ambiguity.** **Situation:** UAE government data-sovereignty requirements were initially unclear across two entities. **Task:** Create a defensible modernization/governance approach. **Action:** Clarified data classes, integration boundaries, SQL target architecture and Purview-style lineage/access evidence; aligned stakeholders through diagrams and decision records. **Result:** Ambiguity became an executable architecture with compliance evidence.
+- **Describe a time your architectural recommendation was rejected by leadership.** **Situation:** Leadership may choose a cheaper or faster option. **Task:** Preserve trust while making risk visible. **Action:** Quantify outage/compliance/cost trade-offs in an ADR with alternatives and accepted risk. **Result:** Even if the recommendation is not chosen, the organization has traceability and a review trigger instead of hidden disagreement.
+- **Tell me about mentoring a team through a difficult technical transition.** **Situation:** Teams moving into AI/GenAI or Python delivery need production patterns. **Task:** Raise capability without becoming the bottleneck. **Action:** Use AI Apprentice/Mastery-style enablement, reference implementations, office hours, evaluation templates and code reviews. **Result:** Engineers become independently productive and quality becomes repeatable.
+- **Describe managing conflicting priorities across multiple concurrent client engagements.** **Situation:** Fortune 500 and government engagements can overlap. **Task:** Protect commitments and architecture quality. **Action:** Prioritize by risk, deadline, dependency and business impact; communicate trade-offs early; split runway from feature work; delegate with clear decision rights. **Result:** Delivery continues without silent overcommitment.
+- **Tell me about a production incident you owned end-to-end, including the postmortem and what changed afterward.** **Situation:** A connected-vehicle platform at **20M+ vehicles** and **~2M msgs/min** can create large operational incidents. **Task:** Restore service and reduce recurrence. **Action:** Run incident command, stabilize ingestion with backpressure/bulkheads, communicate, identify root cause and produce a blameless postmortem. **Result:** Durable actions include partitioning fixes, alerts, replay tooling, runbooks and improved SLO dashboards.
 
 ---
 
 ## Round 9 · Executive / bar-raiser
 
-**What they're testing:** Strategic judgment — build vs. buy, cost discipline, and a point of view on where aviation-tech is heading.
+**What they're testing:** Strategic judgment, build-vs-buy, cost discipline and realistic AI vision.
 
-- If you had 90 days as the new Solutions Architect for a portfolio, what would your first three moves be?
-- Build vs. buy: when would you recommend Emirates build a capability in-house (e.g., a GenAI customer-service layer) vs. buy/extend a vendor platform (e.g., Altéa, OneCargo)?
-- How do you defend an architecture decision's cost to a CFO who only sees the invoice, not the risk it avoided?
-- Where do you think generative AI and agentic systems genuinely change airline operations in the next 3 years, versus where it's hype?
-- How would you structure architecture governance so it accelerates delivery instead of becoming a bottleneck for five ARTs?
+**If you had 90 days as the new Solutions Architect for a portfolio, what would your first three moves be?** First, baseline architecture: C4 views, ownership, data flows, SLOs, incident history, cloud spend, security and current ADRs. Second, align with Product, RTEs, EA and operations on the top three risks. Third, turn those risks into visible runway enablers for the next PI. Do not arrive with a prebuilt “Microsoft answer”; start with evidence.
+
+**Build vs. buy: when would you recommend Emirates build in-house vs buy/extend a vendor platform?** Buy/extend specialized industry commodity capabilities such as PSS core inventory/ticketing/DCS or mature cargo platform components. Build where Emirates differentiates: customer experience, orchestration, AI/data products, partner experience, operational decision support and governance. The anti-corruption layer is the compromise: use vendor depth while preserving Emirates-owned agility.
+
+**How do you defend an architecture decision's cost to a CFO who only sees the invoice?** Translate cost into risk-adjusted business value: avoided outage, lower MTTR, compliance evidence, partner isolation and unit cost per transaction. Show alternatives considered, including cheaper options rejected or accepted. Also identify overbuild honestly; not every workload deserves active-active.
+
+**Where do you think generative AI and agentic systems genuinely change airline operations in the next 3 years, versus where it's hype?** Real value is constrained knowledge work: policy-grounded customer service, cargo document intelligence, engineering knowledge search, ops copilots and developer productivity. Hype is unconstrained agents making pricing, refund, safety or rebooking decisions without deterministic controls. Aviation AI must be grounded, auditable, reversible and policy-bound.
+
+**How would you structure architecture governance so it accelerates delivery instead of becoming a bottleneck for five ARTs?** Pre-solve common decisions through reference architectures, templates, landing zones, API standards and observability packages. Use risk-tiered governance: golden path for low-risk changes, peer review for medium risk, architecture board with SLA for high-risk data/security/PSS/cost decisions. Track exceptions openly.
 
 ---
 
@@ -219,55 +610,238 @@ Walk end-to-end through a passenger-facing booking flow, naming the component, i
 
 | JD / Emirates area | What it is | Your resume evidence | Gap to address in prep |
 |---|---|---|---|
-| SAFe (ARTs, architecture runway) | Scaled Agile portfolio delivery | Led cross-functional teams (6–10, and 40+ on connected-vehicle); no explicit "SAFe/ART" title | Learn SAFe vocabulary precisely (ART, PI, runway, enabler) so you can map your delivery experience onto it fluently |
-| ADRs / architecture governance | Documented, reviewable architecture decisions | Well-Architected reviews, NFR ownership (implicit governance) | Prepare 2–3 concrete "here's an ADR I'd have written" examples from past projects |
-| TOGAF / ArchiMate / C4 / UML | EA modelling frameworks and notations | Not explicitly listed | Skim TOGAF ADM phases and C4 model levels (context/container/component/code) — enough to discuss fluently, not become certified |
-| Azure cloud-native (AKS, APIM, Event-driven) | Emirates' primary cloud platform | Azure Functions, AKS, Service Bus, Logic Apps, APIM-adjacent integration work | Strong — lead with this |
-| Amadeus Altéa / PSS integration | Airline reservation backbone | No direct PSS experience | Frame as "anti-corruption layer around a vendor system" — a pattern you *have* done (Purview-integrated migration, procurement platform around existing ERP-like systems) |
-| SkyCargo / OneCargo-style logistics | Cargo/logistics microservices | Connected-vehicle platform (20M+ vehicles), IoT-style telemetry | Direct transferable pattern — emphasize the telemetry/event-ingestion parallel |
-| GenAI/RAG/agents | AI platform design | Deep, hands-on production delivery (Azure AI Foundry, multi-agent, RAG) | Strongest differentiator — anchor Round 6 and Round 9 here |
-| Enterprise governance (security, cost, observability) | Cross-portfolio standards | SLA ownership, cost optimisation, Purview-based governance | Strong — cite the UAE government and CPG procurement engagements |
-| Regulatory (UAE PDPL, GDPR, aviation security) | Multi-jurisdiction compliance | Data-sovereignty/governance delivery in UAE government | Directly relevant — your strongest regional proof point |
+| SAFe (ARTs, architecture runway) | Scaled Agile portfolio delivery with PI planning, enablers and runway | Led cross-functional teams and multi-team platforms; can map experience to ART language | Learn SAFe terms precisely: ART, PI, enabler, runway, ROAM, RTE |
+| ADRs / architecture governance | Durable, reviewable decisions and exception management | Well-Architected reviews, NFR ownership, regulated delivery | Prepare 2-3 example ADRs from past work |
+| TOGAF / ArchiMate / C4 / UML | EA method and modelling views | Architecture communication experience | Be fluent enough to explain which view answers which stakeholder question |
+| Azure cloud-native | AKS, APIM, Azure SQL/Cosmos, Event Hubs, Entra, DevOps | AZ-305/AZ-204/AZ-104/AZ-400; Azure Functions/AKS/Service Bus/AI | Strong — lead with this |
+| Amadeus Altéa / PSS integration | Vendor PSS source of truth for RES/INV/DCS | No direct PSS experience | Frame as anti-corruption layer around a vendor system |
+| SkyCargo / OneCargo logistics | Cargo booking, warehouse, ULD, customs, ONE Record | Connected-vehicle telemetry and distributed scale | Emphasize event ingestion and partner integration transferability |
+| GenAI/RAG/agents | Customer assistants, document intelligence, ops copilots | Production GenAI/RAG/multi-agent delivery, AI-102 | Strong differentiator; stress guardrails and evaluation |
+| Enterprise data governance | Lineage, classification, data residency, audit evidence | UAE government data-sovereignty, SQL + Purview | Very relevant to UAE/GDPR/PDPL discussion |
+| Regulatory/security | UAE PDPL, TDRA, PCI-DSS, GDPR, IATA security | Regulated government engagements, Azure security certs | Classify data before choosing region |
+| Cost/FinOps | Shared cloud spend, ART chargeback, CFO defense | Cost optimization and platform governance experience | Prepare cost-per-transaction and chargeback examples |
 
 ---
 
 ## Technical question bank (rapid-fire, by topic)
 
-**PSS / reservations:** What's the difference between Reservation, Inventory and Departure Control in a PSS? · Why is an anti-corruption layer the right pattern around a vendor PSS? · How do you avoid double-booking when the PSS is the source of truth but you cache availability? · What is IATA NDC and why does it matter for distribution? · How would you version a booking API consumed by five teams?
+### PSS / reservations
 
-**Loyalty / event-driven:** Why is redemption a stronger-consistency problem than accrual? · How do you design an auditable, append-only ledger? · What's the difference between at-least-once and exactly-once processing, and how do you get exactly-once semantics on top of at-least-once delivery? · When would you choose Kafka-class streaming vs a simple queue for accrual events?
+**Q: What's the difference between Reservation, Inventory and Departure Control in a PSS?** Reservation manages PNRs, ticketing and booking records. Inventory manages schedules, seat/class availability and overbooking controls. Departure Control handles check-in, boarding and load/day-of-departure processes. Emirates-built systems should orchestrate around these vendor-owned domains rather than duplicate them.
 
-**Cargo / logistics:** How do you handle out-of-order IoT/scan events in a state machine? · Why decompose cargo into booking/warehouse/ULD/compliance as separate services? · What does IATA ONE Record standardize and why does it matter at partner boundaries?
+**Q: Why is an anti-corruption layer the right pattern around a vendor PSS?** It translates vendor-specific EDIFACT/XML/NDC concepts into Emirates-owned canonical APIs and events. It centralizes idempotency, observability, error handling and rate limits. It also protects channels from future PSS interface changes.
 
-**Cloud / Azure:** AKS namespace-per-ART vs cluster-per-ART — trade-offs? · How does APIM handle per-partner rate limiting and contract versioning? · When do you choose Cosmos DB over Azure SQL, and what does "tunable consistency" actually mean operationally? · What does a Well-Architected review actually produce as an artifact?
+**Q: How do you avoid double-booking when the PSS is the source of truth but you cache availability?** Treat cache as a shopping hint only. At checkout, confirm availability in the PSS with an idempotency key before payment capture. If the PSS rejects or times out, reconcile by request key/reference and never create a blind second booking.
 
-**Governance / SAFe:** What triggers writing an ADR vs just making the call? · What's on an architecture runway, and how far ahead should it look? · How do you track and eventually resolve a documented "deviation" from architecture standards? · What's the difference between an Enterprise Architect and a Solution Architect's remit?
+**Q: What is IATA NDC and why does it matter for distribution?** NDC is an IATA standard for richer airline offer/order distribution through sellers and aggregators. It lets airlines expose more controlled offers than legacy distribution paths. Architecturally it still needs versioned contracts, validation and partner governance.
 
-**AI/ML for aviation:** What guardrails would you put around an ML-driven dynamic pricing engine? · How is aircraft predictive maintenance architecturally similar to connected-vehicle telemetry? · How do you keep a customer-facing fare-rules chatbot from hallucinating policy details?
+**Q: How would you version a booking API consumed by five teams?** Prefer additive changes. For breaking change, run v1 and v2 in APIM, add contract tests, publish deprecation timelines and monitor old-version usage. Capture the migration in an ADR so the sunset is governed rather than tribal knowledge.
+
+### Loyalty / event-driven
+
+**Q: Why is redemption a stronger-consistency problem than accrual?** Accrual can post later and be corrected with an adjustment. Redemption spends value and must prevent double-spend at transaction time. Therefore redemption needs atomic check-and-debit/reservation semantics while accrual can be eventually consistent.
+
+**Q: How do you design an auditable, append-only ledger?** Store every accrual, redemption, expiry and adjustment as immutable entries with source reference, rule version, effective time, posted time and correlation ID. Current balance is a projection or sum, not the only truth. Corrections are new entries.
+
+**Q: What's the difference between at-least-once and exactly-once processing, and how do you get exactly-once semantics on top of at-least-once delivery?** At-least-once means duplicates can arrive. Business-exactly-once is achieved with idempotency keys, unique constraints and transactional domain writes. The broker may redeliver, but the ledger or booking state changes once.
+
+**Q: When would you choose Kafka-class streaming vs a simple queue for accrual events?** Use streaming when many consumers need replayable ordered events: ledger projections, notifications, campaigns and analytics. Use a queue for point-to-point work where one worker handles a message. Loyalty fan-out is a good streaming case.
+
+### Cargo / logistics
+
+**Q: How do you handle out-of-order IoT/scan events in a state machine?** Store immutable events and use occurred_at, sequence and business transition rules. Recompute projections within a reconciliation window. Conflicts become operational exceptions, not silent overwrites.
+
+**Q: Why decompose cargo into booking/warehouse/ULD/compliance as separate services?** These domains have different ownership, release cadence, data models and compliance risk. Customs changes should not redeploy booking; scan ingestion should not block revenue accounting. Bounded contexts reduce blast radius.
+
+**Q: What does IATA ONE Record standardize and why does it matter at partner boundaries?** ONE Record standardizes cargo data sharing across airlines, forwarders, handlers and authorities. It reduces bespoke partner mappings. It improves interoperability for shipment, tracking and compliance data.
+
+### Cloud / Azure
+
+**Q: AKS namespace-per-ART vs cluster-per-ART — trade-offs?** Namespace-per-ART is cheaper and simpler but shares blast radius. Cluster-per-ART improves isolation but increases cost, policy drift and upgrade work. Use shared clusters for normal workloads and dedicated clusters for regulated or mission-critical domains.
+
+**Q: How does APIM handle per-partner rate limiting and contract versioning?** APIM products/subscriptions apply quotas and policies per partner. Versioning can be route, header or product based with separate schemas/backends. Telemetry identifies consumers still on deprecated versions.
+
+**Q: When do you choose Cosmos DB over Azure SQL, and what does tunable consistency mean operationally?** Choose Cosmos for high-scale, partitioned, globally distributed document/key-value workloads with a strong partition key. Choose Azure SQL for relational integrity, transactions and complex queries. Tunable consistency means explicitly choosing strong, bounded staleness, session or eventual consistency and accepting latency/availability/cost implications.
+
+**Q: What does a Well-Architected review actually produce as an artifact?** It produces a prioritized risk/action register across reliability, security, cost, operations and performance. Each finding has severity, owner, due date and acceptance criteria. A score without actions is not architecture governance.
+
+### Governance / SAFe
+
+**Q: What triggers writing an ADR vs just making the call?** Write an ADR for decisions that are hard to reverse, cross teams, affect standards, create security/compliance/cost impact or set long-lived direction. Routine local implementation choices can stay local. ADRs are for consequential traceability.
+
+**Q: What's on an architecture runway, and how far ahead should it look?** Runway contains enablers needed for upcoming features: platform work, API contracts, observability, data models and risk-reduction spikes. It usually looks one to two PIs ahead. Too far ahead becomes speculative inventory.
+
+**Q: How do you track and eventually resolve a documented deviation from architecture standards?** Record owner, reason, risk, review date and remediation path. Review in PI planning or architecture governance. A deviation without owner/expiry is unmanaged debt.
+
+**Q: What's the difference between an Enterprise Architect and a Solution Architect's remit?** Enterprise Architecture sets cross-portfolio principles and standards. Solution Architecture applies them to a portfolio/product, makes delivery trade-offs and governs teams toward the target. Staff-level SAs also feed lessons back to EA.
+
+### AI/ML for aviation
+
+**Q: What guardrails would you put around an ML-driven dynamic pricing engine?** Bound price changes, require human approval above thresholds, log model version/features/decision, monitor drift and support rollback. The model recommends; deterministic business rules and governance constrain. Avoid opaque autonomous price changes.
+
+**Q: How is aircraft predictive maintenance architecturally similar to connected-vehicle telemetry?** Both ingest high-volume time-series events from assets, partition by asset, handle late/out-of-order data, extract features and score risk. Both need replay, drift monitoring and alert routing. Aviation adds stricter safety and maintenance governance.
+
+**Q: How do you keep a customer-facing fare-rules chatbot from hallucinating policy details?** Use RAG over approved policy documents, cite sources, restrict tool actions, set confidence thresholds and escalate uncertain cases. Log prompts, retrieved docs, model version and answer. Deterministic eligibility tools should decide refunds, not free-form text.
 
 ---
 
 ## Deeper / staff-level questions
 
-- Design a zero-downtime migration of the booking orchestration layer from one PSS integration pattern to another, with live traffic and no double-bookings during cutover.
-- How would you design chargeback-accurate cost allocation for shared AKS/APIM infrastructure used by five ARTs with very different traffic profiles?
-- Two ARTs need the same capability (e.g., document intelligence for both cargo customs docs and passenger travel-document verification) — do you build a shared platform service or let each build their own? Defend the trade-off.
-- Design a multi-region active-active architecture for the booking orchestration layer where the underlying PSS itself is single-write-region — what does "active-active" even mean here, and where's the real bottleneck?
-- How would you retrofit architecture governance (ADRs, runway, review gates) onto five ARTs that have been shipping without any for two years, without grinding delivery to a halt?
-- Walk through a "chaos day" scenario: DXB is unreachable, the PSS is degraded, and your booking orchestration layer's regional failover partially works. What's your incident-command sequence?
+### Design a zero-downtime migration of the booking orchestration layer from one PSS integration pattern to another, with live traffic and no double-bookings during cutover.
+
+**Requirements & scale** — Live global booking traffic, hundreds of writes/sec at peak, no duplicate PNRs, no incorrect payment capture, rollback in minutes. The PSS remains source of truth.
+
+**Architecture**
+```text
+[Channels] -> [Booking API facade]
+                 |-> [Old adapter] -> [PSS]
+                 |-> [New adapter] -> [PSS]
+                 |-> [shared idempotency store]
+                 |-> [shadow compare + reconciliation]
+              [feature flags / canary router]
+```
+
+**Data & consistency** — Centralize idempotency before migration. Start with shadow reads/non-mutating compares, then canary low-risk writes. Map every idempotency key to a PSS reference. Payment capture remains behind confirmed PSS booking.
+
+**Scale & capacity** — Shadowing can double read load, so throttle comparisons and avoid unnecessary vendor calls. Canary by channel, market, route or percentage. Metrics compare latency, response codes, fares, availability and mismatch rates.
+
+**Failure modes & resilience** — Ambiguous new-adapter writes trigger lookup by idempotency/PSS reference before retry. If mismatch rates exceed threshold, route back to old adapter. Keep old path warm until reconciliation is clean.
+
+**Trade-offs & alternatives** — Big-bang cutover is cheaper but too risky. Dual-writing to two booking truths is invalid. Strangler/canary migration costs more but gives rollback and evidence.
+
+**Follow-up answers** — No double-bookings come from shared idempotency and PSS commit semantics, not from deployment tooling alone.
+
+### How would you design chargeback-accurate cost allocation for shared AKS/APIM infrastructure used by five ARTs with very different traffic profiles?
+
+**Requirements & scale** — Leadership needs fair cost visibility by ART, service, environment and capability. Accuracy should drive behavior without creating accounting theater.
+
+**Architecture**
+```text
+[AKS labels/quotas] + [APIM product metrics] + [Log Analytics usage] + [Azure cost exports]
+        -> [FinOps model]
+        -> [dashboard: ART, service, unit cost, trend, anomaly]
+```
+
+**Data & consistency** — Enforce tags/labels at deployment: ART, service, env, owner, costCenter. APIM subscriptions map API calls to consumers. Shared fixed cost is allocated by agreed formula; variable cost follows usage.
+
+**Scale & capacity** — Track CPU/memory requests vs actuals, APIM calls, egress, Cosmos RU/s and telemetry volume. Log volume is often the hidden cost. Use budgets and alerts.
+
+**Failure modes & resilience** — Missing tags break chargeback, so fail CI/CD or Azure Policy for untagged resources. If the model is opaque, teams will dispute it; publish assumptions.
+
+**Trade-offs & alternatives** — Showback is easier culturally; chargeback drives accountability but can cause gaming. Start with showback and move to chargeback when data quality is strong.
+
+**Follow-up answers** — CFOs should see cost per booking search, confirmed booking, cargo event or loyalty transaction, not just cloud service totals.
+
+### Two ARTs need the same capability (e.g., document intelligence for both cargo customs docs and passenger travel-document verification) — do you build a shared platform service or let each build their own? Defend the trade-off.
+
+**Requirements & scale** — Both need OCR/extraction, confidence scoring, human review and audit. Cargo and passenger identity data have different schemas, retention and privacy rules.
+
+**Architecture**
+```text
+[Shared Document AI Platform]
+  OCR runtime, model registry, evaluation, observability, human-review workflow
+        |-> [Cargo customs domain adapter]
+        |-> [Passenger travel-doc domain adapter]
+```
+
+**Data & consistency** — Share platform primitives, not domain ownership. Each ART owns schema, validation, retention and access. Raw documents are isolated by domain/jurisdiction.
+
+**Scale & capacity** — Shared runtime reduces duplicated cost and governance work. Quotas prevent one ART starving another. Evaluation sets are per domain.
+
+**Failure modes & resilience** — A shared outage affects both domains, so SLOs and manual fallback are required. Model regression must be caught before production by domain-specific tests.
+
+**Trade-offs & alternatives** — Independent builds are faster initially but duplicate compliance and cost. A heavy central platform bottlenecks teams. A thin shared platform plus domain adapters is the balanced answer.
+
+**Follow-up answers** — This is a strong candidate mapping to production document/RAG work, but be careful about passenger identity privacy.
+
+### Design a multi-region active-active architecture for the booking orchestration layer where the underlying PSS itself is single-write-region — what does "active-active" even mean here, and where's the real bottleneck?
+
+**Requirements & scale** — Global users need low-latency reads and reliable writes. The PSS write path is the real authority and may be single-region/single-writer.
+
+**Architecture**
+```text
+[Global users] -> [Front Door active-active]
+      |-> [Region A stateless APIs/read cache]
+      |-> [Region B stateless APIs/read cache]
+                  -> [single PSS write authority]
+```
+
+**Data & consistency** — Active-active applies to edge, stateless APIs, search and read models. Booking writes route to the PSS authority with idempotency. Local stores track request state but do not become inventory truth.
+
+**Scale & capacity** — Regional caches absorb reads; event partitions use booking reference. Write throughput is bounded by PSS quotas and payment/PSS saga latency.
+
+**Failure modes & resilience** — If one region fails, route users to another. If the PSS write authority is degraded, front-end active-active does not solve booking commits; enter degraded mode.
+
+**Trade-offs & alternatives** — True multi-master inventory is unsafe without PSS support. Active-passive everything is simpler but poorer for global reads. Precise language beats buzzwords.
+
+**Follow-up answers** — The bottleneck is source-of-truth inventory/booking confirmation, not AKS replicas.
+
+### How would you retrofit architecture governance (ADRs, runway, review gates) onto five ARTs that have been shipping without any for two years, without grinding delivery to a halt?
+
+**Requirements & scale** — Five ARTs already have delivery pressure and local patterns. Governance must reduce risk while preserving velocity.
+
+**Architecture**
+```text
+[current-state assessment] -> [top risks] -> [golden paths]
+          -> [lightweight ADRs] -> [exception register] -> [PI runway]
+```
+
+**Data & consistency** — Create a decision repository and service catalog. Do not demand retroactive ADRs for everything; document high-risk current decisions and standards going forward.
+
+**Scale & capacity** — Start with controls that scale: API standards, identity/secrets, observability, cost tags and data classification. Automate checks in CI/CD.
+
+**Failure modes & resilience** — If governance is bureaucracy, teams bypass it. If too weak, risk remains hidden. Time-box reviews and provide templates.
+
+**Trade-offs & alternatives** — Full board review for every change is slow; no governance is risky. Use risk-tiered governance with SLAs.
+
+**Follow-up answers** — The first PI should show value: fewer incidents, clearer ownership, faster onboarding or cost visibility.
+
+### Walk through a "chaos day" scenario: DXB is unreachable, the PSS is degraded, and your booking orchestration layer's regional failover partially works. What's your incident-command sequence?
+
+**Requirements & scale** — Combined regional, vendor and application incident affecting revenue and passengers. Goals: protect correctness, restore critical paths, communicate clearly and avoid making recovery harder.
+
+**Architecture / sequence**
+```text
+1. Declare major incident; appoint incident commander.
+2. Freeze risky deployments; preserve logs/evidence.
+3. Assess customer impact, PSS status, region health, payment ambiguity.
+4. Shift safe read traffic to healthy region.
+5. Put booking writes into controlled degraded mode.
+6. Protect PSS with throttles/circuit breakers.
+7. Start reconciliation for ambiguous bookings/payments.
+8. Communicate to channels, contact centre, executives and partners.
+9. Recover gradually, validate business transactions, then postmortem.
+```
+
+**Data & consistency** — Do not sacrifice booking/payment correctness for availability. Ambiguous states are isolated for reconciliation. Idempotency keys are essential during retry/recovery.
+
+**Scale & capacity** — Surviving regions receive extra traffic, so shed non-critical personalization and protect core booking/status endpoints.
+
+**Failure modes & resilience** — Partial failover can be worse than no failover if health checks are only technical. Use business-transaction health: can we search, price, book, pay and retrieve?
+
+**Trade-offs & alternatives** — Keeping checkout open may protect short-term revenue but create disputes. Controlled degradation is safer.
+
+**Follow-up answers** — Postmortem creates runway items: failover tests, degraded-mode UX, clearer health signals, reconciliation automation and communication templates.
 
 ---
 
 ## Scenario-based questions (situational & troubleshooting)
 
-1. A partner airline's mileage-exchange API silently starts returning stale data. How do you detect this, and what's your immediate mitigation?
-2. Booking volume spikes 50x in 10 minutes (a flash sale). Your orchestration layer's downstream PSS calls are rate-limited by the vendor. What do you do in the first hour?
-3. An auditor asks you to prove that EU passenger data never left EU-classified storage for the last 12 months. What evidence do you produce, and how did your architecture make that possible?
-4. A newly onboarded ART starts building a service that duplicates an existing platform capability because they didn't know it existed. How do you prevent this going forward without adding bureaucracy?
-5. Your Well-Architected review flags a cost issue in a service that's also mid-way through a critical PI (Program Increment). Do you block the release?
-6. A GenAI-based customer service assistant gives a passenger an incorrect refund-eligibility answer. Walk through your incident response and the architectural fix.
-7. Cargo customs integration goes down at a regional hub, blocking shipments. Your architecture has no fallback for this partner. What's the immediate workaround, and what ADR do you write afterward?
-8. A CFO asks why the cloud bill doubled after a "successful" migration. How do you investigate and what governance was missing?
+1. **A partner airline's mileage-exchange API silently starts returning stale data. How do you detect this, and what's your immediate mitigation?** Detection comes from freshness SLOs, partner response timestamps, sequence gaps, settlement variance and member-dispute spikes. Immediately mark the partner path degraded, stop final automatic posting if correctness is uncertain, hold transactions as pending and communicate to operations. Root cause checks partner release/cache behavior and our adapter assumptions. The durable ADR requires freshness fields, contract tests, stale-data circuit breakers, reconciliation and partner health dashboards.
+
+2. **Booking volume spikes 50x in 10 minutes (a flash sale). Your orchestration layer's downstream PSS calls are rate-limited by the vendor. What do you do in the first hour?** Detect 429s, queue depth, retry amplification and conversion impact. Immediately enable APIM/channel throttles, increase safe cache use, slow checkout entry, disable non-critical personalization and protect PSS with backoff/circuit breakers. Do not let clients create duplicate booking attempts. The durable fix is a flash-sale mode ADR: pre-warmed caches, queue-based checkout, vendor quota planning, explicit customer messaging and load-test gates.
+
+3. **An auditor asks you to prove that EU passenger data never left EU-classified storage for the last 12 months. What evidence do you produce, and how did your architecture make that possible?** Produce Purview lineage, classification reports, storage-region inventory, access logs, pipeline histories, DLP alerts, encryption/key evidence and approved transfer records. The architecture made this possible by tagging data at source, separating EU storage, enforcing policy-controlled pipelines and cataloging lineage automatically. If evidence is missing, freeze questionable flows and investigate. Durable fix: no production pipeline without classification, lineage and region-policy checks.
+
+4. **A newly onboarded ART starts building a service that duplicates an existing platform capability because they didn't know it existed. How do you prevent this going forward without adding bureaucracy?** First compare requirements and see whether the existing capability can be extended rather than blaming the team. Root cause is discoverability and onboarding, not bad intent. Durable fix: searchable service/capability catalog, onboarding checklist, platform office hours, reference architectures and a lightweight reuse check for new epics.
+
+5. **Your Well-Architected review flags a cost issue in a service that's also mid-way through a critical PI (Program Increment). Do you block the release?** Classify severity. If it risks runaway spend, reliability or compliance, block or require mitigation; if it is optimization, add budgets, autoscaling caps, log sampling or rightsizing while release proceeds. Root cause is often missing FinOps gates, tags or load testing. Durable fix: cost acceptance criteria, unit-cost dashboards and remediation as a PI enabler.
+
+6. **A GenAI-based customer service assistant gives a passenger an incorrect refund-eligibility answer. Walk through your incident response and the architectural fix.** Immediately disable the affected intent or force human escalation, preserve transcript, retrieved docs, model version and tool calls, and correct the passenger outcome. Root cause checks stale retrieval, prompt, policy version, guardrail and tool authorization. Durable fix: stricter RAG grounding, deterministic refund eligibility tools, confidence thresholds, citations, red-team tests and an ADR defining allowed assistant actions.
+
+7. **Cargo customs integration goes down at a regional hub, blocking shipments. Your architecture has no fallback for this partner. What's the immediate workaround, and what ADR do you write afterward?** Use an approved manual or alternate customs channel if allowed, queue submissions, mark shipments customs-pending/held, prioritize critical cargo and keep booking/warehouse running without falsely clearing goods. Root cause is missing partner resilience design. ADR: customs integration needs health checks, circuit breaker, DLQ, manual fallback workflow, audit trail, OLA/SLA and degraded-mode UI. Never bypass customs controls silently.
+
+8. **A CFO asks why the cloud bill doubled after a "successful" migration. How do you investigate and what governance was missing?** Start with cost exports by subscription, tag, service, region and time; find drivers such as AKS overprovisioning, APIM tier, egress, logs, Cosmos RU/s, snapshots or idle non-prod. Mitigate with budgets, rightsizing, autoscaling schedules, telemetry sampling and cleanup. Missing governance likely includes enforced tags, unit-cost model, budgets, architecture cost review and chargeback/showback.
 
 ---
 

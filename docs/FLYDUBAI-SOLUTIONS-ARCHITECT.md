@@ -1,61 +1,64 @@
 # flydubai — Solutions Architect Interview Guide
 
-A complete, round-by-round preparation guide for a **Solutions Architect** role at **flydubai** (Dubai, UAE) — the Dubai Government-owned **low-cost carrier (LCC)** that is now deeply partnered with Emirates. Built from the role's job description and flydubai's publicly documented technology landscape. Used by the `/airlines` page.
+A complete, round-by-round preparation guide for a **Solutions Architect** role at **flydubai** (Dubai, UAE) — the Dubai Government-owned **low-cost carrier (LCC)** now deeply partnered with Emirates. Every round below contains **full, worked, architect-level answers** — not one-line skeletons — so you can read them aloud in the room and defend the trade-offs.
 
-> **Scope note.** This guide reverse-engineers a realistic interview loop and technical landscape from the public JD (large-scale distributed systems, microservices, event-driven architecture, cloud-native, SAFe/agile, well-architected framework) plus flydubai's publicly reported technology choices (**Sabre SabreSonic** PSS, **Microsoft Azure** cloud-first, **OPEN** rewards now unified into **Emirates Skywards**, the Emirates–flydubai codeshare partnership). flydubai does not publish its internal architecture, so technical specifics below are **industry-standard airline/LCC patterns you should be able to defend**, not confirmed internal system designs. Treat brand and vendor facts as public context, not insider knowledge.
+> **Scope note.** This guide reverse-engineers a realistic interview loop and technical landscape from the public JD (large-scale distributed systems, microservices, event-driven architecture, cloud-native, SAFe/agile, well-architected framework) plus flydubai's publicly reported technology choices (**Sabre SabreSonic** PSS, **Microsoft Azure** cloud-first, **OPEN** rewards now unified into **Emirates Skywards**, the Emirates–flydubai codeshare partnership). flydubai does not publish its internal architecture, so specifics below are **industry-standard airline/LCC patterns you should be able to defend**, not confirmed internal designs. Treat brand/vendor facts as public context, not insider knowledge.
 
 ---
 
 ## Context: flydubai & the low-cost-carrier tech landscape
 
-**Who flydubai is.** flydubai is a **low-cost carrier** launched in 2009, owned by the Investment Corporation of Dubai (Dubai Government) and chaired by Sheikh Ahmed bin Saeed Al Maktoum — the same chairman as Emirates. It operates a **single-fleet-type** Boeing 737 operation (737-800 and 737 MAX 8/9), flying a point-to-point and DXB-connecting network of 130+ destinations. The LCC model shapes everything in IT: **ancillary revenue** (unbundled fares, seats, bags, meals) is a first-class product, **cost-efficiency and lean IT** are architectural constraints, and **high aircraft utilisation** makes operational-disruption tooling business-critical.
+**Who flydubai is.** A **low-cost carrier** launched in 2009, owned by the Investment Corporation of Dubai and chaired by Sheikh Ahmed bin Saeed Al Maktoum (the same chairman as Emirates). It runs a **single-fleet-type** Boeing 737 operation (737-800 and 737 MAX 8/9) across a 130+ destination point-to-point and DXB-connecting network. The LCC model shapes IT: **ancillary revenue** (unbundled fares, seats, bags, meals) is a first-class product, **cost-per-transaction** is an architectural constraint, and **high aircraft utilisation** makes disruption tooling business-critical.
 
-**Why this matters for architecture.** An LCC is not "a smaller full-service airline." The commercial model — sell the seat cheap, monetise everything around it — means the booking/merchandising path and the **dynamic pricing / ancillary engine** are the crown jewels, and every millisecond and every dollar of run-cost is scrutinised. You should be able to reason about **unbundled fare construction, ancillary catalog/offer management, and conversion-optimised booking flows**, not just seat inventory.
+**Why this matters for architecture.** An LCC is not "a smaller full-service airline." Sell the seat cheap, monetise everything around it — so the **shopping/booking/merchandising path** and the **dynamic-pricing / ancillary engine** are the crown jewels, and every millisecond and every dirham of run-cost is scrutinised. You must reason about **unbundled fare construction, ancillary catalog/offer management, conversion-optimised booking flows**, and cloud spend as a P&L line — not just seat inventory.
 
 **The platform landscape you'll be expected to reason about:**
 
-1. **Passenger Service System (PSS) — Sabre SabreSonic.** flydubai publicly moved onto **Sabre's SabreSonic** PSS (from its earlier Videcom/legacy LCC system), which also put flydubai into the **GDS** so travel agents and corporate channels can sell it. SabreSonic provides reservation, inventory and departure control, plus merchandising/ancillary capabilities. As with any vendor PSS, flydubai-built systems are **orchestrators and channels around Sabre**, integrating over Sabre APIs and IATA **NDC**, not replacements for it.
-2. **Digital channels & merchandising.** Web and mobile booking, self-service (check-in, changes, disruption re-accommodation), and third-party/OTA/GDS distribution — all fronted by APIs, with an **offer/order** mindset (IATA's Offers & Orders direction) where ancillaries are merchandised alongside the fare.
-3. **OPEN rewards → Emirates Skywards.** flydubai's own loyalty program, **OPEN**, is a deliberately simple, cash-like scheme (earn ~1 point per USD spent, no blackout dates, redeem on any flight; points forfeited after 24 months of account inactivity). Under the **Emirates–flydubai partnership**, **Emirates Skywards** is now the unified loyalty currency across both carriers — members earn and redeem Miles and Tier Points on both airlines. This makes **loyalty integration between two independent programs/platforms** a very real, flydubai-specific architecture problem.
-4. **Emirates–flydubai partnership integration.** Codeshare, aligned schedules, **through-check-in and baggage transfer** across Dubai International (flydubai at Terminal 2/3, Emirates at Terminal 3), and a combined network marketed as one journey. The integration surface — schedules, availability, single PNR/interline, baggage, loyalty, and disruption handling **across two different PSS platforms (Sabre and Amadeus Altéa)** — is arguably the most distinctive system-design theme at flydubai.
-5. **Cloud strategy — Azure cloud-first.** flydubai has publicly pursued a **Microsoft Azure** cloud-first strategy (with Microsoft 365 for collaboration), giving a cleaner, more Azure-native landscape than Emirates' Azure+AWS hybrid. Expect Azure-native answers (AKS, App Service/Functions, API Management, Azure SQL/Cosmos DB, Event Hubs/Service Bus, Entra ID, Azure Monitor) with an LCC's relentless focus on **cost per transaction**.
-6. **Governance & regulatory context.** UAE data-residency and sector guidance (Dubai Government / TDRA cloud policies), **PCI-DSS** (payments are central to a direct-sell LCC), IATA security standards, and GDPR-equivalent handling for EU passengers all shape architecture. Agile/SAFe-style delivery and a "well-architected" bar are expected, but expect a leaner, more pragmatic governance footprint than a mega-carrier's.
+1. **PSS — Sabre SabreSonic.** flydubai publicly moved onto **Sabre's SabreSonic** PSS (from an earlier legacy LCC system) and into the **GDS**, so agents/corporates can sell it. SabreSonic provides reservation, inventory and departure control plus merchandising/ancillary capabilities, exposed via Sabre REST/SOAP APIs and IATA **NDC**. flydubai-built systems are **orchestrators and channels around Sabre** (anti-corruption layer), not a bespoke reservation core.
+2. **Digital channels & merchandising.** Web/mobile booking, self-service (check-in, changes, disruption re-accommodation), OTA/GDS distribution — API-fronted, with an **offer/order** mindset (IATA Offers & Orders) where ancillaries are merchandised beside the fare.
+3. **OPEN rewards → Emirates Skywards.** flydubai's own loyalty program, **OPEN**, is deliberately simple and cash-like (earn ~1 point per USD, no blackout dates, redeem on any flight; points forfeited after 24 months of inactivity). Under the **Emirates–flydubai partnership**, **Emirates Skywards** is now the unified loyalty currency across both carriers. This makes **loyalty integration between two independently-owned platforms** a live, flydubai-specific architecture problem.
+4. **Emirates–flydubai partnership integration.** Codeshare, aligned schedules, **through-check-in and baggage transfer** at DXB (flydubai at T2/T3, Emirates at T3), single-journey marketing. The integration surface — schedules, availability, interline PNR, baggage, loyalty and disruption **across two different PSS platforms (Sabre + Amadeus Altéa)** — is the most distinctive system-design theme at flydubai.
+5. **Cloud — Azure cloud-first.** flydubai has publicly pursued a **Microsoft Azure** cloud-first strategy (plus Microsoft 365), a cleaner Azure-native landscape than Emirates' Azure+AWS hybrid. Expect Azure-native answers (AKS/Container Apps, App Service/Functions, API Management, Azure SQL/Cosmos DB, Event Hubs/Service Bus, Entra ID, Azure Monitor) with relentless **cost-per-transaction** focus.
+6. **Governance & regulation.** UAE data-residency and TDRA cloud policy, **PCI-DSS** (payments are central to a direct-sell LCC), IATA security, and GDPR-equivalent handling for EU passengers. Agile/SAFe-style delivery and a "well-architected" bar are expected, but leaner and more pragmatic than a mega-carrier's.
 
-**Why a Microsoft Azure/GenAI architect profile fits.** flydubai's Azure-first, cost-conscious, digitally-merchandised model maps directly onto an Azure Solutions Architect background: cloud-native platforms, event-driven integration, production RAG/agentic delivery for self-service and operations, Well-Architected cost/reliability reviews, and multi-team technical leadership — with a strong bonus if you can talk **ancillary revenue, dynamic pricing guardrails, and cross-carrier integration** fluently.
+**Why a Microsoft Azure/GenAI architect profile fits.** flydubai's Azure-first, cost-conscious, digitally-merchandised model maps onto an Azure Solutions Architect background: cloud-native platforms, event-driven integration, production RAG/agentic delivery for self-service and operations, Well-Architected cost/reliability reviews, and multi-team leadership — with a bonus if you talk **ancillary revenue, dynamic-pricing guardrails and cross-carrier integration** fluently.
 
-**UAE hiring loop context.** flydubai loops for architect-level roles typically run: **online application (sometimes an aptitude/technical screen) → recruiter/HR screen (occasionally a recorded video intro) → 1–2 technical/architecture rounds (scenario + case study) → managerial/behavioral → final leadership round**, over **3–6 weeks**. Comp is **tax-free AED**; expect discussion of relocation, visa sponsorship, and allowances (housing, schooling, flights) as part of total comp — this repo's own résumé already states "Open to relocation to the UAE," a strong opener.
+**UAE hiring loop context.** flydubai architect loops typically run **online application (sometimes an aptitude/technical screen) → recruiter/HR screen (occasionally a recorded video intro) → 1–2 technical/architecture rounds (scenario + case study) → managerial/behavioural → final leadership round**, over **3–6 weeks**. Comp is **tax-free AED**; expect relocation, visa sponsorship and allowances (housing, schooling, flights) in the conversation — this repo's résumé already says "Open to relocation to the UAE," a strong opener.
 
 ---
 
 ## How to use this guide
 
-Each round below has the same shape:
+Each round has the same shape: **What they're testing**, then **Questions** with a **full worked answer**, the **key points** to land, and the **red flags** that fail the round. System-design cases follow a fixed skeleton you should replicate live: **Requirements & scale → Architecture (with a diagram) → Data & consistency → Scale & capacity → Failure modes → Trade-offs & alternatives → Follow-ups**.
 
-- **What they're testing** — the signal the interviewer is calibrating.
-- **Questions** — realistic prompts, each with a **strong-answer skeleton**, **key points to hit**, and **red flags** that fail the round.
-
-Practice out loud. For system design, **drive the requirements yourself** (peak transactions/sec, regions, SLA, consistency needs, and *cost per transaction* — this is an LCC) before drawing boxes. For architecture-leadership questions, anchor answers in **trade-offs, ADRs, and governance**, not just technology choices. For behavioral, use **STAR** (Situation, Task, Action, Result) with a quantified result.
+Practice out loud. For system design, **drive the requirements yourself** (peak TPS, regions, latency budget, consistency, RTO/RPO, and *cost per transaction* — this is an LCC) before drawing boxes. For leadership questions, anchor in **trade-offs, ADRs and governance**. For behavioural, use **STAR** with a quantified result.
 
 ---
 
 ## Round 1 · Recruiter / HR screen
 
-**What they're testing:** Is your architecture experience real and at the right altitude (enterprise/platform vs single-project)? Are location, visa, notice period and comp aligned? Can you tell a crisp, senior-sounding story in 90 seconds?
+**What they're testing:** Is your architecture experience real and at the right altitude (enterprise/platform vs single-project)? Are location, visa, notice period and comp aligned? Can you tell a crisp, senior story in 90 seconds?
 
 **Q: Walk me through your background in 90 seconds, architect-level.**
-- *Strong-answer skeleton:* 14 years → progression from developer to Technical Lead/Architect at Microsoft → own end-to-end architecture strategy, technology selection, delivery risk and cost across Fortune 500 + government engagements → GenAI/Azure specialization with production RAG and multi-agent systems → led/influenced teams from 6 to 40+ engineers → AZ-305 (Solutions Architect Expert) plus AI-102/AZ-204/AZ-104/AZ-400.
-- **Key points:** Ownership language ("I own," not "I contributed to"), quantified scale, a certification that maps directly to the JD (AZ-305), and — for an LCC — at least one *cost-optimisation* proof point.
-- **Red flags:** Talking only about code; no mention of governance, stakeholders, cost, or trade-offs; can't name a scale metric.
+
+> "I'm an AI & cloud architect with 14 years' experience, currently a Technical Lead/Architect at Microsoft. I own end-to-end solution architecture — technology selection, NFRs, delivery risk and cost — for Fortune 500 and government clients. My deepest scale work is a connected-vehicle platform serving 20M+ vehicles at ~2M telemetry messages a minute across four regions, where I owned a 98–99% SLA, the event-ingestion architecture and incident patterns. I also delivered a UAE-government data-sovereignty programme, migrating regulated data into governed SQL with Microsoft Purview lineage for two government entities. On the AI side I've shipped production RAG and multi-agent systems on Azure AI Foundry with explicit cost and model governance. I'm AZ-305 (Solutions Architect Expert) plus AI-102, AZ-204, AZ-104 and AZ-400. What draws me to flydubai specifically is the LCC problem shape — merchandising, ancillary revenue and cost-per-transaction discipline — layered on an Azure-first stack, which is exactly where I operate."
+
+- **Key points:** ownership language ("I own"), quantified scale, an AZ-305 hook that maps to the JD, and at least one **cost-optimisation** proof point (LCCs care).
+- **Red flags:** only talking about code; no governance/stakeholders/cost; can't name a scale metric.
 
 **Q: Why flydubai / why an LCC?**
-- *Strong-answer skeleton:* Genuine UAE exposure (delivered a UAE Government data-sovereignty/governance engagement — Informatica → SQL + Purview, 2 government entities). Interest in flydubai's Azure-first, cost-disciplined, digitally-merchandised model and the distinctive Emirates–flydubai integration challenge. Openness to relocation already stated.
-- **Key points:** Cite the actual UAE project; show you understand an LCC is a *merchandising and cost* business, not a scaled-down full-service airline; be concrete about relocation readiness (visa sponsorship required, timeline).
-- **Red flags:** Generic "I love aviation"; treating flydubai as "just a small Emirates"; unclear on relocation logistics.
 
-**Q: What's your target compensation and notice period?**
-- *Strong-answer skeleton:* State a tax-free AED band researched for Solutions Architect level in Dubai, note current notice period, and ask about the relocation/housing package structure explicitly (a normal ask in UAE hiring).
-- **Key points:** Research-backed number, not a guess; comfortable discussing allowances (housing, schooling, flights) as part of total comp.
-- **Red flags:** Refusing to give a number; anchoring only on home-country comp without adjusting for tax-free AED and relocation costs.
+> "Two reasons. First, genuine regional fit — I've already delivered a UAE-government data-sovereignty engagement, so I understand PDPL, residency and governed-data expectations here, not as theory. Second, the LCC engineering problem is genuinely interesting to me: an LCC lives or dies on ancillary attach-rate, conversion and cost-per-seat, so the booking and offer path is the commercial core, not a back-office system. flydubai's Azure-first stack and the distinctive Emirates–flydubai integration — making two carriers on two different PSS feel like one journey — are exactly the kind of problems I want to own. And I've already stated I'm open to relocating to the UAE."
+
+- **Key points:** cite the real UAE project; show you understand an LCC is a *merchandising and cost* business; be concrete on relocation (visa sponsorship required, timeline).
+- **Red flags:** generic "I love aviation"; treating flydubai as "a small Emirates"; vague on relocation.
+
+**Q: Target compensation and notice period?**
+
+> "My notice is [X weeks]. On comp, I'm benchmarking against Solutions Architect roles in Dubai on a tax-free AED total-package basis, so I'd want to look at base plus the housing, schooling and flight allowances together rather than just base — I'm targeting a total package in the [researched AED band]. Could you share how the relocation and housing package is structured for this level?"
+
+- **Key points:** a research-backed number; comfort discussing allowances as part of total comp; you understand tax-free changes the maths.
+- **Red flags:** refusing a number; anchoring only on home-country base without adjusting for tax-free AED and relocation.
 
 ---
 
@@ -64,163 +67,453 @@ Practice out loud. For system design, **drive the requirements yourself** (peak 
 **What they're testing:** Can you operate at platform scope, not just project scope? Do you understand escalation, governance, and enforcing architectural intent across teams you don't manage — in a lean, cost-sensitive org?
 
 **Q: Describe the broadest architectural scope you've owned — how many teams and platforms did your decisions touch?**
-- *Strong-answer skeleton:* Reference the connected-vehicle platform (20M+ vehicles, ~2M telemetry msgs/min, EMEA/Russia/Americas/Asia) — architecture decisions rippled across regional platform teams, not one project; SLA ownership (98–99%) is a platform-level commitment. Pair with the UAE government marketplace work, where architecture had to satisfy two separate entities' governance requirements simultaneously.
-- **Key points:** Multi-team blast radius, SLA/NFR ownership at platform level, working across organizational/regulatory boundaries.
-- **Red flags:** Every example is single-team/single-project; no decision reconciled across conflicting stakeholder requirements.
 
-**Q: How do you keep several teams building consistently with your architectural intent when you don't manage them — without heavyweight process?**
-- *Strong-answer skeleton:* Written artifacts first (ADRs/RFCs), not verbal alignment; a lightweight design-time review gate, not just at release; a small set of non-negotiable NFRs (security, observability, **cost tagging** — crucial for an LCC) enforced via templates/golden paths rather than manual review of everything; a pre-defined escalation owner so a disagreement has a known resolution path.
-- **Key points:** Artifact-driven governance, golden paths over gatekeeping, pre-defined escalation, cost-awareness baked into the standard.
-- **Red flags:** "I just talk to people a lot" with no repeatable mechanism; pure command-and-control review that a lean org can't sustain.
+> "The connected-vehicle platform is my clearest example of platform-scope, not project-scope, ownership. It served 20M+ vehicles at ~2M messages/minute across EMEA, Russia, the Americas and Asia. My architecture decisions there — the ingestion/streaming topology, partitioning strategy, back-pressure handling and the regional failover model — weren't scoped to one team; they set constraints that every regional platform team had to build within, and the 98–99% SLA was a platform-level commitment I owned, not a single team's. My second example is the UAE-government marketplace, where the architecture had to satisfy **two** separate government entities' governance and residency requirements simultaneously — so the hard part wasn't the tech, it was reconciling conflicting stakeholder constraints into one design that both would accept. Both are the kind of 'your decision ripples across many teams and you own the NFRs' scope this role needs."
 
-**Q: Tell me about a time your architecture and another architect's conflicted. What happened?**
-- *Strong-answer skeleton:* STAR — name the actual trade-off (e.g., in-flight document processing without persistent storage vs. another team's audit-log requirement on the automotive invoice project), how it was resolved (ephemeral processing + a compliant audit trail via structured logging, not raw document storage), and what changed afterward (it became the template pattern for future document-processing services).
-- **Key points:** Specific technical conflict, a documented resolution, a durable artifact/pattern that outlived the disagreement.
-- **Red flags:** Vague "we talked it through"; no lasting artifact; blames the other architect.
+- **Key points:** multi-team blast radius, platform-level SLA/NFR ownership, reconciling conflicting stakeholders.
+- **Red flags:** every example is single-team/single-project; no decision reconciled across conflicting requirements.
+
+**Q: How do you keep several teams building to your architectural intent when you don't manage them — without heavyweight process a lean org can't afford?**
+
+> "Three mechanisms, in order. First, **write it down** — architectural intent lives in ADRs and lightweight RFCs, not in my head or in meetings, so a team building six weeks later has a durable, linkable decision with its context and trade-offs. Second, **golden paths over gatekeeping** — I encode the non-negotiables (identity via Entra, structured logging/observability, cost tagging, secrets handling) into templates, pipeline checks and reference implementations, so the *easy* path is the *compliant* path and I'm not manually reviewing every PR. Third, a **design-time review gate, not a release-time one** — a 30-minute architecture review when a design is still cheap to change, plus a pre-agreed escalation owner (the Enterprise Architect or the ART lead) so a genuine disagreement has a known, fast resolution path instead of stalling delivery. For a lean LCC the key is that governance has to *accelerate* delivery — templates and automated checks do that; a heavyweight review board doesn't."
+
+- **Key points:** artifact-driven governance, golden paths, design-time gate, pre-defined escalation, cost-tagging as a first-class NFR.
+- **Red flags:** "I talk to people a lot" with no repeatable mechanism; a command-and-control board a lean org can't sustain.
+
+**Q: Tell me about a time your architecture and another architect's conflicted.**
+
+> "On the automotive invoice-intelligence platform I designed **in-flight document processing with no persistent storage** — documents were processed in memory and discarded — to meet a strict security/compliance bar. Another architect on the audit side needed a durable audit trail of every document processed, which looked like a direct contradiction with 'don't store the document.' We resolved it by separating the two concerns: we never persisted the raw document, but we persisted a **structured, hashed audit record** (document hash, extracted fields, decision, timestamps, actor) — enough to prove what happened and reconstruct the decision without retaining sensitive content. I wrote it up as an ADR, and it became the **template pattern** for every subsequent document-processing service. The lasting value wasn't winning the argument; it was that the resolution outlived the disagreement as a reusable standard."
+
+- **Key points:** a specific technical conflict, a documented resolution that satisfied both, a durable artifact/pattern.
+- **Red flags:** vague "we talked it through"; no lasting artifact; blaming the other architect.
 
 ---
 
 ## Round 3 · System design (LCC / aviation domain)
 
-Five cases mapped to flydubai's actual domains. Always **gather requirements first**: peak transactions/sec, regions/latency budget, consistency needs (strong vs eventual), failure-mode tolerance (can we lose a booking? double-sell a seat?), and — because this is an LCC — **cost per transaction**.
+Six worked cases mapped to flydubai's real domains. In each, notice the discipline: **state requirements with numbers first, draw the components, name where consistency is strong vs eventual, do the capacity math, then failure modes and trade-offs.** Do this live — the panel is scoring your *process* as much as your answer.
 
-### Case 1 — Booking & ancillary merchandising around a PSS you don't own (SabreSonic-style)
-Design the orchestration/merchandising layer that lets flydubai's own channels (app, web, contact centre) sell fares **plus ancillaries** (seats, bags, meals) against a third-party PSS (Sabre SabreSonic) without becoming tightly coupled to it.
-- **Strong-answer skeleton:** Anti-corruption layer between flydubai channels and Sabre's APIs/NDC; own a **canonical offer/order domain model** so ancillaries are merchandised consistently across channels and a future PSS change doesn't ripple everywhere; an **offer/pricing service** that composes fare + ancillary bundles (aligned to IATA Offers & Orders thinking); idempotent writes back to Sabre (order/PNR references, not raw retries) to avoid duplicate bookings; cache read-heavy availability/ancillary-catalog queries with a short TTL and a "confirm at PSS before payment capture" step.
-- **Key points:** Anti-corruption layer, canonical offer/order model, ancillary/merchandising as a first-class concern, idempotency at the PSS boundary, cache-then-confirm before payment.
-- **Follow-ups:** How do you keep ancillary conversion high without over-calling the PSS (cost + latency)? (Cache the catalog + price locally; confirm price/availability at order creation only.)
-- **Red flags:** Proposes replacing Sabre; treats ancillaries as an afterthought; no idempotency story; "just call the API" for a payment-bearing flow.
+### Case 1 — Booking & ancillary merchandising around SabreSonic (a PSS you don't own)
 
-### Case 2 — Loyalty integration: OPEN and Emirates Skywards across two carriers
-Design accrual/redemption so that a flydubai flight earns the correct **Emirates Skywards** Miles/Tier Points (the unified currency), while respecting flydubai's own OPEN mechanics and Emirates' program rules — across two independently-owned loyalty platforms.
-- **Strong-answer skeleton:** Event-driven: flight-completion event → accrual calculation (fare class, tier multiplier, cross-carrier earning rules) → **append-only, auditable ledger** → member balance projection (read model) updated async; **redemption is the harder path** — needs strong consistency (no double-spend) via a transactional outbox / optimistic locking; because Skywards is owned by a *partner* program, the cross-program exchange runs through a **reconciliation/settlement boundary** (near-real-time earning event, but authoritative settlement reconciled in batch), with an anti-corruption layer isolating flydubai from Skywards' contract changes.
-- **Key points:** Append-only ledger + CQRS-style read projection, strong consistency only for redemption, cross-program integration as a settlement/reconciliation boundary (not naive real-time), anti-corruption between the two programs.
-- **Follow-ups:** A member's flydubai flight didn't credit Skywards Miles — how do you investigate across two systems? (Correlation ID on the earning event, ledger replay on both sides, reconciliation report — not "look at current balance.")
-- **Red flags:** Single mutable balance column with no audit trail; assumes both programs can share one synchronous database; treats accrual and redemption as the same consistency problem.
+*Design the orchestration/merchandising layer that lets flydubai's channels (app, web, contact centre) sell fares **plus ancillaries** against Sabre SabreSonic without tightly coupling to it.*
+
+**Requirements & scale.** Assume ~1,000–3,000 availability searches/sec at peak (shopping) but only ~10–50 bookings/sec (look-to-book on an LCC is often 100:1 to 1000:1); a **price-accuracy** hard requirement (never charge a stale ancillary price); payment involved, so PCI-DSS scope; p95 search latency budget ~300–500 ms; booking must be **idempotent** (a double-submit or retry must never create two PNRs). Cost target: minimise paid Sabre API calls, which dominate marginal cost.
+
+**Architecture.**
+```
+                 ┌──────────────┐
+  web / app  ───▶│ Front Door/CDN│───▶ static assets, WAF, DDoS
+                 └──────┬───────┘
+                        ▼
+                 ┌──────────────┐   authN/Z, rate-limit, versioning
+                 │   APIM (GW)  │
+                 └──────┬───────┘
+                        ▼
+        ┌───────────────────────────────┐
+        │  Shopping/Offer service (AKS) │◀── competitor & demand signals
+        │  - fare + ancillary bundling  │
+        │  - Offer cache (Redis)        │
+        └───────┬───────────────┬───────┘
+                │ (read)        │ (write, at order time only)
+                ▼               ▼
+        ┌──────────────┐  ┌───────────────────────┐
+        │ Availability │  │ Booking/Order service │──▶ Payments (PCI, tokenised)
+        │ cache (Redis)│  │  - idempotency store   │
+        └──────┬───────┘  │  - Sabre ACL           │
+               │          └───────────┬───────────┘
+               │  cache-miss / confirm │  order create/modify
+               └──────────────┬────────┘
+                              ▼
+                    ┌───────────────────┐
+                    │  Sabre SabreSonic │  (RES/INV/DCS, NDC)  ◀ system of record
+                    └─────────┬─────────┘
+                              ▼ order events (outbox → Event Hubs)
+        ┌────────────┬──────────────┬─────────────┐
+        ▼            ▼              ▼             ▼
+   Loyalty     Notifications   Analytics/DL   Ancillary fulfilment
+```
+
+**Anti-corruption layer (ACL).** All Sabre calls go through a single ACL that translates Sabre's models to a **canonical offer/order domain model**. Channels depend on the canonical model, so a Sabre change (or a future PSS swap) is absorbed in one place instead of rippling into every app.
+
+**Data & consistency.** Sabre is the **single source of truth** for inventory and PNRs — I do **not** hold a competing booking database. I keep two short-TTL read caches (availability, ancillary catalog+price) to serve the read-heavy shopping traffic cheaply, and I apply a **cache-then-confirm** rule: I can *show* a cached price, but I re-validate price and availability **at order creation, before payment capture**, so a stale cache can never charge the wrong amount. Booking writes carry an **idempotency key** (channel + client-generated request id) persisted with a unique constraint, so retries/double-submits collapse to one PNR.
+
+**Scale & capacity.** At 2,000 searches/sec with a 90% cache hit rate, only ~200 calls/sec reach Sabre — an order-of-magnitude cost saving that is itself an architectural justification. Redis sized for the working set of routes×dates (tens of GB); TTL tuned per volatility (availability seconds-to-minutes, catalog hours). Booking at 50/sec is trivial for the OLTP store.
+
+**Failure modes.** If **Sabre is degraded**: shopping continues in a clearly-labelled degraded mode from cache (read-through with staleness flag); new bookings **queue with honest customer messaging** and are reconciled when Sabre recovers — never a silent success. Circuit-breaker around the ACL (half-open probing) so we shed load instead of hammering a sick dependency. Payments stay isolated in PCI scope; a payment success with a failed PSS write becomes a **compensating action** (saga) that either completes the booking on recovery or refunds — never take money without a booking.
+
+**Trade-offs & alternatives.** (a) *Own a full booking DB and sync with Sabre* — rejected: you inherit a two-master consistency nightmare and duplicate the vendor's core competency. (b) *Call Sabre directly from each channel, no ACL* — rejected: every channel couples to EDIFACT/NDC quirks and a PSS change is a fleet-wide rewrite. (c) *Cache nothing, always hit Sabre* — rejected on **cost and latency** for an LCC. The chosen design isolates the vendor, protects price integrity, and cuts marginal cost.
+
+**Follow-ups.**
+- *Keep ancillary conversion high without over-calling the PSS?* Cache catalog + price locally with a short TTL; only confirm price/availability at order creation. Pre-warm caches for hot routes ahead of a sale.
+- *Prevent double PNRs on retry?* Idempotency key with a unique constraint at the booking store, plus idempotent order-create semantics at the Sabre boundary (reference the prior request, don't blindly retry).
+
+**Red flags:** proposing to replace Sabre; treating ancillaries as an afterthought; no idempotency; "just call the API" for a money-bearing flow; caching prices with no confirm-before-charge boundary.
+
+### Case 2 — Loyalty across two programs: OPEN and Emirates Skywards
+
+*A flydubai flight must earn the correct **Emirates Skywards** Miles/Tier Points (the unified currency) while respecting flydubai's OPEN mechanics and Emirates' rules — across two independently-owned platforms.*
+
+**Requirements & scale.** ~30M shared Skywards members; accrual events on every completed segment (flydubai does tens of thousands of segments/day); **redemption must never double-spend** (strong consistency); accrual can be **eventually consistent** (miles appearing seconds/minutes later is fine); cross-program settlement must be **auditable** for money-movement between two companies.
+
+**Architecture.**
+```
+ flight completed (DCS) ──▶ [outbox] ──▶ Event Hubs
+                                           │
+                                           ▼
+                              ┌───────────────────────┐
+                              │ Accrual service        │  fare class × tier ×
+                              │  (rules engine)        │  cross-carrier rules
+                              └──────────┬─────────────┘
+                                         ▼ append
+                              ┌───────────────────────┐        ┌───────────────┐
+                              │ Miles LEDGER           │──CQRS─▶│ Balance read   │
+                              │ (append-only, audited) │  proj  │ model (fast)   │
+                              └──────────┬─────────────┘        └───────────────┘
+                                         ▼ (cross-program)
+                              ┌───────────────────────┐   ACL   ┌───────────────┐
+                              │ Settlement/Reconcile   │◀──────▶│ Skywards       │
+                              │ (near-RT earn, batch $)│         │ (partner sys)  │
+                              └───────────────────────┘         └───────────────┘
+ redemption ──▶ Redemption service ──▶ ledger (strong consistency, optimistic lock)
+```
+
+**Data & consistency.** The **ledger is append-only** — every accrual/redemption/adjustment is an immutable entry; the member **balance is a projection** (CQRS), rebuildable by replay. **Accrual** is eventually consistent (fire the earn event, update the projection async). **Redemption** needs **strong consistency to prevent double-spend**: I take a conditional write against the ledger (optimistic concurrency on the member's version, or a serializable transaction) so two concurrent redemptions can't both succeed on the same balance. Because Skywards is a **partner-owned** program, cross-program earning fires near-real-time but the authoritative **money settlement is a batch reconciliation** — I never assume the two systems share a synchronous transaction.
+
+**Scale & capacity.** Ledger grows unbounded, so I partition by member id and roll old entries to cheaper storage with periodic **balance snapshots** so "current balance" doesn't require replaying years of history. "What was my balance on 3 March?" = snapshot + entries since — cheap and provable.
+
+**Failure modes.** If the Skywards ACL is down, earning events **buffer** (Event Hubs retention) and reconcile on recovery; members see a pending state, not a lost mile. A poison earning event goes to a **dead-letter queue** with a correlation id for investigation. Redemption fails **closed** (deny) rather than risk double-spend.
+
+**Trade-offs & alternatives.** (a) *Single mutable balance column* — rejected: no audit trail, impossible to answer disputes or prove settlement between two companies. (b) *Real-time synchronous cross-program calls on every earn* — rejected: couples flydubai's availability to a partner's uptime and creates a distributed transaction across company boundaries. (c) *Same strong consistency for accrual and redemption* — rejected: accrual doesn't need it and paying that cost hurts throughput.
+
+**Follow-ups.**
+- *A flydubai flight didn't credit Skywards Miles — investigate across two systems?* Correlation id on the earn event → check outbox/Event Hubs delivery → ledger entry present? → reconciliation report between the two programs. Never "look at the current balance."
+- *Member disputes a redemption from 3 weeks ago?* Ledger replay/audit trail shows the exact entries; the balance is derived, so the history is the truth.
+
+**Red flags:** mutable balance with no ledger; assuming both programs share one DB; treating accrual and redemption as the same consistency problem.
 
 ### Case 3 — Emirates–flydubai codeshare / interline integration (the signature flydubai case)
-Design the integration that makes an Emirates + flydubai itinerary feel like **one journey**: aligned schedules and availability, single/linked PNR, **through-check-in and baggage transfer at DXB**, and coordinated disruption handling — spanning **two different PSS platforms** (Sabre for flydubai, Amadeus Altéa for Emirates).
-- **Strong-answer skeleton:** Treat each carrier's PSS as an external system behind an anti-corruption layer; build an **interline/codeshare orchestration service** exchanging schedule/availability and booking/interline messages over IATA standards (EDIFACT/NDC, interline messaging); own a **canonical itinerary model** spanning both segments so downstream (baggage, notifications, disruption) doesn't care which PSS owns which leg; baggage transfer is an **event + reconciliation** problem across two DCS systems (bag-tag events, sortation, mishandled-bag fallback); disruption/IRROPS must coordinate re-accommodation across both carriers with clear ownership per segment.
-- **Key points:** Two-PSS anti-corruption, canonical cross-carrier itinerary model, standards-based interline messaging, baggage as cross-DCS events with reconciliation, disruption coordination with per-segment ownership.
-- **Follow-ups:** A passenger misconnects DXB because the flydubai inbound is late — which system owns the rebooking, and how do both PSS stay consistent? (Segment-owning carrier owns its rebooking; orchestration layer coordinates and keeps the canonical itinerary authoritative; no silent double-booking on either PSS.)
-- **Red flags:** Assumes one shared PSS; ignores that baggage/DCS are per-carrier; no canonical model, so every downstream system has to special-case each PSS.
+
+*Make an Emirates + flydubai itinerary feel like **one journey**: aligned schedules/availability, linked PNR, **through-check-in and baggage transfer at DXB**, coordinated disruption — spanning **two different PSS** (Sabre for flydubai, Amadeus Altéa for Emirates).*
+
+**Requirements & scale.** Two systems of record that will never merge; a passenger expects one booking, one bag-drop, one set of connections; DXB is the hub where bags and passengers transfer between T2/T3; disruption on one carrier's leg must trigger coordinated re-accommodation; interline settlement (who owes whom) must be auditable.
+
+**Architecture.**
+```
+        ┌───────────────────────────────────────────┐
+        │   Interline/Codeshare Orchestration svc    │
+        │   - canonical cross-carrier ITINERARY model│
+        │   - per-segment ownership map              │
+        └───────┬───────────────────────────┬────────┘
+             ACL│ (EDIFACT/NDC, interline)   │ACL
+                ▼                            ▼
+        ┌──────────────┐             ┌──────────────┐
+        │ flydubai PSS │             │ Emirates PSS │
+        │ (SabreSonic) │             │ (Amadeus     │
+        │  RES/INV/DCS │             │  Altéa)      │
+        └──────┬───────┘             └──────┬───────┘
+               │ bag-tag/scan events        │
+               ▼                            ▼
+        ┌───────────────────────────────────────────┐
+        │  Baggage reconciliation (cross-DCS events) │
+        │  bag state machine + mishandled fallback   │
+        └───────────────────────────────────────────┘
+```
+
+**Data & consistency.** Each PSS stays authoritative for **its own segment**; the orchestration layer owns a **canonical itinerary** that references both segments and records **which carrier owns which leg** (so rebooking authority is never ambiguous). There is **no shared booking database** — consistency is achieved by **exchanging standards-based interline messages** (IATA EDIFACT/NDC, interline e-ticketing) through per-carrier ACLs, plus an eventual-consistency reconciliation loop. Baggage transfer is modelled as a **cross-DCS event stream + state machine**: bag-tag/scan events from both DCS systems drive a per-bag state (checked → loaded → transferred → delivered), with a **mishandled-bag fallback** when the two systems disagree.
+
+**Failure modes.** If one carrier's PSS is down for maintenance, the other carrier can still sell/service its own leg because the canonical itinerary and ACL decouple them; the down segment shows a pending state and reconciles on recovery. On a **misconnect** (flydubai inbound late → missed Emirates connection): the **segment-owning carrier owns its rebooking**, the orchestration layer coordinates and keeps the canonical itinerary authoritative, and neither PSS is double-booked because each write goes through its own idempotent ACL.
+
+**Trade-offs & alternatives.** (a) *One shared PSS* — impossible/undesirable; two companies, two vendors, two roadmaps. (b) *Point-to-point integrations between every app and both PSS* — rejected: N×2 coupling and every downstream system special-cases each PSS. (c) *Batch-only reconciliation* — rejected for the passenger-facing path (too slow for connections); batch is fine for **settlement** but the itinerary/baggage path needs event-time coordination.
+
+**Follow-ups.**
+- *Which system owns the rebooking on a misconnect, and how do both PSS stay consistent?* The carrier that owns the affected segment; orchestration coordinates; canonical itinerary stays authoritative; idempotent ACL writes prevent double-booking.
+- *Baggage state disagreement between the two DCS?* Last-writer-wins per bag within a reconciliation window, plus a mishandled-bag exception workflow — not "latest message wins" blindly.
+
+**Red flags:** assuming a shared PSS; ignoring that baggage/DCS are per-carrier; no canonical model, so everything special-cases each PSS.
 
 ### Case 4 — Irregular operations (IRROPS) for a point-to-point LCC network
-A sandstorm closes DXB for six hours. Design the system that re-accommodates affected flydubai passengers across a mostly point-to-point Boeing 737 network with high aircraft utilisation.
-- **Strong-answer skeleton:** Burst-load, priority-queueing problem — expect 50–100x normal rebooking volume in minutes; an auto-rebooking rules engine (tier priority, connection risk, fare rules, **ancillary re-fulfilment** for paid seats/bags) generates candidate itineraries against live inventory, falling back to human agents for edge cases; design for **graceful degradation** (batch + queue-depth-driven customer comms) rather than assuming real-time for everyone; because a single-fleet LCC has thin aircraft/crew slack, surface **crew/aircraft constraints** into re-accommodation options; run decision-support tooling from a secondary region because DXB itself may be degraded.
-- **Key points:** Burst/priority-queue design, rules engine + human fallback, ancillary re-fulfilment, LCC crew/aircraft scarcity, explicit degraded-mode UX, geographic failover for tooling.
-- **Follow-ups:** How do you stop the rebooking engine from double-selling seats while thousands race for the same inventory? (Optimistic concurrency + PSS as single source of truth for seat state — ties back to Case 1.)
-- **Red flags:** Assumes normal-load architecture scales linearly; no human fallback; forgets ancillaries the passenger already paid for; forgets the tooling itself must survive the outage.
 
-### Case 5 — Dynamic pricing & ancillary revenue optimisation
-Design a system that recommends fare and ancillary price adjustments in near-real-time from demand signals, safely — the commercial heart of an LCC.
-- **Strong-answer skeleton:** A pricing/offer service consumes demand signals (searches, load factor, competitor fares, time-to-departure) and produces bounded recommendations; **guardrails are the architecture**: hard min/max bounds, rate-of-change limits, human approval above a threshold, full audit trail, and a fast kill-switch/rollback; ancillary pricing (seats/bags/meals) is optimised per-segment; the ML models sit behind an MLOps pipeline with versioning, drift monitoring, and shadow/A-B evaluation before any price goes live.
-- **Key points:** Bounded, auditable, reversible pricing; guardrails and human-in-the-loop above thresholds; ancillary as its own optimisation surface; MLOps discipline (shadow, drift, rollback).
-- **Follow-ups:** A pricing model starts recommending near-zero fares on a route — what stops that reaching customers? (Bounds + rate limits + anomaly alarm + kill-switch, all before publish — never rely on the model being "correct.")
-- **Red flags:** Unbounded model output straight to the storefront; no rollback/kill-switch; no audit trail; treating dynamic pricing as a pure data-science problem with no guardrail architecture.
+*A sandstorm closes DXB for six hours. Re-accommodate affected passengers across a mostly point-to-point Boeing 737 network with high utilisation and thin slack.*
 
-### Case 6 — Multi-region data residency & DR
-flydubai operates from the UAE (home jurisdiction) and flies into the EU (GDPR) and other markets with local rules. Design the data architecture.
-- **Strong-answer skeleton:** Residency isn't "one Azure region" — it needs a **data-classification model** (PII, payment/PCI, regulated, operational telemetry) with per-classification placement rules; UAE-resident systems for local regulatory data, EU-appropriate processing for GDPR subjects, with cross-border transfer mechanisms only where genuinely needed; DR strategy (active-active vs active-passive) chosen per criticality tier and RTO/RPO, not one global story; prove compliance with lineage/governance tooling (Purview-class), not a spreadsheet.
-- **Key points:** Classification drives placement, explicit cross-border justification, DR varies by tier, PCI-DSS isolation for payments, auditable lineage.
-- **Red flags:** "Replicate everything everywhere"; no classification step; unaware UAE PDPL and GDPR differ; payments not isolated for PCI.
+**Requirements & scale.** Expect **50–100× normal rebooking volume in minutes**; a hard need to avoid double-selling seats while thousands race; passengers have **paid ancillaries** (seats/bags) that must be re-fulfilled; crew/aircraft slack is thin on a single-fleet LCC, so options are constrained; the tooling itself must survive a degraded DXB.
+
+**Architecture & approach.** This is a **burst-load, priority-queue** problem, not steady-state. Affected passengers enter a **priority queue** (tier, connection risk, fare rules, special-needs). A **rules-engine + optimiser** generates candidate itineraries against **live Sabre inventory**, honouring crew/aircraft constraints surfaced from ops systems, and **re-fulfils paid ancillaries** on the new itinerary. High-confidence matches auto-rebook; ambiguous/edge cases **fall back to human agents**. Customer comms are **queue-depth-driven** (batch notifications with realistic ETAs) rather than pretending every passenger gets instant real-time handling. **Decision-support tooling runs from a secondary Azure region** because DXB infra may itself be degraded.
+
+**Consistency.** Seat assignment uses **optimistic concurrency with Sabre as the single source of truth** — the rebooking engine proposes, Sabre confirms; a lost race retries against fresh inventory. No local seat-map "truth" that can drift.
+
+**Failure modes.** If the optimiser is overwhelmed, degrade to **rules-only** auto-rebooking plus agent queues (graceful degradation), never a hard stop. If comms provider throttles, batch and back off with backpressure.
+
+**Trade-offs.** (a) *Assume normal-load architecture scales linearly* — rejected: 100× bursts need queueing/backpressure, not just autoscale. (b) *Fully automated, no humans* — rejected: edge cases and duty-of-care need agents. (c) *Real-time individual processing for all* — rejected: batch + honest ETAs is more reliable under burst.
+
+**Follow-ups.** *Stop the engine double-selling seats?* Optimistic concurrency + Sabre as source of truth (ties to Case 1's idempotency). *Passenger already paid for seat/bag?* Ancillary re-fulfilment is part of the rebooking transaction, with automatic refund if it can't be honoured.
+
+**Red flags:** linear-scale assumption; no human fallback; forgetting paid ancillaries; forgetting the tooling must survive the outage.
+
+### Case 5 — Dynamic pricing & ancillary revenue optimisation (the commercial core)
+
+*Recommend fare and ancillary price adjustments in near-real-time from demand signals — safely.*
+
+**Requirements & scale.** Inputs: searches, load factor, time-to-departure, competitor fares, historical demand. Output: a bounded price recommendation per fare/ancillary per segment. Hard constraint: **a model error must never publish an absurd fare to customers**. Revenue impact is direct, so **guardrails are the architecture**, not an add-on.
+
+**Architecture.**
+```
+ demand/competitor signals ──▶ Feature store ──▶ Pricing model (versioned)
+                                                        │ recommendation
+                                                        ▼
+                                         ┌──────────────────────────┐
+                                         │  Guardrail / policy layer │
+                                         │  - hard min/max bounds     │
+                                         │  - max rate-of-change      │
+                                         │  - anomaly detector        │
+                                         │  - human approval > thresh │
+                                         │  - kill-switch / rollback  │
+                                         └────────────┬─────────────┘
+                                                      ▼ published price
+                                            Offer service / storefront
+                                                      │
+                                            (shadow + A/B logs) ──▶ eval
+```
+
+**Design.** The model sits behind an **MLOps pipeline** (feature store, versioning, drift monitoring, shadow deployment, A/B). Its output is **never trusted directly**: a **policy/guardrail layer** enforces hard min/max bounds, a maximum rate-of-change per interval, an anomaly detector, human approval above a configurable threshold, a full audit trail of every price change, and a **fast kill-switch** to revert to a safe rules-based baseline. Ancillary pricing (seats/bags/meals) is a **separate optimisation surface** with its own bounds.
+
+**Failure modes.** A model that starts recommending near-zero fares is **caught by bounds + rate-limits + anomaly alarm before publish**, and the kill-switch reverts to the baseline. A drifting model trips the drift monitor and is rolled back to the last-known-good version.
+
+**Trade-offs.** (a) *Model output straight to storefront* — rejected: one bad model = revenue disaster. (b) *Pure rules, no ML* — safer but leaves revenue on the table; use rules as the **fallback baseline**, ML as the optimiser on top. (c) *Human approval on every change* — too slow; approve only above a materiality threshold.
+
+**Red flags:** unbounded output to the storefront; no rollback/kill-switch; no audit trail; treating pricing as a pure data-science problem with no guardrail architecture.
+
+### Case 6 — Multi-region data residency, payments & DR
+
+*flydubai operates from the UAE and flies into the EU (GDPR) and other jurisdictions. Design the data architecture.*
+
+**Requirements.** UAE PDPL/TDRA residency for local regulatory data; GDPR obligations for EU passengers; **PCI-DSS** isolation for cardholder data (central to a direct-sell LCC); different criticality tiers need different RTO/RPO.
+
+**Design.** Start with a **data-classification model** — PII, payment/PCI, regulated, operational telemetry — and derive **per-classification placement rules**, because "put everything in one region" fails both residency and cost tests. UAE-resident stores for local regulatory data; EU-appropriate processing for GDPR subjects, with cross-border transfer mechanisms (SCCs/adequacy) **only where genuinely needed and justified in an ADR**. **Payments** are tokenised and isolated in a PCI-scoped service so cardholder data never touches the main application estate. **DR** is chosen **per tier**: active-active for the booking/offer path (revenue-critical, low RTO), active-passive for back-office; not one global story. Prove compliance with **lineage/governance tooling (Purview-class)**, not a manual spreadsheet — which maps directly to my UAE-government Purview experience.
+
+**Follow-up.** *Prove to an auditor EU data never left EU storage for 12 months?* Data lineage/catalog evidence plus access logs — and the architecture made it provable by classifying and placing data deliberately, not by hoping.
+
+**Red flags:** "replicate everything everywhere"; no classification; unaware PDPL and GDPR differ; payments not PCI-isolated.
 
 ---
 
 ## Round 4 · Coding / technical deep-dive
 
-**What they're testing:** Can you go from architecture diagram to real implementation trade-offs? Comfort in the JD's stack (cloud-native, event-driven, APIs) with an LCC's cost lens.
+**What they're testing:** Can you go from diagram to real implementation trade-offs? Comfort in the JD's stack (cloud-native, event-driven, APIs) with an LCC's cost lens. Below are **worked** answers with real code.
 
-- **Idempotent event consumer.** Implement a Kafka/Event-Hubs/Service-Bus consumer that processes a "flight completed" event exactly-once from the accrual service's point of view, given at-least-once delivery. *(Answer: idempotency key = flight+passenger+event-type with a unique constraint, or an outbox + processed-events table.)*
-- **API versioning across consumers.** Multiple channels (web, app, OTAs/GDS) consume your booking/offer API and you need a breaking change. Version and migrate without a big-bang release. *(Answer: additive-first, deprecation window with telemetry on old-version usage, contract testing, and a documented ADR for the sunset date.)*
-- **Circuit breaker around a flaky dependency.** A partner/interline or GDS endpoint is unreliable. Implement/describe a circuit breaker + fallback for availability lookups. *(Answer: breaker with half-open probing, fallback to last-known/cached availability with a staleness flag surfaced to the user — not a silent stale read.)*
-- **Concurrency control for seat/ancillary assignment.** Two booking requests race for the same seat. Walk through optimistic vs pessimistic locking trade-offs and pick one with justification.
-- **Cost-aware caching.** Design a cache for the ancillary catalog/pricing that minimises expensive PSS calls without ever charging a stale price — where's the "confirm at PSS" boundary?
+**1) Idempotent event consumer (exactly-once *effect* on at-least-once delivery).**
+The transport (Event Hubs/Service Bus/Kafka) gives at-least-once, so duplicates *will* arrive. Make the **effect** idempotent with a processed-events table and a unique constraint inside the same transaction as the business write:
+
+```csharp
+// C# — accrual consumer; "flight completed" may be delivered more than once.
+public async Task HandleAsync(FlightCompletedEvent e, CancellationToken ct)
+{
+    // Idempotency key = the natural business identity of the effect.
+    var key = $"{e.FlightId}:{e.PassengerId}:accrual";
+
+    await using var tx = await _db.BeginTransactionAsync(ct);
+    try
+    {
+        // INSERT fails on the unique constraint if we've seen this key before.
+        await _db.ExecuteAsync(
+            "INSERT INTO processed_events(idempotency_key, processed_at) VALUES(@k, SYSUTCDATETIME())",
+            new { k = key }, tx);
+
+        var miles = _rules.CalculateMiles(e);          // fare class × tier × partner rules
+        await _ledger.AppendAsync(e.MemberId, miles, key, tx);  // append-only ledger entry
+
+        await tx.CommitAsync(ct);                       // atomic: dedupe + effect together
+    }
+    catch (UniqueConstraintViolation)                   // duplicate delivery
+    {
+        await tx.RollbackAsync(ct);                     // already processed → no-op, ack the message
+    }
+}
+```
+Key point: the dedupe row and the ledger write commit **atomically**, so a crash between them can't double-credit. This is the **inbox** side of the inbox/outbox pattern.
+
+**2) Transactional outbox (reliable publish without dual-write).**
+Never write to your DB *and* publish to a broker in two separate steps — a crash between them loses or duplicates events. Write the event to an `outbox` table **in the same transaction** as the state change; a relay publishes and marks it sent:
+
+```sql
+BEGIN TRAN;
+  UPDATE orders SET status = 'CONFIRMED' WHERE order_id = @id;
+  INSERT INTO outbox(id, topic, payload, created_at, sent)
+  VALUES (NEWID(), 'order.confirmed', @json, SYSUTCDATETIME(), 0);
+COMMIT;   -- state change and event are now atomic
+-- A background relay (or CDC/Debezium) reads unsent rows, publishes, sets sent=1.
+```
+
+**3) Circuit breaker + fallback around a flaky dependency (GDS/interline).**
+
+```python
+# Half-open circuit breaker: shed load from a sick dependency, serve stale-with-flag.
+class Breaker:
+    def __init__(self, fail_threshold=5, cooldown=30):
+        self.fails, self.open_until, self.f, self.cd = 0, 0, fail_threshold, cooldown
+    def call(self, fn, fallback):
+        now = time.time()
+        if now < self.open_until:                 # OPEN → don't even try
+            return fallback(stale=True)
+        try:
+            r = fn(); self.fails = 0; return r    # success resets (also closes half-open)
+        except DependencyError:
+            self.fails += 1
+            if self.fails >= self.f:
+                self.open_until = now + self.cd   # trip to OPEN
+            return fallback(stale=True)           # last-known value, flagged stale (never silent)
+```
+Key point: the fallback returns **last-known availability with an explicit staleness flag** surfaced to the user — a silent stale read is worse than a visible one.
+
+**4) Concurrency control for seat/ancillary assignment (optimistic vs pessimistic).**
+Two bookings race for seat 12A. **Optimistic** wins for high-read/low-contention web traffic — no held locks, cheaper, but the loser must retry:
+
+```sql
+-- Optimistic: succeed only if the row hasn't changed since we read it (version check).
+UPDATE seat_assignment
+   SET passenger_id = @pax, version = version + 1
+ WHERE flight_id = @f AND seat = '12A' AND version = @seenVersion;
+-- @@ROWCOUNT = 0  → someone else took it → re-read fresh inventory and retry/offer alternative.
+```
+Pessimistic (`SELECT ... FOR UPDATE`) is justified only for genuinely high-contention rows (e.g., the last seat in a flash sale), where retry storms would be worse than a short lock. State the trade-off and pick deliberately.
+
+**5) Cost-aware caching with a confirm boundary.**
+Cache the ancillary catalog/price with a short TTL to cut expensive PSS calls, but **re-validate at order creation before payment** so a stale cache can never charge a wrong price:
+
+```
+show price (from cache, may be stale)  →  add to cart  →
+   AT ORDER CREATE: reprice+reconfirm against PSS  →  if changed, tell customer; else capture payment
+```
+The "confirm at PSS" step is the hard boundary between *cheap reads* and *correct money*.
 
 ---
 
 ## Round 5 · Cloud & data architecture (Azure-first)
 
-**What they're testing:** Real Azure depth mapped to flydubai's Azure-first, cost-disciplined reality — not "read the docs" answers.
+**What they're testing:** Real Azure depth mapped to flydubai's Azure-first, cost-disciplined reality.
 
-- **AKS / App Service for a lean platform.** How do you structure namespaces/environments so several teams share infrastructure without stepping on each other's blast radius or cost allocation — while keeping run-cost low for an LCC?
-- **APIM as the integration front door.** How would you use Azure API Management to expose booking/offer/loyalty APIs to partners (Emirates interline, OTAs, GDS, aggregators) with per-partner rate limiting, versioning, and NDC-shaped payload validation?
-- **Data platform + governance.** Design the data platform feeding revenue management, ancillary/pricing analytics, and personalization from operational systems, with lineage and access control (Purview-class) satisfying UAE/EU compliance.
-- **Cost per transaction.** For an LCC, cloud spend is a P&L line. Where do you attack cost — right-sizing, autoscaling to zero for spiky workloads (Functions/Container Apps), reserved capacity for steady load, caching to cut PSS calls — and how do you make cost visible (tagging, showback)?
-- **Well-Architected review.** Walk through applying the Azure Well-Architected Framework's five pillars (reliability, security, cost, operational excellence, performance) to the booking/offer service from Case 1 — leading with **cost** and **reliability**.
+**Q: How do you structure compute (AKS/Container Apps) for several teams without stepping on each other's blast radius or cost — while keeping run-cost low for an LCC?**
+> Namespace-per-team on a shared AKS cluster gives cost efficiency and a single upgrade surface, with **network policies, resource quotas and separate node pools** to contain blast radius and noisy-neighbour risk; cluster-per-domain is justified only where isolation/compliance demands it (e.g., PCI). For spiky, event-driven workloads I'd push toward **Azure Container Apps / Functions that scale to zero** rather than always-on AKS pods, because for an LCC idle capacity is wasted margin. Cost is made visible with **tag-based showback per team/product** so each ART sees its cost-per-booking.
+
+**Q: How would you use APIM as the partner front door?**
+> Azure API Management sits in front of booking/offer/loyalty APIs exposed to Emirates interline, OTAs, GDS and aggregators. It enforces **per-partner products with rate limits and quotas**, **contract versioning** (path/header versioning with deprecation windows), **payload validation** against NDC/interline schemas, OAuth2/JWT validation, and response caching for idempotent reads. Regional APIM instances behind Front Door give geo-routing and residency control.
+
+**Q: Design the data platform feeding revenue management, ancillary analytics and personalization.**
+> Operational stores publish changes via **CDC/outbox → Event Hubs → a medallion Data Lake** (bronze raw / silver conformed / gold marts) on ADLS + Synapse/Fabric, with **Purview** for catalog, lineage and access control satisfying UAE/EU compliance. Analytical load is isolated from OLTP (no reporting queries on the booking DB). Freshness is tiered — near-real-time for pricing/ops signals, batch for finance.
+
+**Q: Where do you attack cloud cost for an LCC?**
+> Right-size and autoscale (scale-to-zero for spiky services), **reserved capacity/savings plans** for steady baseline load, **caching to cut paid PSS/GDS calls** (often the biggest marginal cost), lifecycle-tier cold data to cheap storage, and enforce **cost tagging + budgets/alerts** so spend is attributable and anomalies are caught early. Cost is an NFR I review in every design, not a cleanup afterthought.
+
+**Q: Walk a Well-Architected review of the Case 1 booking/offer service.**
+> **Reliability:** circuit breakers around Sabre, queue-and-reconcile on PSS outage, multi-region active-active read. **Security:** Entra workload identity (no embedded secrets), PCI isolation for payments, APIM auth. **Cost:** cache hit-rate as a first-class metric (fewer paid PSS calls), scale-to-zero for spiky compute. **Operational excellence:** IaC, blue/green deploys, structured logging, runbooks. **Performance:** p95 search-latency budget, Redis for read-heavy shopping. I'd lead the readout with **cost and reliability** because that's where the LCC business risk concentrates.
 
 ---
 
 ## Round 5B · Full-stack reference architecture (edge → database)
 
-Walk end-to-end through a passenger-facing booking + ancillary flow, naming the component, its purpose, the trade-off, a lower-cost alternative, and single- vs multi-region considerations at each layer:
+Walk end-to-end through a passenger-facing booking + ancillary flow, naming each component's purpose, the trade-off, a lower-cost alternative, and single- vs multi-region considerations:
 
-1. **Edge/CDN** — Azure Front Door / CDN for static app assets and DDoS protection; trade-off: latency hop on cache miss; lower-cost alt: App Gateway alone at smaller scale.
-2. **API Gateway (APIM)** — auth, rate limiting, partner/GDS contract versioning; trade-off: another hop + per-call cost; multi-region: regional APIM with Front Door geo-routing.
-3. **Offer/booking orchestration service (AKS or Container Apps)** — the anti-corruption + merchandising layer from Case 1; trade-off: complexity vs calling Sabre directly; multi-region: active-active read, active-passive write (PSS is the write authority).
-4. **Event backbone (Event Hubs / Service Bus)** — fan-out to loyalty, notifications, analytics; trade-off: eventual consistency downstream; lower-cost alt: Service Bus topics for lower-throughput domains.
-5. **Order/OLTP store (Azure SQL / Cosmos DB)** — strong consistency for payment/order and loyalty redemption; trade-off: Cosmos DB tunable consistency needs a deliberate choice, not a default.
-6. **Payments (PCI-DSS scope)** — tokenized, isolated payment service; trade-off: added integration vs keeping cardholder data out of the main app; a hard compliance boundary for a direct-sell LCC.
-7. **Data Lake + Purview** — analytics/AI training data with lineage; trade-off: freshness lag vs operational stores.
-8. **Identity (Entra ID / Workload Identity Federation)** — service-to-service auth without embedded secrets; multi-region: token caching to survive a transient IdP blip.
-9. **Observability (Azure Monitor / App Insights + a business-metric layer like Kusto/ADX)** — SLA/SLO **and** cost-per-transaction tracking; trade-off: telemetry volume cost.
+1. **Edge/CDN** — Azure Front Door/CDN for static assets, WAF and DDoS at the edge. *Trade-off:* latency hop on cache miss. *Cheaper alt:* App Gateway alone at smaller scale. *Multi-region:* Front Door geo-routes to the nearest region.
+2. **API Gateway (APIM)** — auth, rate-limiting, partner/GDS contract versioning, schema validation. *Trade-off:* another hop + per-call cost. *Multi-region:* regional APIM behind Front Door.
+3. **Offer/booking orchestration (AKS or Container Apps)** — the ACL + merchandising layer from Case 1. *Trade-off:* complexity vs calling Sabre directly (worth it for decoupling + caching). *Multi-region:* active-active read, active-passive write (PSS is the write authority).
+4. **Cache (Azure Cache for Redis)** — availability + ancillary catalog/price. *Trade-off:* staleness, bounded by TTL + confirm-at-order. *Cheaper alt:* in-process cache for low scale (loses cross-node sharing).
+5. **Event backbone (Event Hubs / Service Bus)** — fan-out to loyalty, notifications, analytics via outbox. *Trade-off:* downstream eventual consistency. *Cheaper alt:* Service Bus topics for lower-throughput domains.
+6. **Order/OLTP store (Azure SQL / Cosmos DB)** — strong consistency for order + loyalty redemption. *Trade-off:* Cosmos tunable consistency is a deliberate choice, not a default.
+7. **Payments (PCI-DSS scope)** — tokenised, isolated payment service; cardholder data never enters the main estate. *A hard compliance boundary for a direct-sell LCC.*
+8. **Data Lake + Purview** — analytics/AI training data with lineage. *Trade-off:* freshness lag vs operational stores.
+9. **Identity (Entra ID / Workload Identity Federation)** — service-to-service auth without embedded secrets. *Multi-region:* token caching to survive a transient IdP blip.
+10. **Observability (Azure Monitor / App Insights + Kusto/ADX)** — SLA/SLO **and** cost-per-transaction telemetry. *Trade-off:* telemetry volume cost at scale; sample high-volume traces.
 
 ---
 
 ## Real-world case studies — how flydubai & the industry actually solve this
 
-- **flydubai + Sabre (SabreSonic).** flydubai selected Sabre's SabreSonic PSS to power its digital transformation and enter the GDS — the reference example of an LCC standardising on a vendor PSS and building channels/merchandising around it rather than running a bespoke reservation core.
-- **flydubai + Microsoft Azure.** flydubai's publicly reported Azure cloud-first move (plus Microsoft 365) is the model for "cost-disciplined, cloud-native LCC IT" — scale on demand, pay for what you use, keep the run-team lean.
-- **OPEN → Emirates Skywards.** The Emirates–flydubai partnership unifying loyalty onto Emirates Skywards is a live example of **integrating two independently-owned loyalty platforms** into one member-facing currency — the archetypal cross-program accrual/redemption/settlement problem.
-- **Emirates–flydubai codeshare.** Aligned schedules, through-check-in, baggage transfer and single-journey marketing across **two different PSS platforms (Sabre + Amadeus Altéa)** — the canonical "make two systems feel like one product via anti-corruption layers and a canonical model" case.
-- **Industry patterns.** Ryanair, Wizz Air and other LCCs have published on ancillary merchandising, dynamic pricing, and cloud cost discipline; IATA's **Offers & Orders / NDC** direction is the distribution backbone. Use these as "here's how the industry solves this class of problem" evidence, not claims about flydubai's internals.
+- **flydubai + Sabre (SabreSonic).** flydubai selected Sabre's SabreSonic PSS to power its digital transformation and enter the GDS — the reference example of an LCC standardising on a vendor PSS and building channels/merchandising around it (anti-corruption layer) rather than running a bespoke reservation core.
+- **flydubai + Microsoft Azure.** flydubai's publicly reported Azure cloud-first move (plus Microsoft 365) is the model for cost-disciplined, cloud-native LCC IT — scale on demand, pay for what you use, keep the run-team lean.
+- **OPEN → Emirates Skywards.** The Emirates–flydubai partnership unifying loyalty onto Emirates Skywards is a live example of **integrating two independently-owned loyalty platforms** into one member-facing currency — the archetypal cross-program accrual/redemption/settlement problem (Case 2).
+- **Emirates–flydubai codeshare.** Aligned schedules, through-check-in, baggage transfer and single-journey marketing across **two different PSS (Sabre + Amadeus Altéa)** — the canonical "make two systems feel like one product via anti-corruption layers and a canonical model" case (Case 3).
+- **Industry patterns.** Ryanair and Wizz Air have published on ancillary merchandising, dynamic pricing and cloud cost discipline; IATA's **Offers & Orders / NDC** is the distribution backbone. Use these as "here's how the industry solves this class of problem," not claims about flydubai internals.
 
 ---
 
 ## Round 6 · AI/ML & MLOps (aviation / LCC-specific)
 
-**What they're testing:** Can you connect your production GenAI/RAG background to an LCC's actual AI use cases?
+**What they're testing:** Can you connect your production GenAI/RAG background to an LCC's real AI use cases — with governance?
 
-- **Dynamic pricing / ancillary optimisation.** Architect near-real-time fare/ancillary recommendations with guardrails (bounded ranges, human approval above a threshold, kill-switch, full audit) — same governance instinct as your LLM cost/model-governance experience, applied to revenue.
-- **Ancillary personalization / next-best-offer.** Recommend the right seat/bag/meal bundle at booking to lift conversion — a recommendation + experimentation problem (shadow, A/B, guardrails against dark-pattern pricing).
-- **Disruption self-service (GenAI).** RAG over fare rules / re-accommodation policy for a chat/voice assistant during IRROPS, with **strict grounding** (no hallucinated refund/rebooking eligibility) — connect to your fine-tuning-vs-RAG trade-off experience.
-- **Predictive maintenance (single fleet).** Boeing 737 sensor telemetry → failure prediction; map to your connected-vehicle telemetry experience (2M msgs/min) — same ingestion/streaming shape, different label. A single fleet type actually *simplifies* the model surface.
-- **MLOps governance at scale.** Model versioning, drift monitoring, rollback, and a clear owner for "who approves a pricing/rebooking model going to production" — exactly the ADR/governance muscle the JD is testing, applied to ML models.
+**Dynamic pricing / ancillary optimisation.** Architect near-real-time fare/ancillary recommendations behind the **guardrail layer from Case 5** (bounded ranges, rate-of-change limits, anomaly detection, human approval above a threshold, audit trail, kill-switch). This is the same instinct as my LLM cost/model-governance work — the model proposes, the policy layer disposes.
+
+**Ancillary personalization / next-best-offer.** Recommend the right seat/bag/meal bundle at booking to lift conversion — a recommender + online-experimentation problem. Serve from a feature store, evaluate with **shadow + A/B**, and guardrail against dark-pattern or discriminatory pricing. Success metric is attach-rate lift, measured, not assumed.
+
+**Disruption self-service (GenAI).** A chat/voice assistant for IRROPS built as **RAG over fare rules / re-accommodation policy** with **strict grounding** — it must cite policy and must **refuse rather than hallucinate** refund/rebooking eligibility. This is exactly my fine-tuning-vs-RAG trade-off experience: RAG for freshness/traceability of policy, with retrieval-quality evals and a "no-answer" path.
+
+**Predictive maintenance (single fleet).** Boeing 737 sensor telemetry → failure prediction maps directly onto my connected-vehicle telemetry experience (~2M msgs/min): the ingestion/streaming/feature shape is the same, only the label differs. A **single fleet type simplifies** the model surface (one airframe/engine family), which is an advantage over a mixed fleet.
+
+**MLOps governance at scale.** Model registry/versioning, drift and data-quality monitoring, automatic rollback, and a **named approver** for "who signs off a pricing/rebooking model going to production." That approval + ADR discipline is precisely the governance muscle the JD is testing, applied to models.
 
 ---
 
 ## Round 7 · Architecture leadership (agile, runway, governance)
 
-**What they're testing:** Direct evidence you can operate architecture governance in a lean, fast-moving org — not just system-design skill.
+**What they're testing:** Can you run architecture governance in a lean, fast org — not just design systems?
 
-- **Architecture runway.** How do you decide what architectural enablers to build 1–2 increments ahead vs what's too speculative — while an LCC pushes hard for feature velocity and low cost?
-- **ADR discipline.** Walk through your ADR process — what triggers one, who reviews it, how deviations get tracked and reconciled.
-- **Technical debt vs velocity.** How do you get debt remediation prioritized against feature and cost work when you don't own the backlog?
-- **Vendor/PoC governance.** Describe running a PoC to validate a new technology (agent framework, vector store, a Sabre capability) and converting the result into a go/no-go architecture decision — not just a demo.
-- **Cross-team consistency without authority.** Two teams built complementary features with incompatible integration patterns. How do you reconcile it after the fact without grinding delivery to a halt?
+**Q: How do you decide what goes on the architecture runway 1–2 increments ahead vs what's too speculative?**
+> The runway holds **enablers that near-term features will provably need** — the ACL for a new partner we've already committed to, the event backbone a queued epic depends on. I fund an enabler when there's a concrete downstream feature within ~2 PIs that would otherwise be blocked or forced into rework; I defer anything speculative to a spike/PoC rather than building it. For an LCC pushing feature velocity, the runway must be *just enough* architecture to keep delivery flowing, not gold-plating.
+
+**Q: Walk me through your ADR process.**
+> An ADR is triggered by a decision that is **costly to reverse or affects multiple teams** (a datastore choice, an integration pattern, a cross-cutting NFR). It captures context, options, the decision, and consequences, is reviewed by the affected architects/ART lead, and lives in a repo next to the code. Deviations aren't forbidden — they're **logged as a tracked exception** with an owner and a reconciliation date, so drift is visible and eventually paid down.
+
+**Q: How do you get tech-debt remediation prioritised when you don't own the backlog?**
+> I make debt **economic and visible** — quantify it as risk/cost (incident hours, cloud waste, change-failure rate) and attach it to a business outcome, then negotiate a standing capacity allocation (e.g., ~15–20% per PI) with the product owner rather than fighting feature-by-feature. Enabler stories on the runway are the SAFe-native vehicle for this.
+
+**Q: Describe running a PoC and converting it into a go/no-go decision, not just a demo.**
+> I define **success criteria up front** (latency, cost, operability, security) so the PoC answers a decision, not a vibe. Example: evaluating an agent framework or vector store — I'd run it against representative data and load, measure against the criteria, and write the result as an ADR with a clear recommendation and the conditions under which we'd revisit. A demo that doesn't change a decision is wasted effort.
+
+**Q: Two teams shipped incompatible integration patterns. Reconcile it after the fact without stalling delivery.**
+> Pick one pattern as the standard based on evidence (which better meets the NFRs), write the ADR, and migrate with a **strangler-fig** approach behind an adapter so neither team stops shipping — converge incrementally rather than a big-bang rewrite. Add a golden-path template so the next team can't diverge by accident.
 
 ---
 
 ## Round 8 · Behavioral / STAR
 
-- Tell me about a time you delivered under significant ambiguity (mirrors the UAE government data-sovereignty engagement — unclear initial requirements across two entities).
-- Describe a time your architectural recommendation was rejected by leadership. What did you do?
-- Tell me about mentoring a team through a difficult technical transition (mirrors your AI Apprentice/Mastery programme and Python skilling work).
-- Describe managing conflicting priorities across multiple concurrent engagements (mirrors running Fortune 500 + government engagements in parallel).
-- Tell me about a production incident you owned end-to-end, including the postmortem and what changed afterward (mirrors your SLA/telemetry ownership on the connected-vehicle platform).
-- Tell me about a time you cut cost significantly without hurting reliability (an LCC-specific favourite — have a quantified example ready).
+Model answers, STAR-shaped and mapped to the résumé.
+
+**Delivering under significant ambiguity.**
+> *Situation:* the UAE-government data-sovereignty programme started with unclear, sometimes conflicting requirements across two entities. *Task:* deliver one governed migration both would accept. *Action:* I ran a discovery to converge on a shared data-classification and residency model, migrated Informatica → SQL with Microsoft Purview lineage, and captured contested decisions as ADRs. *Result:* a governed, reusable data services marketplace with lineage and access controls, accepted by both entities.
+
+**Architectural recommendation rejected by leadership.**
+> *Situation:* I recommended RAG over fine-tuning on a procurement platform; leadership initially favoured fine-tuning. *Task:* make the right call defensible. *Action:* I ran a scoped evaluation comparing accuracy, retrieval cost and freshness, and presented the trade-off with numbers. *Result:* we adopted RAG where it won and reserved fine-tuning for narrow cases — decision made on evidence, not authority, and documented.
+
+**Mentoring through a hard technical transition.**
+> *Situation:* engineers needed to move onto applied GenAI/Azure AI. *Task:* raise capability fast. *Action:* I designed and ran AI Apprentice/Mastery and two-tier Python skilling programmes and delivered Tech-Lead-Readiness sessions. *Result:* multiple developer communities onboarded to AI workloads; several went on to lead client-facing architecture.
+
+**Conflicting priorities across concurrent engagements.**
+> *Situation:* running Fortune-500 and government engagements in parallel. *Task:* protect delivery on all. *Action:* I set explicit priority and escalation rules, delegated with clear ownership, and made trade-offs visible to stakeholders early. *Result:* commitments met without silent slippage.
+
+**Production incident owned end-to-end.**
+> *Situation:* an SLA-threatening issue on the connected-vehicle platform (98–99% SLA). *Task:* restore and prevent recurrence. *Action:* I drove incident command, used telemetry to isolate root cause, mitigated, and ran the postmortem. *Result:* SLA held; the fix became a durable pattern and a monitoring improvement.
+
+**Cutting cost without hurting reliability (LCC favourite).**
+> *Situation:* rising cloud/processing cost on a document-intelligence platform. *Task:* cut cost, keep security and reliability. *Action:* moved to in-flight processing with no persistent storage and right-sized/cached the hot path. *Result:* ~3× faster processing at lower cost with the compliance bar intact.
 
 ---
 
 ## Round 9 · Executive / bar-raiser
 
-**What they're testing:** Strategic judgment — build vs. buy, cost discipline, and a point of view on where LCC/aviation-tech is heading.
+**What they're testing:** strategic judgment — build vs buy, cost discipline, a point of view on where LCC/aviation-tech is heading.
 
-- If you had 90 days as the new Solutions Architect for a platform, what would your first three moves be?
-- Build vs. buy: when would you recommend flydubai build in-house (e.g., a GenAI self-service layer or ancillary optimiser) vs. buy/extend a vendor platform (SabreSonic, a loyalty platform)?
-- How do you defend an architecture decision's cost to a CFO who only sees the invoice, not the risk it avoided — in a business where cost per seat is the whole game?
-- Where does generative AI / agentic tech genuinely change LCC operations in the next 3 years (self-service, merchandising, disruption) versus where it's hype?
-- How would you structure architecture governance so it *accelerates* delivery for a fast, lean org instead of becoming a bottleneck?
+**Q: First 90 days as the new Solutions Architect for a platform?**
+> *0–30:* listen and map — the current architecture, the ADR backlog (or lack of one), the top reliability/cost pains, and the team's golden paths. *30–60:* land two or three high-leverage decisions as ADRs (e.g., the PSS anti-corruption pattern, a cost-tagging/observability standard) and stand up a lightweight design-review gate. *60–90:* prove value on one concrete outcome — a cost-per-booking reduction or a reliability fix — so governance is seen as an accelerator, not a tax.
+
+**Q: Build vs buy?**
+> Buy/extend where a specialist vendor already does it at scale and it's not your differentiator — the reservation core (SabreSonic), a loyalty platform. Build where it's **your competitive edge and moves fast** — the offer/merchandising layer, ancillary optimisation, disruption self-service. The test is: does building this create durable differentiation, or am I rebuilding a commodity I'll have to maintain forever?
+
+**Q: Defend a decision's cost to a CFO who only sees the invoice?**
+> I translate architecture into **risk and unit economics** — this spend buys a lower change-failure rate, avoided incident hours, or a lower cost-per-booking — and I show the counterfactual cost of *not* doing it (an outage during a flash sale, a compliance finding). For an LCC where cost-per-seat is the whole game, I frame everything as its effect on unit cost.
+
+**Q: Where does GenAI genuinely change LCC ops in 3 years vs hype?**
+> Real: disruption self-service and contact-centre deflection (grounded RAG), merchandising/next-best-offer, and internal engineering/ops copilots. Hype-for-now: fully autonomous pricing or irrops decisions with no human guardrail — the guardrail/kill-switch architecture matters more than the model. I'd invest where there's a measurable attach-rate or deflection metric and a safe fallback.
+
+**Q: Structure governance so it accelerates a lean org instead of bottlenecking it?**
+> Golden paths and automated policy checks instead of manual review boards; ADRs for the few decisions that matter; a design-time gate, not a release-time one; and pre-agreed escalation so disagreements resolve in hours, not sprints. Governance should make the compliant path the easy path.
 
 ---
 
@@ -228,13 +521,13 @@ Walk end-to-end through a passenger-facing booking + ancillary flow, naming the 
 
 | JD / flydubai area | What it is | Your resume evidence | Gap to address in prep |
 |---|---|---|---|
-| LCC commercial model | Ancillary revenue, unbundled fares, cost-per-seat discipline | Cost-optimisation ownership across engagements | Learn LCC merchandising / offer-order vocabulary so you can talk ancillaries fluently |
+| LCC commercial model | Ancillary revenue, unbundled fares, cost-per-seat discipline | Cost-optimisation ownership across engagements | Learn LCC merchandising / offer-order vocabulary to talk ancillaries fluently |
 | Sabre SabreSonic / PSS integration | Airline reservation backbone (vendor) | No direct PSS experience | Frame as "anti-corruption layer + canonical model around a vendor system" — a pattern you *have* done |
-| Emirates–flydubai integration | Cross-carrier codeshare/loyalty across two PSS | Multi-entity UAE government integration | Direct transferable pattern — two systems, one product, via anti-corruption + canonical model |
-| Loyalty (OPEN / Skywards) | Cross-program accrual/redemption/settlement | Event-driven, ledgered systems | Prepare the append-only ledger + cross-program settlement answer |
+| Emirates–flydubai integration | Cross-carrier codeshare/loyalty across two PSS | Multi-entity UAE government integration | Direct transferable pattern — two systems, one product, via ACL + canonical model |
+| Loyalty (OPEN / Skywards) | Cross-program accrual/redemption/settlement | Event-driven, ledgered systems | Rehearse the append-only ledger + cross-program settlement answer (Case 2) |
 | Azure cloud-native (AKS, APIM, event-driven) | flydubai's primary cloud platform | Azure Functions, AKS, Service Bus, Logic Apps, APIM-adjacent work | Strong — lead with this; add explicit *cost-per-transaction* framing |
-| Dynamic pricing / ancillary ML | Revenue optimisation with guardrails | LLM cost/model governance, guardrail design | Map your guardrail instincts onto revenue-safety (bounds, kill-switch, audit) |
-| GenAI/RAG/agents | Self-service & operations AI | Deep production delivery (Azure AI Foundry, multi-agent, RAG) | Strongest differentiator — anchor Round 6 and Round 9 here |
+| Dynamic pricing / ancillary ML | Revenue optimisation with guardrails | LLM cost/model governance, guardrail design | Map guardrail instincts onto revenue-safety (bounds, kill-switch, audit) |
+| GenAI/RAG/agents | Self-service & operations AI | Deep production delivery (Azure AI Foundry, multi-agent, RAG) | Strongest differentiator — anchor Rounds 6 and 9 here |
 | Enterprise governance (security, cost, observability) | Cross-platform standards, lean footprint | SLA ownership, cost optimisation, Purview-based governance | Strong — emphasise *lean* governance that speeds delivery |
 | Regulatory (UAE PDPL, GDPR, PCI-DSS) | Multi-jurisdiction + payments compliance | Data-sovereignty/governance delivery in UAE government | Add PCI-DSS payment-isolation talking point for a direct-sell LCC |
 
@@ -242,41 +535,70 @@ Walk end-to-end through a passenger-facing booking + ancillary flow, naming the 
 
 ## Technical question bank (rapid-fire, by topic)
 
-**PSS / booking / ancillary:** What are Reservation, Inventory and Departure Control in a PSS? · Why an anti-corruption layer around a vendor PSS (SabreSonic)? · How do you merchandise ancillaries consistently across channels? · How do you avoid double-booking when the PSS is source of truth but you cache availability? · What is IATA NDC / Offers & Orders and why does it matter for an LCC? · How do you cache ancillary pricing without ever charging a stale price?
+Each question has a concise but real answer — say these in 2–4 sentences.
 
-**Loyalty / cross-program:** Why is redemption a stronger-consistency problem than accrual? · How do you design an auditable, append-only ledger? · How do you integrate two independently-owned loyalty programs (OPEN ↔ Skywards) — real-time earning vs batch settlement? · Exactly-once on top of at-least-once delivery?
+**PSS / booking / ancillary**
+- **Q: What are RES, INV and DCS in a PSS?** Reservation manages bookings/ticketing (PNRs); Inventory manages schedules, seat availability and overbooking; Departure Control handles check-in, boarding and load planning. They're distinct because they change at different rates and have different consistency needs.
+- **Q: Why an anti-corruption layer around SabreSonic?** It translates the vendor's models to your canonical domain model so channels don't couple to EDIFACT/NDC quirks, and a PSS change (or swap) is absorbed in one place instead of rippling fleet-wide.
+- **Q: How do you merchandise ancillaries consistently across channels?** Own a single **offer/order** service that composes fare + ancillary bundles, so every channel renders the same catalog, pricing and rules from one source.
+- **Q: Avoid double-booking when you cache availability but the PSS is source of truth?** Cache-then-confirm: show cached availability, but re-validate and write through the PSS at order time with an idempotency key, so the PSS remains the single arbiter of seat state.
+- **Q: What is IATA NDC / Offers & Orders and why does it matter for an LCC?** A modern XML/API distribution standard that lets airlines sell rich, personalised offers (fare + ancillaries) through third parties instead of legacy fare-filing — crucial for an LCC whose revenue is ancillary-heavy.
+- **Q: Cache ancillary pricing without charging a stale price?** Short TTL for display, plus a mandatory reprice/confirm against the PSS at order creation before payment capture.
 
-**Cross-carrier integration:** How do you make an Emirates+flydubai itinerary feel like one journey across two PSS? · How do you handle baggage transfer across two DCS systems? · Who owns rebooking on a misconnect, and how do both PSS stay consistent?
+**Loyalty / cross-program**
+- **Q: Why is redemption a stronger-consistency problem than accrual?** Redemption spends a finite balance, so a race can double-spend real value; accrual only adds and can be eventually consistent. Redemption needs a conditional/serializable write.
+- **Q: Design an auditable append-only ledger.** Immutable entries (accrual/redemption/adjustment) partitioned by member, with periodic balance snapshots; the current balance is a projection you can rebuild by replay, which makes disputes and settlement provable.
+- **Q: Integrate OPEN ↔ Skywards — real-time or batch?** Near-real-time earning event for member experience, but authoritative money settlement between the two companies as a batch reconciliation, with an ACL isolating you from the partner's contract changes.
+- **Q: Exactly-once on at-least-once delivery?** You can't get exactly-once *delivery*, so make the *effect* idempotent: a processed-events key with a unique constraint committed atomically with the business write.
 
-**Cloud / Azure:** AKS namespace-vs-cluster trade-offs for a lean org? · How does APIM do per-partner rate limiting and versioning? · When Cosmos DB over Azure SQL, and what does tunable consistency mean operationally? · Where do you attack cloud cost for an LCC? · What does a Well-Architected review produce as an artifact?
+**Cross-carrier integration**
+- **Q: Make an Emirates+flydubai itinerary feel like one journey across two PSS?** A canonical cross-carrier itinerary model plus per-carrier ACLs exchanging standards-based interline messages; each PSS stays authoritative for its own segment.
+- **Q: Baggage transfer across two DCS?** Model it as a cross-DCS event stream driving a per-bag state machine, with last-writer-wins in a reconciliation window and a mishandled-bag fallback.
+- **Q: Who owns rebooking on a misconnect?** The carrier that owns the affected segment; the orchestration layer coordinates and keeps the canonical itinerary authoritative so neither PSS is double-booked.
 
-**Governance / agile:** What triggers an ADR vs just making the call? · What's on an architecture runway and how far ahead? · How do you keep governance lightweight enough to *speed up* a fast org? · Enterprise Architect vs Solution Architect remit?
+**Cloud / Azure**
+- **Q: AKS namespace-vs-cluster trade-offs for a lean org?** Namespace-per-team on a shared cluster is cheaper and simpler to operate (quotas + network policies for isolation); cluster-per-domain only where compliance/isolation demands it.
+- **Q: APIM per-partner rate limiting and versioning?** Per-partner products with quotas/throttling and OAuth, plus header/path versioning with deprecation windows and schema validation on NDC/interline payloads.
+- **Q: Cosmos DB over Azure SQL — when, and what is tunable consistency?** Cosmos for globally-distributed, high-throughput, flexible-schema workloads; its consistency levels (strong→eventual) are an explicit per-workload choice trading latency/availability for freshness — never leave it on default without deciding.
+- **Q: Where do you attack cloud cost for an LCC?** Scale-to-zero for spiky compute, reservations for steady load, caching to cut paid PSS/GDS calls, storage tiering, and cost tagging with budgets so spend is attributable.
+- **Q: What does a Well-Architected review produce?** A prioritised findings/risk register across the five pillars with owners and remediation actions — an artifact, not a verbal "looks fine."
 
-**AI/ML for aviation:** What guardrails around an ML dynamic-pricing/ancillary engine? · How is 737 predictive maintenance like connected-vehicle telemetry? · How do you stop a fare-rules chatbot from hallucinating refund eligibility?
+**Governance / agile**
+- **Q: What triggers an ADR vs just deciding?** A decision that's costly to reverse or affects multiple teams; trivial, local, reversible calls don't need one.
+- **Q: What's on an architecture runway and how far ahead?** The enablers near-term (~1–2 PI) committed features provably need — no more; speculative work goes to a spike.
+- **Q: Keep governance lightweight enough to speed up a fast org?** Golden paths + automated checks + design-time review, not release-time gatekeeping.
+- **Q: Enterprise Architect vs Solution Architect remit?** EA owns cross-portfolio standards and the reference architecture; SA owns the end-to-end architecture of a specific solution/ART within those standards.
+
+**AI/ML for aviation**
+- **Q: Guardrails around an ML dynamic-pricing engine?** Hard min/max bounds, rate-of-change limits, anomaly detection, human approval above a threshold, full audit and a kill-switch to a rules baseline — all before publish.
+- **Q: How is 737 predictive maintenance like connected-vehicle telemetry?** Same high-volume sensor ingestion/streaming/feature pipeline; only the predicted label differs, and a single fleet type simplifies the model.
+- **Q: Stop a fare-rules chatbot hallucinating refund eligibility?** Grounded RAG over policy with citations, retrieval-quality evals, and a "refuse/escalate" path rather than a confident guess.
 
 ---
 
 ## Deeper / staff-level questions
 
-- Design a zero-downtime migration of the booking/offer orchestration layer from one PSS integration pattern to another, with live traffic and no double-bookings during cutover.
-- Design the Emirates–flydubai interline layer so that either carrier's PSS can be down for maintenance without blocking the other carrier's ability to sell/service the shared itinerary. Where's the real bottleneck?
-- How would you design chargeback-accurate cloud cost allocation across several teams with very different traffic profiles, so an LCC can see cost-per-booking by product?
-- Two teams need the same capability (e.g., document intelligence for both travel-document verification and refund evidence) — shared platform service or let each build their own? Defend the trade-off.
-- Design an active-active booking layer where the underlying PSS is single-write-region — what does "active-active" even mean here, and where's the bottleneck?
-- Walk through a "chaos day": DXB is unreachable, SabreSonic is degraded, and your regional failover only partially works. What's your incident-command sequence?
+- **Zero-downtime PSS integration migration.** Move the booking/offer orchestration from one PSS integration pattern to another with live traffic and no double-bookings during cutover. *Approach:* **strangler-fig** behind the ACL — route a growing % of traffic (canary by route/market) to the new path, run both in parallel with shadow-comparison of results, keep the PSS as the single source of truth so both paths reconcile there (no local truth to diverge), and cut over per-route with instant rollback. Idempotency keys ensure a retry across paths can't create two PNRs.
+- **Resilient Emirates interline.** Design the interline layer so either carrier's PSS can be down for maintenance without blocking the other carrier's ability to sell/service the shared itinerary. *Approach:* canonical itinerary + per-carrier ACL decouple the two; the up carrier serves its own segment; the down segment shows a pending state and reconciles on recovery; the real bottleneck is **write-availability to the down PSS**, mitigated by queue-and-reconcile plus clear customer messaging.
+- **Cost-per-booking allocation.** Chargeback-accurate cloud cost across teams with different traffic profiles. *Approach:* mandatory resource tagging by team/product, per-request cost attribution via telemetry (compute + paid PSS/GDS calls), and showback dashboards so an LCC can see cost-per-booking by product and optimise it.
+- **Shared vs per-team capability.** Document intelligence needed for both travel-document verification and refund evidence — build a shared platform service or let each team build its own? *Approach:* shared service if the capability is stable, reused and benefits from a single security/compliance surface; per-team if requirements genuinely diverge and coupling would slow both. Decide with an ADR; a thin shared library + separate deployments is often the pragmatic middle.
+- **Active-active with a single-write PSS.** What does active-active even mean when the PSS is single-write-region? *Approach:* active-active applies to the **read/orchestration tier** (both regions serve shopping and read paths); writes still funnel to the PSS's write authority, so the real design question is **fast, consistent read replication and graceful write-path failover**, not pretending you have multi-master booking.
+- **Chaos day.** DXB unreachable, SabreSonic degraded, regional failover only partially works. *Approach:* incident command from the secondary region; shed load with circuit breakers; serve shopping in degraded/cached mode; queue bookings with honest messaging; prioritise IRROPS re-accommodation via rules-only fallback; communicate status; post-incident, write ADRs for the gaps the partial failover exposed.
 
 ---
 
 ## Scenario-based questions (situational & troubleshooting)
 
-1. Skywards Miles stop crediting for flydubai flights after a partner-side API change. How do you detect it, and what's your immediate mitigation?
-2. Booking volume spikes 50x in 10 minutes (a flash sale). Your orchestration layer's downstream PSS calls are rate-limited by the vendor. What do you do in the first hour — and how do you protect ancillary conversion?
-3. An auditor asks you to prove EU passenger data never left EU-classified storage for 12 months. What evidence do you produce, and how did your architecture make that possible?
-4. The cloud bill jumped 40% after a "successful" feature launch on an LCC's tight budget. How do you investigate, and what cost-governance was missing?
-5. Your Well-Architected review flags a reliability risk in a service mid-way through a critical release. Do you block it? How do you decide?
-6. A GenAI disruption-assistant gives a passenger an incorrect rebooking-eligibility answer. Walk through incident response and the architectural fix (grounding, guardrails).
-7. A dynamic-pricing model starts publishing near-zero fares on a route. What in your architecture stops it reaching customers, and what's the postmortem?
-8. Baggage transfer between a flydubai and an Emirates flight fails at DXB because the two DCS systems disagree on the bag's state. What's the immediate workaround and the ADR you write afterward?
+Each has a full answer: **detect → mitigate → root-cause → durable fix / ADR.**
+
+1. **Skywards Miles stop crediting for flydubai flights after a partner-side API change.** *Detect:* accrual-success-rate and reconciliation-mismatch alarms fire; correlation ids show earn events sent but not settling. *Mitigate:* buffer earn events (Event Hubs retention) so nothing is lost; show members a pending state; hotfix the ACL mapping. *Root cause:* the partner changed a contract we consumed without a versioned/validated boundary. *Durable fix:* contract tests + schema validation at the ACL, a versioning agreement with the partner, and an alert on reconciliation drift — ADR recorded.
+2. **Booking volume spikes 50× in 10 minutes (flash sale); Sabre rate-limits us.** *First hour:* protect the PSS with a **request queue + backpressure**, raise cache hit-rate/TTL for availability to cut PSS calls, and serve shopping in a slightly-degraded cached mode; keep the **confirm-at-order** step so prices stay correct; prioritise checkout traffic over speculative shopping; protect ancillary conversion by caching the catalog so add-to-cart still works. *Durable fix:* pre-warm caches before announced sales, negotiate burst limits, and load-test the sale path — ADR on the sale runbook.
+3. **Auditor: prove EU passenger data never left EU-classified storage for 12 months.** *Answer:* produce **data-lineage/catalog evidence (Purview-class)** plus access logs showing storage location and cross-border transfers; the architecture made this provable because data was **classified and placed deliberately** with per-classification residency rules, not replicated everywhere. If we lacked it, the fix is to introduce classification-driven placement and lineage tooling.
+4. **Cloud bill jumps 40% after a "successful" launch on a tight LCC budget.** *Investigate:* cost-by-tag/resource breakdown to find the driver (often an un-cached hot path hitting paid PSS/GDS calls, an oversized SKU, or chatty telemetry). *Mitigate:* add caching/right-size/sample telemetry. *Root cause:* cost wasn't an NFR in the design review and there was no budget alert. *Durable fix:* cost tagging, budgets/alerts, and cost as a mandatory Well-Architected review item — ADR.
+5. **Well-Architected review flags a reliability risk mid-way through a critical release. Block it?** *Decide by risk:* if the risk is customer-facing revenue loss (e.g., no PSS-outage fallback on the booking path) I hold the release and fast-track the fix; if it's a lower-tier concern I let it ship with a **tracked exception (logged deviation + owner + remediation date)** so delivery isn't held hostage. Governance should be risk-proportionate, not binary.
+6. **GenAI disruption-assistant gives a passenger wrong rebooking eligibility.** *Respond:* disable the specific capability (kill-switch), fall back to agent handling, and notify affected passengers. *Root cause:* the model answered beyond its grounding. *Durable fix:* strict RAG grounding with citations, a refusal path for low-confidence retrieval, eval gates on policy-answer accuracy before release, and human-in-the-loop for eligibility decisions — ADR.
+7. **Dynamic-pricing model publishes near-zero fares on a route.** *What stopped it:* the **guardrail layer** — hard min bounds + rate-of-change limit + anomaly alarm — blocks publish, and the kill-switch reverts to the rules baseline. *Postmortem:* investigate the feature/data drift that produced the recommendation, add a regression case, and confirm bounds/alerts are tuned. The architecture's job was to make the model *unable* to reach customers with an absurd price.
+8. **Baggage transfer between a flydubai and Emirates flight fails at DXB — the two DCS disagree on the bag's state.** *Immediate:* trigger the **mishandled-bag exception workflow** (locate, reconcile, forward on next service) and inform the passenger. *Root cause:* out-of-order/late scan events across two DCS with no reconciliation window. *Durable fix:* a per-bag state machine with last-writer-wins in a bounded reconciliation window and an explicit exception path — ADR on cross-DCS baggage consistency.
 
 ---
 
@@ -291,4 +613,5 @@ Walk end-to-end through a passenger-facing booking + ancillary flow, naming the 
 - [IATA — Offers & Orders](https://www.iata.org/en/programs/airline-distribution/retailing/)
 - [Microsoft Azure — Well-Architected Framework](https://learn.microsoft.com/azure/well-architected/)
 - [Microsoft Learn — Azure Solutions Architect Expert (AZ-305)](https://learn.microsoft.com/credentials/certifications/azure-solutions-architect/)
+- [Martin Fowler — Transactional Outbox / enterprise integration patterns](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [PCI Security Standards Council — PCI DSS](https://www.pcisecuritystandards.org/)
