@@ -90,6 +90,13 @@ const CARRIERS: Carrier[] = [
     ],
     quickLinks: [
       {
+        href: "#interview-strategy-negotiation-playbook",
+        icon: "♟️",
+        title: "Strategy & negotiation playbook",
+        description:
+          "5-phase game plan: anchor the grade, principal-level case twists, bridge the Java/Kafka stack, war stories, and the offer close — all in your voice.",
+      },
+      {
         href: "#technology-skills-map-jd-stack-emirates-landscape-your-resume",
         icon: "🧭",
         title: "Tech & skills map",

@@ -606,6 +606,99 @@ For scale, maintain monthly/member snapshots and replay later entries. Correctio
 
 ---
 
+## Interview strategy & negotiation playbook
+
+The rounds above prepare *what* you'll say. This section is the *how* — the meta-game of positioning yourself at senior/principal altitude (Emirates uses a **Grade** system; a 14-year cross-domain architect should be aiming at the **Grade 9 / senior IC band**, not the entry Grade 8 Solution Architect), controlling each phase, and closing the offer. Every script below is written in **your** voice and mapped to **your résumé**, so you can say it as-is.
+
+### Phase 1 — Recruiter screen: confirm the budget, plant the "senior" seed
+
+**Objective:** find out the grade/budget early and anchor yourself one level up before assessments lock you in.
+
+**Grading seed (say this on the first call):**
+> "I understand the title is Solutions Architect. Given my 14 years leading cross-domain architecture — including a 20-million-vehicle platform at ~2M messages a minute and a UAE-government data-sovereignty programme — I'm targeting a **senior individual-contributor package (Grade 9-equivalent)**. Is this role budgeted to accommodate that experience level, or is the grade assessed during the loop?"
+
+**Read the answer:**
+- *"Strictly Grade 8"* → decide consciously whether the total package still works; pivot to maxing the band + sign-on/relocation later (Phase 5).
+- *"Grade is assessed on the interview"* → you're green-lit; now your job is to *perform at Grade 9* in every round (scope, governance, mentoring language — not just code).
+
+**Your elevator pitch (résumé-anchored):**
+> "I'm a hands-on architect who doesn't just design — I own delivery. For 14 years I've closed the gap between 'PowerPoint architecture' and shipped code: I owned a 98–99% SLA on a connected-vehicle platform at aviation-comparable scale, modernised regulated UAE-government data into governed SQL with Purview lineage, and shipped production GenAI/RAG systems on Azure AI Foundry. I design it, I govern it, and I make sure it actually lands in production."
+
+**Key points:** anchor the grade in round one; lead the pitch with *ownership + delivery + a number*. **Red flags:** accepting the entry grade by default; a pitch that's all design and no delivery.
+
+### Phase 2 — Technical assessment: prove "Emirates scale" with principal-level twists
+
+**Objective:** on the case study (take-home or whiteboard) don't just draw microservices — show the *migration risk, consistency and resilience* thinking a principal brings. These map directly to Round 3's worked cases above; here's how to frame each to score senior:
+
+- **Booking-engine modernisation (monolith → microservices, zero downtime).** Lead with **strangler fig** (route a growing % behind a façade, never a big-bang), **SAGA** for split-brain/distributed transactions during dual-run, **distributed tracing (OpenTelemetry)** so you can prove parity, and **idempotency** so retries across old/new paths never double-book. Tie to your résumé: *"I ran exactly this incremental-cutover discipline when I owned the 98–99%-SLA platform — you migrate behind a façade and reconcile against a single source of truth."* (See Round 3 Case 1 + Deeper "zero-downtime migration".)
+- **Loyalty / 3rd-party partner integration (Skywards + hotel partner).** Lead with **OAuth2/OIDC** for partner trust, **circuit breakers + timeouts** for when the partner API is slow, **idempotency keys** to stop double points accrual, and an **append-only ledger** for auditable settlement between two companies. (See Round 3 Case 2 + the ledger/idempotency code in Round 4.)
+- **High-volume "mega sale" (system crashes at 50% off launch).** Lead with a **virtual waiting room / queue + backpressure**, **CDN edge caching** of static assets, **read-replicas + Redis** to protect the write path, and **cache-then-confirm** so you never sell a stale price. Tie to résumé: *"Burst load is the connected-vehicle problem — you queue and shed, you don't assume linear autoscale."* (See Round 3 Case 4 + Scenario 2.)
+
+**Study/verbal checklist to have on the tip of your tongue:** Strangler Fig · SAGA · Circuit Breaker · CQRS · Idempotency · Outbox · Kafka (async) · Redis (cache) · Kubernetes (scale) · OpenTelemetry (trace).
+
+**Key points:** every case = *pattern name + why + failure mode + a résumé tie-in*. **Red flags:** drawing boxes with no migration/consistency/resilience story.
+
+### Phase 3 — The technical grill: survive the "why", bridge the stack
+
+**Objective:** answer "why", and bridge Emirates' actual engineering stack to your Azure/.NET depth without faking Java experience.
+
+**The coding-question trap — answer at Grade 9, not junior:**
+> "I can write this in Python or C#. Before I do — what are the latency and consistency constraints, is this a real-time service or a batch job, and what's the expected throughput? That changes the data structure and the error-handling." *Then* write it.
+
+**Bridge the stack honestly.** Emirates Group IT is a well-known **Java / Spring Boot** shop with **React/Angular** front-ends, **Kafka** messaging, and **Oracle / Couchbase / MongoDB** data stores — that's the environment you'd operate in. Your résumé is **Azure / .NET / C#**. Don't bluff Java seniority; bridge it:
+> "My production depth is .NET and Azure, but the *architecture* is stack-agnostic — Kafka is Event Hubs, Spring Boot services are the same bounded-context microservices I've designed on AKS, Couchbase/Mongo are the same document-store consistency trade-offs I make with Cosmos DB. I ramp on Spring quickly because I've made these exact design decisions; the syntax is the smallest part."
+
+This is credible *because* your guide already reasons in patterns (outbox, circuit breaker, optimistic locking) that are identical across both stacks.
+
+**Killer question to ask *them* (shows leadership):**
+> "How does Emirates handle **architecture drift** today — when production code no longer matches the design documentation or the ADRs? That's a problem I've fixed before with golden paths and design-time review gates, and I'd want to know how much of my first 90 days goes there."
+
+**Key points:** clarify constraints before coding; bridge stacks via patterns, not bluffing; ask a question that positions you as the person who *fixes* drift. **Red flags:** coding instantly; pretending to be a Java expert; no questions for them.
+
+### Phase 4 — Behavioral & leadership: be senior, safe, and diplomatic
+
+**Objective:** prove "influence without authority", sound judgment under conflict, and customer obsession — the Grade 9 differentiators. Full STAR answers live in Round 8; here are the three the grade hinges on, in your voice:
+
+- **Influence without authority (change a team's tech stack):**
+> "I didn't mandate it. On the procurement platform, leadership leaned toward fine-tuning; I built a scoped **PoC comparing RAG vs fine-tuning** on accuracy, cost and freshness, showed the numbers, and let the team *discover* the win themselves. We adopted RAG where it won — decision by evidence, not authority. That's how I move teams I don't manage."
+
+- **Conflict / risk (a PM wants to skip a security review to hit a date):**
+> "I don't block emotionally — I make the risk *business-legible*: 'skipping this exposes us to a potential compliance finding and X hours of downtime risk; here's the cost.' Then I put the decision where it belongs — I document it as a **tracked exception with a named owner and a remediation date**, so whoever accepts the risk accepts it on record. Nine times out of ten, once it's explicit and owned, the review happens." *(Note: frame it as informed, documented risk-acceptance — not as pressuring anyone.)*
+
+- **Customer obsession (tie architecture to the passenger):**
+> "I connect every NFR to the passenger. We didn't cut booking API latency to hit a dashboard metric — we cut it so a passenger checks in seconds faster at the gate, or a Skywards member sees their miles instantly. On the document-intelligence platform I made processing ~3× faster at lower cost; that's fewer seconds a customer waits, not just a cheaper invoice."
+
+**Have three war stories ready** (this is your prep homework — write them STAR-shaped):
+1. **A failure you owned and fixed** → the SLA-threatening production incident on the connected-vehicle platform (incident command → root cause → durable pattern).
+2. **A disagreement with a boss where you were right** → RAG-over-fine-tuning, proven with a PoC.
+3. **A time you saved money** → in-flight document processing with no persistent storage → ~3× faster, lower cost, compliance bar intact.
+
+**Key points:** influence via PoC, not mandate; risk = documented, owned, business-framed; every answer lands back on the passenger. **Red flags:** "I forced them"; skipping governance to please a PM; metrics with no customer link.
+
+### Phase 5 — Negotiation: close at the right grade
+
+**Objective:** convert the offer into a Grade 9-appropriate package, with a graceful fallback if the title can't move.
+
+**The primary close (when they offer):**
+> "I'm genuinely excited about the team and the scope. Looking at what we discussed — mentoring, architecture strategy and governance across multiple teams — this is **principal/senior scope**, and I'd want the package to reflect the **Grade 9 band**, particularly the tier-1 benefits like **schooling and housing allowances**, to make the relocation viable."
+
+**The fallback (if the grade/title is fixed at 8):**
+> "If the grade is fixed, I understand. Then I'd ask that we **max out the Grade 8 band** and bridge the gap with a **sign-on bonus or relocation premium** — so the total package reflects the scope even if the grade label can't move yet, with a review checkpoint at [6–12 months]."
+
+**Frame it on tax-free AED total package**, not home-country base: base + bonus + housing + schooling + flights + medical + relocation. Asking about allowances is normal and expected in Dubai.
+
+**Key points:** justify the grade with *scope you already demonstrated in the loop*; always have a title-vs-comp fallback; negotiate total package, not base. **Red flags:** anchoring on base alone; no fallback; conceding the grade before testing the band.
+
+### One-page pre-loop checklist
+
+- **Résumé tweak:** ensure "Governance", "Strategy" and "Cost Optimization" appear in your summary line (they map straight to the JD's accountability language).
+- **System design reps:** rehearse "design an airline check-in / booking system" out loud until the strangler-fig + SAGA + idempotency + cache-then-confirm flow is automatic.
+- **Three war stories written** (failure-fixed / disagreed-and-right / saved-money) — STAR, quantified.
+- **Grade anchored** in the recruiter call; **stack bridge** rehearsed (Azure ↔ Java/Kafka/Couchbase); **drift question** ready to ask.
+- **Numbers loaded:** 14 yrs · 20M+ vehicles · ~2M msgs/min · 98–99% SLA · ~3× faster doc processing · AZ-305/AI-102/AZ-204/AZ-104/AZ-400.
+
+---
+
 ## Technology & skills map — JD stack ↔ Emirates landscape ↔ your resume
 
 | JD / Emirates area | What it is | Your resume evidence | Gap to address in prep |
@@ -614,6 +707,7 @@ For scale, maintain monthly/member snapshots and replay later entries. Correctio
 | ADRs / architecture governance | Durable, reviewable decisions and exception management | Well-Architected reviews, NFR ownership, regulated delivery | Prepare 2-3 example ADRs from past work |
 | TOGAF / ArchiMate / C4 / UML | EA method and modelling views | Architecture communication experience | Be fluent enough to explain which view answers which stakeholder question |
 | Azure cloud-native | AKS, APIM, Azure SQL/Cosmos, Event Hubs, Entra, DevOps | AZ-305/AZ-204/AZ-104/AZ-400; Azure Functions/AKS/Service Bus/AI | Strong — lead with this |
+| Emirates engineering stack | Java/Spring Boot, React/Angular, Kafka, Oracle/Couchbase/MongoDB | Azure/.NET/C# depth; identical patterns (Event Hubs≈Kafka, Cosmos≈Couchbase/Mongo) | Don't bluff Java — bridge via stack-agnostic patterns; be ready to ramp on Spring |
 | Amadeus Altéa / PSS integration | Vendor PSS source of truth for RES/INV/DCS | No direct PSS experience | Frame as anti-corruption layer around a vendor system |
 | SkyCargo / OneCargo logistics | Cargo booking, warehouse, ULD, customs, ONE Record | Connected-vehicle telemetry and distributed scale | Emphasize event ingestion and partner integration transferability |
 | GenAI/RAG/agents | Customer assistants, document intelligence, ops copilots | Production GenAI/RAG/multi-agent delivery, AI-102 | Strong differentiator; stress guardrails and evaluation |
