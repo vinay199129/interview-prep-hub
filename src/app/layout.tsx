@@ -9,9 +9,9 @@ import { NavLink } from "@/components/NavLink";
 
 // Author / project links — update these to point at your real profiles.
 const AUTHOR_NAME = "Vinay Pratap Singh Bhadauria";
-const REPO_URL = "https://github.com/vinay199129/interview-prep-hub";
-const PROFILE_URL = "https://github.com/vinay199129";
-const PORTFOLIO_URL = "https://vinay199129.github.io/portfolio/";
+const REPO_URL = "https://github.com/vinay-p-singh/interview-prep-hub";
+const PROFILE_URL = "https://github.com/vinay-p-singh";
+const PORTFOLIO_URL = "https://vinay-p-singh.github.io/portfolio/";
 
 export const metadata: Metadata = {
   title: "Interview Prep Hub",
