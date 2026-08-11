@@ -63,6 +63,12 @@ export default function Home() {
             Senior &amp; Leadership →
           </Link>
           <Link
+            href="/agentic-ai"
+            className="inline-flex items-center px-3 py-2 text-sm text-brand-700 dark:text-brand-100 hover:underline underline-offset-4"
+          >
+            Agentic AI Architect →
+          </Link>
+          <Link
             href="/roles"
             className="inline-flex items-center px-3 py-2 text-sm text-brand-700 dark:text-brand-100 hover:underline underline-offset-4"
           >

@@ -61,6 +61,7 @@ export default function RootLayout({
                 <NavLink href="/tracks">Tracks</NavLink>
                 <NavLink href="/roles">Roles</NavLink>
                 <NavLink href="/leadership">Leadership</NavLink>
+                <NavLink href="/agentic-ai">Agentic AI</NavLink>
                 <NavLink href="/last-mile">Last-Mile</NavLink>
                 <NavLink href="/airlines">Airlines</NavLink>
                 <NavLink href="/skills-prep">Skills</NavLink>
