@@ -1,6 +1,8 @@
 # Agentic AI Solution Architect — Interview Guide (12+ years)
 
-A complete, round-by-round preparation guide for a senior/principal **Solution Architect — Agentic AI / Enterprise AI** role. Built from a job description asking for 12+ years in solution architecture, AI/ML and Generative AI, with explicit expectations around **agentic architecture, use-case discovery, LLM selection, AI security and Responsible AI, guardrails, integration architecture, technical governance and stakeholder management**. Used by the `/agentic-ai` page.
+A complete preparation guide for a senior/principal **Solution Architect — Agentic AI / Enterprise AI** role. Built from a job description asking for 12+ years in solution architecture, AI/ML and Generative AI, with explicit expectations around **agentic architecture, use-case discovery, LLM selection, AI security and Responsible AI, guardrails, integration architecture, technical governance and stakeholder management**. Used by the `/agentic-ai` page.
+
+> **Structure note.** The 13 numbered sections are **topic modules for study**, not interview rounds — a real loop is 5–7 stages. See [The real interview loop](#the-real-interview-loop-and-how-the-13-modules-map-to-it) for the mapping, and [Deep dives](#deep-dives-trade-offs-decision-points-per-topic) for the trade-off and decision-point material that Stages 3–5 are built around.
 
 > **Scope note.** No employer's internal architecture is published, so everything below is an **industry-standard pattern you should be able to defend**, backed by primary sources (papers, vendor docs, standards bodies) linked in *Learn it properly* and *Sources*. Treat vendor and product facts as public context, not insider knowledge. Product surfaces in this space change fast — always re-check the linked docs before an interview and say so out loud if a detail is version-dependent; that itself is an architect signal.
 
@@ -8,21 +10,49 @@ A complete, round-by-round preparation guide for a senior/principal **Solution A
 
 ## The JD, decoded — what each line is really testing
 
-| JD line | What the interviewer is actually probing | Where it shows up in the loop |
+| JD line | What the interviewer is actually probing | Covered in |
 | --- | --- | --- |
-| 12+ years in solution architecture / AI-ML / GenAI | Can you operate at portfolio altitude, not project altitude? | Rounds 1–2, executive round |
-| Strong expertise in **agentic AI architecture** | Do you know when *not* to use an agent, and can you name/justify patterns? | Rounds 3–5 |
-| **Use-case discovery**, requirement analysis, business → scalable AI | Do you have a repeatable qualification method, or do you just say yes? | Round 3 |
-| **Agent design patterns**, autonomous & multi-agent | Depth: ReAct, planner-executor, reflection, supervisor/orchestrator, hand-off, HITL | Round 4 |
-| **LLM evaluation & selection** on business/technical/perf/cost | Can you build a selection matrix and defend it with numbers? | Round 6 |
-| AI security, Responsible AI, risk, enterprise security | Threat modelling for AI, not generic security theatre | Round 7 |
-| **AI guardrails** for secure, reliable, compliant behaviour | Layered controls with failure modes, not "we added a system prompt" | Round 8 |
-| **Integration architecture** — APIs, enterprise apps, data, external | The unglamorous 70% of the work: contracts, identity, idempotency, latency budgets | Round 9 |
-| **Technical governance**, standards, best practices | Do you produce artefacts (ADRs, paved roads, review gates) or opinions? | Round 10 |
-| Scalable, secure, high-performance, enterprise-ready | Capacity, cost per task, latency budgets, resilience, AgentOps | Round 11 |
-| Cross-functional collaboration + stakeholder management | Influence without authority; translating between CxO and engineers | Rounds 12–13 |
+| 12+ years in solution architecture / AI-ML / GenAI | Can you operate at portfolio altitude, not project altitude? | Modules 1–2, 13 |
+| Strong expertise in **agentic AI architecture** | Do you know when *not* to use an agent, and can you name/justify patterns? | Modules 4–5, D1–D4 |
+| **Use-case discovery**, requirement analysis, business → scalable AI | Do you have a repeatable qualification method, or do you just say yes? | Module 3 |
+| **Agent design patterns**, autonomous & multi-agent | Depth: ReAct, planner-executor, reflection, supervisor/orchestrator, hand-off, HITL | Module 4, D2 |
+| **LLM evaluation & selection** on business/technical/perf/cost | Can you build a selection matrix and defend it with numbers? | Module 6, D7, D11 |
+| AI security, Responsible AI, risk, enterprise security | Threat modelling for AI, not generic security theatre | Module 7, D9 |
+| **AI guardrails** for secure, reliable, compliant behaviour | Layered controls with failure modes, not "we added a system prompt" | Module 8, D10 |
+| **Integration architecture** — APIs, enterprise apps, data, external | The unglamorous 70% of the work: contracts, identity, idempotency, latency budgets | Module 9, D8, D13 |
+| **Technical governance**, standards, best practices | Do you produce artefacts (ADRs, paved roads, review gates) or opinions? | Module 10, D17–D18 |
+| Scalable, secure, high-performance, enterprise-ready | Capacity, cost per task, latency budgets, resilience, AgentOps | Module 11, D14–D16 |
+| Cross-functional collaboration + stakeholder management | Influence without authority; translating between CxO and engineers | Modules 12–13 |
 
 **The single biggest differentiator at this level:** most candidates describe *what an agent is*. You must describe **what breaks in production** — non-determinism, unbounded loops, tool-call cost blow-ups, prompt injection through retrieved content, silent quality regression on model upgrade, and no rollback story — and the architecture that contains each.
+
+---
+
+## The real interview loop — and how the 13 modules map to it
+
+**You will not sit 13 rounds.** A senior/principal Agentic AI Solution Architect loop is typically **5–7 stages over 2–4 weeks**. The 13 numbered sections below are **topic modules** — a study structure, not a schedule. Most stages pull from several modules, and most modules get tested in more than one stage. Here is the realistic mapping.
+
+| Stage | Typical format & length | Who runs it | Modules you're drawing on | What decides pass/fail |
+| --- | --- | --- | --- | --- |
+| **1 · Recruiter screen** | 25–30 min call | Talent acquisition | 1 | Altitude of your story, production-vs-pilot GenAI, comp/notice alignment |
+| **2 · Hiring manager** | 45–60 min | The architecture lead / head of AI | 1, 2, 3, 13 | Scope of ownership, governing without authority, whether you say no to bad use cases |
+| **3 · Technical deep dive** | 60–90 min, whiteboard or shared doc | Senior/principal architect peer | 4, 6, 9, 11 | Pattern depth, trade-off fluency, whether you know failure modes |
+| **4 · System design case** | 60–90 min, one scenario end to end | Architect panel (2–3) | 5, 9, 11 (+4, 8) | Requirement-driving, a defensible design, honest trade-offs at 10× scale |
+| **5 · Security / governance / RAI panel** | 45–60 min | Security architect, risk, sometimes legal/privacy | 7, 8, 10 | AI-specific threat modelling, guardrail layering, framework literacy (NIST/OWASP/ISO/EU AI Act) |
+| **6 · Stakeholder / behavioral** | 45–60 min | Cross-functional partners (product, delivery, data) | 12, 3, 10 | STAR with artefacts and numbers, conflict handled with evidence |
+| **7 · Executive / bar-raiser** | 30–45 min | Director/VP/CTO, sometimes a business sponsor | 13, 6, 11 | Business framing, build-vs-buy, 90-day plan, unit economics, judgement about hype |
+
+**Common variations you should prepare for:**
+
+- **Some loops merge 3 and 4** into a single 2-hour architecture session — be ready to go deep on patterns *and* design a system in one sitting.
+- **Some add a take-home or presentation:** "present a target-state agentic architecture for our domain to a mixed panel" — 30 min talk, 30 min grilling. Modules 5, 7, 8 and 10 carry that.
+- **A few still run a coding/pairing exercise** even for architects — usually implementing a tool-calling loop, a schema-validated structured output, or debugging a broken agent trace. Modules 4 and 9 cover the substance; practise writing it, not just describing it.
+- **Consulting/SI employers add a client-facing simulation:** run a discovery workshop or defend an estimate. Module 3 and Module 12 carry that.
+- **Product/AI-native companies compress the whole thing to 4 stages** and weight Modules 4, 6 and 11 heavily; **regulated enterprises expand Stage 5** into two separate panels (security, then risk/compliance).
+
+**How to use this mapping when you prep:** work the modules for knowledge, then rehearse by *stage* — because a stage is a 60-minute performance with a different audience, not a topic. The most common failure at this level is giving the Stage 3 answer (deep technical) in Stage 7 (executive), or the Stage 7 answer (business framing) in Stage 3. Same knowledge, different altitude.
+
+For each topic's **trade-offs and decision points** — the "which option would you pick and why" material that Stages 3–5 are built around — go to the [deep dives](#deep-dives-trade-offs-decision-points-per-topic).
 
 ---
 
@@ -40,9 +70,11 @@ Then move: architecture → control flow → data/state → evaluation → guard
 
 For leadership rounds, answer with **artefacts**: ADRs, C4 views, a model-selection matrix, an eval suite, a threat model, an AI use-case intake form, a risk register, a golden-path repo, a cost dashboard. Artefacts are how a 12-year architect is distinguished from a very good 6-year engineer.
 
+**Where the trade-off material lives.** Modules 1–13 give you the *answers*; the [deep dives](#deep-dives-trade-offs-decision-points-per-topic) (D1–D18) give you the *decisions* behind them — for each architectural choice, the option space, when each option wins, what you pay for it, and the production signal that tells you the choice was wrong. In Stages 3–5 of a real loop, that is most of what you'll be asked. Rehearse naming the decision, giving 2–3 options, stating your deciding criteria, committing to a choice, and saying what would change your mind.
+
 ---
 
-## Round 1 · Recruiter / HR screen
+## Module 1 · Recruiter / HR screen
 
 **What they're testing:** Is your experience at enterprise altitude, is the GenAI experience *production* rather than *pilot*, and are logistics (notice, comp, location) aligned?
 
@@ -77,7 +109,7 @@ Concretely, I own architecture decisions across [N] teams, define the NFRs and r
 
 ---
 
-## Round 2 · Hiring manager — scope, ownership & architecture altitude
+## Module 2 · Hiring manager — scope, ownership & architecture altitude
 
 **What they're testing:** Have you owned architecture across teams you don't manage, and can you govern without blocking?
 
@@ -123,7 +155,7 @@ Each rung adds non-determinism, latency, cost and failure modes. I only climb wh
 
 ---
 
-## Round 3 · AI use-case discovery & requirement analysis
+## Module 3 · AI use-case discovery & requirement analysis
 
 **What they're testing:** Do you have a repeatable method for turning vague business asks into scoped, feasible, measurable AI solutions — and for killing bad ones early?
 
@@ -180,7 +212,7 @@ That gives four quadrants. Sequence deliberately: start with **high-value, high-
 
 ---
 
-## Round 4 · Agent design patterns (autonomous & multi-agent)
+## Module 4 · Agent design patterns (autonomous & multi-agent)
 
 **What they're testing:** Genuine pattern depth — can you name patterns, state their failure modes, and choose between them under constraints?
 
@@ -257,7 +289,7 @@ Two rules I never bend: **memory writes are permissioned like any other write**,
 
 ---
 
-## Round 5 · Agentic system design cases
+## Module 5 · Agentic system design cases
 
 Each case: drive requirements first, then architecture, control flow, data, guardrails, evaluation, operations, trade-offs.
 
@@ -319,7 +351,7 @@ Each case: drive requirements first, then architecture, control flow, data, guar
 
 ---
 
-## Round 6 · LLM evaluation & model selection
+## Module 6 · LLM evaluation & model selection
 
 **What they're testing:** Can you make a defensible, evidence-based model choice across business, technical, performance and cost dimensions — the JD says this explicitly.
 
@@ -363,7 +395,7 @@ Fine-tuning does not make a model know your current data, and it creates a lifec
 
 ---
 
-## Round 7 · AI security, Responsible AI & risk management
+## Module 7 · AI security, Responsible AI & risk management
 
 **What they're testing:** Do you threat-model AI systems specifically, and do you know the frameworks well enough to run a governance conversation with a CISO and a legal counsel?
 
@@ -416,7 +448,7 @@ Each of these maps to a control I can point at in the architecture, and to evide
 
 ---
 
-## Round 8 · Guardrails — design & implementation
+## Module 8 · Guardrails — design & implementation
 
 **What they're testing:** The JD calls this out separately, so expect depth. Show layers, placement, failure behaviour and measurement.
 
@@ -459,7 +491,7 @@ Full trace, guardrail verdicts recorded (including *why*), anomaly detection on 
 
 ---
 
-## Round 9 · Integration architecture
+## Module 9 · Integration architecture
 
 **What they're testing:** The JD lists APIs, enterprise applications, data platforms and external services. This is where 12-year architects separate from 6-year ones.
 
@@ -492,7 +524,7 @@ Full trace, guardrail verdicts recorded (including *why*), anomaly detection on 
 
 ---
 
-## Round 10 · Technical governance, standards & architecture practice
+## Module 10 · Technical governance, standards & architecture practice
 
 **What they're testing:** The JD says "defining and implementing technical governance frameworks, architecture standards and best practices." Show mechanisms.
 
@@ -519,7 +551,7 @@ Full trace, guardrail verdicts recorded (including *why*), anomaly detection on 
 
 ---
 
-## Round 11 · Scale, performance, cost & AgentOps
+## Module 11 · Scale, performance, cost & AgentOps
 
 ### Q: How do you make an agentic system performant?
 
@@ -554,7 +586,7 @@ The mindset shift I emphasise: an agentic system is never 'done'. It's a **conti
 
 ---
 
-## Round 12 · Stakeholder management & behavioral (STAR)
+## Module 12 · Stakeholder management & behavioral (STAR)
 
 **What they're testing:** The JD emphasises cross-functional collaboration with business, engineering, security and others. Answer in STAR, quantify, and always name the artefact that resolved it.
 
@@ -580,7 +612,7 @@ The mindset shift I emphasise: an agentic system is never 'done'. It's a **conti
 
 ---
 
-## Round 13 · Executive / bar-raiser
+## Module 13 · Executive / bar-raiser
 
 ### Q: What's your 90-day plan?
 
@@ -603,6 +635,320 @@ Hype: fully autonomous end-to-end business processes in regulated, irreversible 
 ### Q: How do you justify the platform investment to a CFO?
 
 **Answer:** "Marginal cost per use case. The first use case carries the platform: gateway, retrieval, evals, guardrails, governance. The second and third should cost a fraction of it, and I commit to that ratio as a measurable target. I present three numbers: total cost of ownership including run and continuous evaluation (people forget the run cost of a system that must be re-evaluated forever), value per use case with confidence ranges, and the risk-avoidance value — one prevented data-leak or wrong-advice incident often exceeds the annual platform cost. And I'd bring the cost-per-task dashboard, because CFOs trust architects who volunteer unit economics before being asked."
+
+---
+
+## Deep dives — trade-offs & decision points per topic
+
+Stages 3–5 of the loop are almost entirely "which option would you choose, and why?" This section is the answer bank for that: for each architectural decision, the realistic options, when each one wins, what you're paying for it, and the signal that tells you the choice was wrong. Say the **decision points** out loud in an interview — architects are graded on the criteria they use, not the conclusion they reach.
+
+A universal framing that works for every one of these: **"It depends on X, Y and Z — here's where the boundary sits, here's what I'd pick for the numbers you gave me, and here's what would make me change my mind."** Never stop at "it depends."
+
+### D1 · Autonomy level — deterministic workflow vs agent
+
+**The decision:** how much runtime freedom the system gets to choose its own steps.
+
+| Option | Pick when | What you're paying | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Rules / deterministic workflow | Steps are knowable, volume high, auditability mandatory | Rigidity; change requests become code changes | Constant exception handling; a rules engine with 400 rules nobody understands |
+| Classical ML | Prediction/classification with labelled data | Training data + lifecycle | You're using an LLM to do logistic regression, at 100× the cost |
+| Single LLM call + structured output | One bounded transformation | Non-determinism in output shape (mitigate with schema) | You're chaining five "single" calls with glue code — you've built an implicit agent |
+| RAG (retrieve → generate) | Grounded Q&A over a known corpus | Retrieval infrastructure, freshness, ACL work | Users need actions, not answers |
+| Single tool-using agent | Variable step count; real system interaction | Loop non-determinism, cost variance, harder testing | Step counts are always the same → it was a workflow |
+| Multi-agent | Separate permission boundaries, real parallelism, context isolation | Coordination failures, debugging cost, compounding error | You can't explain which agent owns a failure |
+
+**Decision points:** Is the step sequence knowable in advance? Is the outcome verifiable? What's the cost of a wrong step, and is it reversible? Do you need an audit trail of *why*? What's the volume — because non-determinism costs scale linearly and debugging cost scales worse?
+
+**The line that scores:** "Agentic flexibility is a cost, not a feature. I buy the least of it that meets the outcome, and I write down what would justify buying more."
+
+### D2 · Topology — single agent vs supervisor vs swarm
+
+**The decision:** how work is decomposed across agents, if at all.
+
+| Topology | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Single agent, many tools | Default. One coherent task domain | Tool-selection accuracy degrades past ~20–30 tools | Prompt is 8k tokens of tool descriptions; wrong-tool rate climbing |
+| Router + specialists (no shared loop) | Intents are cleanly separable and cheap to classify | Misroutes; a routing layer to maintain | Routing accuracy < ~90%, or constant "route to general" fallback |
+| Supervisor / orchestrator-worker | Sub-tasks need different tools, permissions or models; central audit needed | Supervisor becomes a bottleneck and a context hog | Supervisor context balloons; latency is dominated by coordination |
+| Sequential pipeline | Order is genuinely known (extract → validate → decide) | Rigid; not really "agentic" (that's fine) | You're forcing dynamic behaviour into fixed stages |
+| Parallel fan-out + merge | Independent subtasks, latency matters | Merge/conflict logic; cost multiplies | Results conflict and the merge step becomes the hard part |
+| Hand-off / triage | Conversational continuity with a better-suited peer | State transfer bugs; loops between peers | Ping-pong hand-offs; context lost at the boundary |
+| Debate / ensemble + judge | High-stakes, low-volume, quality >> cost | 3–5× cost and latency | Used on routine traffic |
+| Free-form group chat | Exploration and research only | Untestable, unbounded | It's in production |
+
+**Decision points:** Do the parts need *different permissions*? Is there true parallelism to exploit? Would contexts poison each other if merged? Can you name the owner of each failure mode? What is the compounded success rate — 0.95⁵ ≈ 0.77, so how many hops can your SLO afford?
+
+**The line that scores:** "I split agents on permission boundaries and context boundaries, not on org chart or on how the diagram looks."
+
+### D3 · Orchestration runtime — in-process loop vs durable workflow
+
+**The decision:** what executes and remembers the agent loop.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| In-process request-scoped loop | Short synchronous tasks (< ~30s), no human approvals, idempotent-or-nothing side effects | Work lost on crash/deploy; no resumability; no replay | Restarts lose in-flight tasks; you can't answer "what happened in run X" |
+| Durable/event-sourced workflow (Durable Functions, Temporal, Step Functions) | Long-running, human approvals, multi-system writes, compensations | Operational complexity; determinism constraints in workflow code | You built retry, checkpointing and timers by hand — badly |
+| Queue + worker with externalised state | High throughput, async UX acceptable | You must build resumability semantics yourself | Duplicate side effects; state races between workers |
+
+**Decision points:** Can a task span a human approval or a slow downstream? Does a partially completed run leave the business in an inconsistent state? Do you need deterministic replay for audit or debugging? What happens to in-flight runs during a deploy — this question alone usually settles it.
+
+**The line that scores:** "An acting agent is a saga. If I can't resume it, compensate it and replay it, I don't have an architecture, I have a demo."
+
+### D4 · Framework choice — SDK, framework, or build it
+
+**The decision:** how much of the loop you own.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Provider SDK only (thin custom loop) | You need full control of state, permissions and telemetry; small number of agent types | You build tracing, retries, memory yourself | Every team rebuilds the same 400 lines slightly differently |
+| Orchestration framework (LangGraph, Agent Framework/Semantic Kernel, AutoGen, CrewAI, ADK) | You want graph/state primitives, streaming, checkpointing and community patterns fast | Framework churn; abstraction leaks; upgrade tax; opinionated state models | You spend more time fighting the abstraction than the problem |
+| Managed agent platform (Foundry Agent Service, Bedrock Agents, vendor copilot platforms) | Speed to value, standard patterns, small team | Lock-in; ceiling on customisation; opaque failures | You need a behaviour the platform won't express, and there's no escape hatch |
+| Low-code (Copilot Studio and similar) | Business-owned, low-risk, read-mostly assistants | Governance sprawl; limited testability | It's doing regulated writes |
+
+**Decision points:** How many agent types will exist in 18 months? Who maintains it? What's the exit cost — can you keep prompts, tool contracts, evals and traces if you leave? Does the framework's state model match your durability requirement? Is the team's real constraint knowledge or time?
+
+**The line that scores:** "I keep the durable assets — tool contracts, evals, prompts, traces — outside whatever framework is fashionable this year. Frameworks are replaceable; those aren't."
+
+### D5 · Memory & state design
+
+**The decision:** what the system remembers, for how long, and who can see it.
+
+| Tier | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| No memory (stateless per task) | Transactional tasks; strongest privacy posture | Users repeat themselves | Users repeat themselves constantly and abandon |
+| Working context only (windowed) | Conversations of bounded length | Truncation loses key facts | Quality degrades late in long conversations |
+| Summarised rolling context | Long conversations, cost-sensitive | Summarisation loses detail and can hallucinate | Facts silently mutate across the summary boundary |
+| Episodic store (past runs/threads) | Continuity across sessions matters | Retention, PII, deletion obligations | You can't answer a deletion request |
+| Semantic/vector memory (learned facts) | Personalisation with real value | Leakage across users/tenants; stale beliefs | A fact learned from user A shows up for user B |
+| Procedural memory (learned routines) | Repeated workflows with stable steps | Behaviour changes without a deploy | Behaviour drifts and nobody can diff it |
+
+**Decision points:** Is memory a *product* requirement or a nice-to-have? What's the retention policy and who signed it? Is memory partitioned per user *and* per tenant? Is a memory write authorised like any other write? Can memory be inspected, corrected and deleted? Does stale memory create a correctness or compliance risk?
+
+**The line that scores:** "Memory is a data-governance surface with a UI, not a feature flag. I design deletion before I design recall."
+
+### D6 · Context engineering — what goes into the window
+
+**The decision:** how you spend a finite, expensive, attention-degrading resource.
+
+| Lever | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Long context, stuff everything | Prototyping; small corpora; strong recency needs | Cost per step × loop length; lost-in-the-middle accuracy loss | Cost per task scales with conversation length; accuracy drops on long inputs |
+| Retrieval with tight top-k + rerank | Most enterprise cases | Retrieval infrastructure; recall risk | Answers miss facts that are demonstrably in the corpus |
+| Summarise-and-compact on overflow | Long-running agents | Detail loss; summary hallucination | The agent "forgets" a constraint it was given |
+| Structured scratchpad / external notes | Multi-step tasks with intermediate results | Extra tooling | The model re-derives the same intermediate result repeatedly |
+| Sub-agent context isolation | Specialised long contexts that would collide | Coordination cost | One task's noise degrades another's accuracy |
+
+**Decision points:** What's the *marginal* value of the 20th retrieved chunk vs its token cost across N loop steps? Where in the window does critical instruction sit (start/end beats middle)? Are you paying for the same system prompt every step — can prompt caching fix it? What's your context growth curve per step, and where does it break the budget?
+
+**The line that scores:** "Context is a budget, and every token is paid for again on every step of the loop. I optimise for precision, not recall, and I measure the curve."
+
+### D7 · Model portfolio — hosted vs open-weights, and routing
+
+**The decision:** which models, where they run, and who decides per request.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Frontier hosted API | Hard reasoning, fast time-to-value, small/medium volume | Per-token cost; provider dependency; data-boundary contracts | Cost per task dominated by easy traffic hitting the big model |
+| Mid-tier hosted | The workhorse for most turns | Occasional quality gaps needing escalation | Escalation rate is high and unmanaged |
+| Small/cheap model | Routing, classification, extraction, guardrail checks | Quality ceiling | You're using a frontier model to classify intents |
+| Fine-tuned small / distilled | High volume, narrow task, stable requirements | Training + lifecycle + re-eval per version | Unit economics fail at scale and you have no cheaper path |
+| Self-hosted open weights | Residency/sovereignty, extreme volume, deep customisation, no-egress mandates | GPU capacity, MLOps, security patching, quality gap | You're running a GPU fleet at 8% utilisation for a chatbot |
+
+**Decision points:** Which *constraint* eliminates options before quality even matters (residency, contractual, procurement)? What's the traffic mix — what share is genuinely hard? Is there an escalation path from cheap to expensive, and is it measured? What's the deprecation notice period and your re-certification cost? Can you swap providers behind the gateway in a config change plus an eval run?
+
+**The line that scores:** "I don't select a model, I select a portfolio and a routing policy — and the eval suite is what makes changing my mind cheap."
+
+### D8 · Tool design & protocol
+
+**The decision:** how capability is exposed to the model.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Fine-grained CRUD tools | Rare — maximum flexibility, exploratory agents | Many steps, high latency/cost, more chances to err | A simple task takes 9 tool calls |
+| Coarse business-intent tools | Default for production | Less flexible; more backend logic per tool | Every new requirement needs a new tool |
+| Generated from OpenAPI wholesale | Fast coverage of a big API surface | Hundreds of tools → selection collapse; leaks vendor semantics | Tool list is enormous and wrong-tool rate is high |
+| MCP servers | Reuse across hosts/clients; ecosystem tools | New trust boundary; supply-chain risk; version drift | A third-party server has ambient credentials |
+| Code execution / sandbox as a "tool" | Data manipulation, analysis, long-tail computation | Sandbox escape risk, resource abuse | It runs with network access and real credentials |
+
+**Decision points:** How many tools before selection accuracy degrades — and what's your plan (namespacing, per-agent subsets, hierarchical selection)? Is each tool's *description* treated as a versioned prompt asset with eval coverage? Are errors written for a model to recover from? Is every write idempotent? What's the side-effect class and does it require approval?
+
+**The line that scores:** "Tool descriptions are prompts and tool contracts are APIs. I version them, test them and own their error messages, because that's where agent accuracy actually comes from."
+
+### D9 · Identity & authorisation for agents
+
+**The decision:** whose authority the agent acts with.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| On-behalf-of / delegated user identity | Any action within a user's own rights | Token plumbing; consent UX; expiry handling | Users see data they couldn't open in the source system |
+| Dedicated agent service identity (narrow scopes) | Autonomous/background work with no user context | Standing privilege; must be reviewed like a service account | One shared identity across many agents; audit trail is useless |
+| Hybrid (delegated for reads, service for writes with policy) | Common in practice | Two paths to reason about | Nobody can state which identity did what |
+| Shared credential / API key | Never in production | Confused deputy; no attribution | It exists |
+
+**Decision points:** Can the agent ever exceed the requesting human's entitlements — and can you prove it can't? Are credentials short-lived and scoped per tool? Is there one principal per agent so the audit log is meaningful? Who reviews agent entitlements, on what cadence? What happens to running agents when the user's access is revoked?
+
+**The line that scores:** "The default is that an agent can never do something the requesting human couldn't do themselves. Every exception to that is a written, owned, time-bound decision."
+
+### D10 · Guardrail placement & failure behaviour
+
+**The decision:** where each control sits and what happens when it fails.
+
+| Control point | Fail-closed when | Fail-open when | Cost |
+| --- | --- | --- | --- |
+| Input safety / injection scan | User-facing, regulated, write-capable | Internal read-only assistants | Latency + FP refusals |
+| Identity-scoped retrieval | Always fail closed | Never | Query complexity |
+| Schema/argument validation | Always fail closed | Never | Negligible — do it |
+| Policy engine before writes | Always fail closed | Never | Rule maintenance |
+| Output groundedness check | Regulated, advice-like content | Casual internal Q&A | Extra model call, latency |
+| Output PII/secret scan | Anything leaving the boundary | — | Latency, FPs |
+| Content-safety service outage | Sensitive/public-facing surfaces | Low-risk internal tools (degrade + log) | Availability vs risk trade |
+
+**Decision points:** What's the cost of a false positive vs a false negative *for this surface*? Which guardrails can be enforced deterministically (schema, policy, permissions) versus probabilistically (classifiers) — and are you relying on the probabilistic ones for anything that must never happen? Is every verdict logged with a reason? Who owns tuning, and on what cadence? Are guardrails central and reusable, or reimplemented per team?
+
+**The line that scores:** "Anything a prompt can be talked out of isn't a guardrail. I put the must-nevers in the permission model and the policy engine, and I use classifiers to reduce noise, not to guarantee safety."
+
+### D11 · Evaluation strategy
+
+**The decision:** how you know it works, before and after release.
+
+| Method | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Programmatic assertions (schema, exact match, tool-call correctness) | Always — the cheap layer | Only covers the checkable | You're using a judge model to check JSON validity |
+| Human expert labels | Establishing ground truth; high-stakes | Slow, expensive, doesn't scale | You have 40 labelled cases and call it an eval suite |
+| LLM-as-judge | Scaling subjective quality once calibrated | Bias, drift, false confidence | Judge scores rise while users complain |
+| Reference trajectories (agent path) | Multi-step agents | Expensive to author and maintain | Right answers via dangerous or 5× cost paths |
+| Adversarial / red-team suite | Any write-capable or public system | Ongoing authoring effort | A pen-test finds a class of attack you never tested |
+| Online A/B + business metrics | Post-launch truth | Needs traffic and instrumentation | Offline metrics are green, business metrics are flat |
+| Shadow mode | Before any write capability | Doubles inference cost temporarily | You went straight to canary on a write-capable agent |
+
+**Decision points:** Does the eval set reflect *production traffic distribution* or the cases you thought of? Is it a release gate with numeric thresholds, or a report nobody blocks on? Is the judge calibrated against human labels, and pinned? How do failures from production get back into the suite? Who owns the suite when the original team moves on?
+
+**The line that scores:** "The eval suite is the product's test pyramid. If it isn't in CI with thresholds, quality is a matter of opinion — and opinions don't survive a model upgrade."
+
+### D12 · Human-in-the-loop design
+
+**The decision:** where a human sits, and what they actually see.
+
+| Pattern | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Approve-before-act | Irreversible or high-value actions | Latency, human throughput ceiling, approval fatigue | Approvers click yes in under two seconds — that's rubber-stamping, not oversight |
+| Review-after-act (sampled) | Reversible actions, high volume | Errors reach users before detection | Sample rate is too low to detect a rare but severe failure |
+| Escalate-on-uncertainty | Confidence signal is meaningful | Calibration problem; escalation floods | Escalation rate is either ~0% or ~40% |
+| Agent-assist (human decides, AI drafts) | Highest-stakes domains; early rollouts | No automation savings — but real quality gains | You promised automation ROI and delivered a drafting tool |
+| Full autonomy | Reversible, verifiable, measured, low blast radius | Requires all the above to be proven first | You started here |
+
+**Decision points:** Does the human see the *actual action and its parameters*, or a persuasive summary? Do they have time and context to genuinely disagree? What's the measured override rate — near zero means the control is theatre? Is autonomy earned progressively with a written promotion criterion, and is there a demotion trigger too?
+
+**The line that scores:** "Autonomy is earned per action class, with data, and it can be revoked. Oversight that nobody exercises is just latency."
+
+### D13 · Data access — unstructured vs structured paths
+
+**The decision:** how the agent touches enterprise data.
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Vector/hybrid retrieval over documents | Knowledge questions, policy, long-tail content | Index freshness, ACL sync, re-embedding cost | Answers cite documents the user can't open, or stale versions |
+| Curated parameterised query tools | Structured facts with known access patterns | Tool per query shape; less flexible | An endless backlog of "add one more report tool" |
+| Semantic layer / metrics store | Analytics questions with governed definitions | Requires a semantic layer to exist | Two answers to "what is revenue" |
+| NL2SQL against a governed view | Genuine ad-hoc analysis need | Injection, runaway queries, silently wrong joins | A wrong number reaches a board deck |
+| Direct DB access | Never | Everything | It exists |
+| Graph / knowledge-graph retrieval | Multi-hop relationship questions | Graph construction and maintenance cost | You built a graph for a FAQ bot |
+
+**Decision points:** Where are permissions enforced — at query time by the platform, or hopefully by the prompt? Is the answer *auditable to a source*? What's the freshness SLA and who owns re-indexing? For structured data: is the query shown to the user, cost-capped and read-only? What happens when an embedding model version changes (full re-index, versioned swap, rollback plan)?
+
+**The line that scores:** "For structured data I constrain to governed queries by default; free-form NL2SQL is a capability I grant deliberately, read-only, cost-capped and visible — not a default."
+
+### D14 · Scaling & capacity
+
+**The decision:** how the system behaves at peak and under stress.
+
+| Lever | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Provisioned/reserved model capacity | Predictable base load, latency guarantees needed | Paying for idle | Utilisation < 40% or constant throttling |
+| Pay-as-you-go with queueing | Spiky or unpredictable traffic | Rate limits become the outage | 429s in production during peak |
+| Batch/offline processing | Non-interactive workloads | Latency | You're paying interactive prices for overnight work |
+| Multi-region deployment | Latency or residency requirements | Data-boundary complexity, cost, consistency | Users on another continent see 4s of network latency |
+| Graceful degradation tiers | Always design this | Product must accept a degraded mode | Your only failure mode is a 500 |
+
+**Decision points:** What's the real bottleneck — the model, the tools, or the systems of record's rate limits (usually the last one)? What's the peak-to-average ratio and how sudden is the ramp? What does the system do when the model provider is throttling — queue, degrade, or fail? Is backpressure explicit and does it propagate to the UX?
+
+**The line that scores:** "In agentic systems the scaling ceiling is almost never the model — it's the downstream enterprise APIs and their quotas. I capacity-plan those first."
+
+### D15 · Cost architecture
+
+**The decision:** how you make unit economics survive success.
+
+| Lever | Typical impact | Trade-off | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Model routing by task difficulty | Often the largest single saving | Routing errors, added complexity | One model serves all traffic |
+| Prompt/prefix caching | Large on repeated system prompts | Cache invalidation discipline | You pay full price for the same 3k-token preamble every step |
+| Semantic caching of answers | Big on repetitive traffic | Staleness; **must** be tenant/permission scoped | A cached answer crosses a tenant boundary |
+| Context trimming / retrieval precision | Compounds across loop steps | Recall risk | Cost grows with conversation length |
+| Step/token budgets | Caps the tail | Some tasks truncate | p99 task costs 50× the median |
+| Distillation / fine-tuned small model | Large at high volume | Training + lifecycle cost | Unit economics fail and there's no cheaper path |
+| Batch APIs | Large for async work | Latency | Overnight jobs at interactive prices |
+
+**Decision points:** Do you measure **cost per completed task** or just monthly spend? Is cost attributed per tenant/use case at the gateway? Where is the p99 tail and what causes it (retries? reflection? long contexts?)? Is there a hard budget circuit breaker, or only an alert nobody reads? Does the business owner see the unit-cost dashboard?
+
+**The line that scores:** "Token price is a distraction. I manage cost per resolved task and its distribution — the tail is where budgets actually die."
+
+### D16 · Observability & operations
+
+**The decision:** what you can see, and how fast you can answer "what happened?"
+
+| Option | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Standard APM only | Never sufficient alone | No visibility into reasoning, retrieval or tool choice | You can see a 200 OK and nothing about why the answer was wrong |
+| OTel GenAI semantic conventions | Default — vendor-neutral, portable | Some instrumentation effort | Each team invents its own trace schema |
+| Vendor LLM-observability platform (LangSmith, Langfuse, Foundry tracing, Arize/Phoenix) | Fast time-to-value, replay UI, eval integration | Cost, lock-in, data-residency review needed | Traces containing PII sit in an unreviewed third party |
+| Full prompt/response capture | Debuggability, audit, regulated contexts | Privacy exposure; storage cost; retention obligations | You log raw PII forever with broad access |
+| Sampled capture + metadata always | Privacy/cost-sensitive at high volume | The failed run you need may not be sampled | You can't reproduce a reported incident |
+
+**Decision points:** Can you replay a specific run end to end with the exact context it saw? Are model version, prompt version, index version and tool versions recorded per run? Who can read traces, and are they redacted? What's the retention, and does it match the audit requirement? Do you alert on *quality* metrics, not just errors and latency?
+
+**The line that scores:** "Trace-first, always. The single highest-ROI thing I build early is run replay — it turns 'the AI is bad' into a specific, fixable defect."
+
+### D17 · Governance operating model
+
+**The decision:** where architecture authority actually sits.
+
+| Model | Pick when | Cost / risk | Signal you chose wrong |
+| --- | --- | --- | --- |
+| Central CoE owns all AI builds | Very early, scarce skills, high risk appetite mismatch | Bottleneck; business resentment; shadow AI | Queue to the CoE is measured in months |
+| Federated with a central platform + standards | Most enterprises at scale (default) | Requires a real platform team and real standards | Standards exist but nothing enforces them |
+| Fully devolved to product teams | Mature engineering culture, low regulatory exposure | Duplication, inconsistent safety, no portfolio view | Three teams built the same agent; nobody has an inventory |
+| Vendor/SI-led | No internal capability, urgent deadline | Knowledge doesn't transfer; exit cost | You can't operate what you own |
+
+**Decision points:** What's the ratio of demand to skilled supply? What's the regulatory exposure? Is there a platform team funded to build the paved road, or are you asking for standards without a product? How is compliance measured — self-attestation, automated conformance, or hope? What's the escape hatch for legitimate exceptions, and does it expire?
+
+**The line that scores:** "Governance is a product with users. If the compliant path is slower than the non-compliant one, I've built the wrong product and teams will route around me."
+
+### D18 · Build vs buy & lock-in
+
+**The decision:** what you own versus rent, and what it costs to leave.
+
+| Layer | Default | Why | When you'd reverse it |
+| --- | --- | --- | --- |
+| Foundation models | Buy | Capital intensity, pace of change | Sovereignty, extreme volume, no-egress mandate |
+| Vector/search infrastructure | Buy | Commodity, well-served | Extreme scale or unusual retrieval semantics |
+| AI gateway | Buy or thin-build | Commodity control point | You need policy semantics no product expresses |
+| Guardrail classifiers | Buy + tune | Vendors have better training data | Domain-specific policy no vendor covers |
+| Agent orchestration | Thin-build over SDKs | Framework churn is a liability | Managed platform genuinely fits and speed dominates |
+| Tool contracts & domain logic | **Build** | This *is* your business | Never |
+| Eval suite & datasets | **Build** | Your definition of good is proprietary | Never |
+| Traces & prompt assets | **Build/own** | Portability depends on it | Never |
+
+**Decision points:** What's the exit cost — can you export prompts, evals, tool definitions and traces? Is the vendor's roadmap aligned or divergent? What's the pace of commoditisation (things that are hard today are products in 12 months)? Is the capability a differentiator or a dependency? Who operates it at 3am?
+
+**The line that scores:** "Rent the infrastructure, own the judgement. My prompts, tool contracts, evals and traces are the assets — everything else is replaceable, and I write the lock-in cost into the ADR rather than discovering it at renewal."
+
+### How to use these in the room
+
+1. **Name the decision** before answering ("the real decision here is autonomy level, not framework").
+2. **Give 2–3 options, not one** — showing the option space is the seniority signal.
+3. **State the deciding criteria** explicitly, then apply them to the numbers you were given.
+4. **Commit to a choice.** "It depends" without a landing is the most common senior-candidate failure.
+5. **Say what would change your mind**, and what signal in production would tell you the choice was wrong. That last part is what principal-level sounds like.
 
 ---
 
@@ -851,10 +1197,12 @@ Everything below is external, primary-source material. Work top-to-bottom if you
 
 | Week | Focus | Do this |
 | --- | --- | --- |
-| 1 | Agent fundamentals | ReAct, Reflexion, Lilian Weng's post, Anthropic's *Building effective agents*, OpenAI's practical guide. Write your own one-page definition of agent vs workflow, and the autonomy ladder from Round 2. |
+| 1 | Agent fundamentals | ReAct, Reflexion, Lilian Weng's post, Anthropic's *Building effective agents*, OpenAI's practical guide. Write your own one-page definition of agent vs workflow, and the autonomy ladder from Module 2. |
 | 2 | Enterprise shape | Azure WAF AI workloads, CAF AI adoption, MCP spec, OAuth on-behalf-of, integration patterns. Draw a full reference architecture for Case 1 from memory, twice. |
 | 3 | Safety & governance | OWASP LLM Top 10 + agentic threats, MITRE ATLAS, NIST AI RMF + GenAI profile, ISO 42001 overview, EU AI Act tiers, Simon Willison on injection. Write a one-page threat model and a six-layer guardrail diagram. |
 | 4 | Evaluation & economics | Hamel Husain on evals, Chip Huyen on evaluation, RAGAS/promptfoo docs, OTel GenAI conventions, LLM-as-judge paper. Build a model-selection matrix and a cost-per-task model for a use case you know. Then do three timed mock design cases out loud. |
+
+**Daily drill throughout:** pick two deep dives (D1–D18), close the page, and talk through the option space, the deciding criteria, your pick and what would change your mind — in under three minutes each. That's the exact shape of a Stage 3–5 answer.
 
 ---
 
