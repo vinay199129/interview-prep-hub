@@ -70,6 +70,12 @@ const CARRIERS: Carrier[] = [
           "Dynamic pricing, predictive maintenance, cargo/customs document intelligence, GenAI guardrails",
       },
       {
+        label: "6B · Agentic AI, LLM & MCP depth",
+        href: "#round-6b-agentic-ai-llm-mcp-engineering-depth",
+        description:
+          "Agents & multi-agent, orchestration frameworks, RAG/vector search, MCP, guardrails, evals & observability, LLMOps, Python/FastAPI, cost",
+      },
+      {
         label: "7 · Architecture leadership",
         href: "#round-7-architecture-leadership-arts-runway-governance",
         description:
@@ -89,6 +95,13 @@ const CARRIERS: Carrier[] = [
       },
     ],
     quickLinks: [
+      {
+        href: "#round-6b-agentic-ai-llm-mcp-engineering-depth",
+        icon: "🤖",
+        title: "Agentic AI / LLM depth",
+        description:
+          "The GenAI skills bar, aviation-contextualised: agents, LangGraph/Semantic Kernel, RAG & vector stores, MCP, guardrails, evals, LLMOps, FastAPI, cost.",
+      },
       {
         href: "#interview-strategy-negotiation-playbook",
         icon: "♟️",
@@ -183,6 +196,12 @@ const CARRIERS: Carrier[] = [
           "Dynamic pricing & ancillary optimisation, next-best-offer, disruption GenAI, 737 predictive maintenance",
       },
       {
+        label: "6B · Agentic AI, LLM & MCP depth",
+        href: "#round-6b-agentic-ai-llm-mcp-engineering-depth",
+        description:
+          "Agents & multi-agent, orchestration frameworks, RAG/vector search, MCP, guardrails, evals, LLMOps, FastAPI, cost-per-contact",
+      },
+      {
         label: "7 · Architecture leadership",
         href: "#round-7-architecture-leadership-agile-runway-governance",
         description:
@@ -202,6 +221,13 @@ const CARRIERS: Carrier[] = [
       },
     ],
     quickLinks: [
+      {
+        href: "#round-6b-agentic-ai-llm-mcp-engineering-depth",
+        icon: "🤖",
+        title: "Agentic AI / LLM depth",
+        description:
+          "The GenAI skills bar for a lean LCC: agents, orchestration frameworks, RAG & vector stores, MCP, guardrails, evals, LLMOps, FastAPI, cost per contact.",
+      },
       {
         href: "#technology-skills-map-jd-stack-flydubai-landscape-your-resume",
         icon: "🧭",

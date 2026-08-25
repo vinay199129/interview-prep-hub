@@ -564,6 +564,78 @@ For scale, maintain monthly/member snapshots and replay later entries. Correctio
 
 ---
 
+## Round 6B · Agentic AI, LLM & MCP engineering depth
+
+**What they're testing:** Emirates Group IT increasingly hires architects against a *GenAI/Agentic AI* skills bar (agents, orchestration, RAG, vector search, MCP, guardrails, evaluation, LLMOps) on top of the aviation architecture bar in Rounds 3–5. Round 6 above is the *applied aviation* view; this round is the *engineering depth* view. If the role you're interviewing for is AI-weighted, work through the full **Agentic AI Solution Architect** guide on this site — this section is the aviation-contextualised summary.
+
+### Agentic AI & multi-agent workflows
+
+**Q: When does an airline problem justify an agent instead of a deterministic workflow?** Use a deterministic workflow when the steps are known and stable — fare quote, payment capture, ticket issue. Use an agent when the *path* is unknown at design time but the *tools* are bounded: an IRROPS ops copilot that must inspect a disrupted PNR, check re-accommodation options, look up hotel/duty rules and draft a recommendation. Rule of thumb: agency buys you branching you can't enumerate; it costs you determinism, latency, token spend and auditability. If you can enumerate the branches, don't pay for an agent.
+
+**Q: How would you structure a multi-agent system for cargo document processing?** Supervisor/orchestrator over specialists: an *extraction* agent (AWB, invoice, dangerous-goods declaration), a *compliance* agent (customs/DGR rule checks), a *reconciliation* agent (match against the booking) and a *human-review* handoff. Agents communicate through a typed shared state, not free-text chat. Hard caps: max steps, max tool calls, wall-clock and token budget, plus a terminating condition — an unbounded agent loop is a production incident and a cost incident at the same time.
+
+**Q: Planning & reasoning patterns you'd actually use.** ReAct for tool-using single agents; plan-and-execute when the task decomposes cleanly and you want the plan reviewable before it runs (useful when a human approver must see the plan); reflection/critic loops for document extraction quality; routing/handoff for a supervisor topology. State the failure mode of each: ReAct loops, plan-and-execute plans go stale mid-run, reflection doubles cost.
+
+**Q: Memory design.** Separate short-term (turn/session state — conversation buffer, tool results), long-term semantic (vector-indexed prior interactions, retrievable), and episodic/operational (durable case state in a real datastore, e.g. the disruption case record). Never let PNR or passenger PII sit in a shared long-term vector memory without classification, TTL and per-user retrieval filters. Memory is a data-governance surface, not a convenience feature.
+
+**Q: Human-in-the-loop.** Design approval as an architectural checkpoint, not a UI afterthought: the agent produces a *proposal* (rebooking option, fare adjustment, refund eligibility) with evidence and confidence; a policy layer decides auto-approve / approve-with-human / block by risk tier and value threshold; the approver's identity, the proposal and the decision are logged immutably. In aviation, anything that spends money or touches safety/entitlement is human-approved above a threshold.
+
+### LLMs & prompting
+
+Capabilities/limits framing: LLMs are strong at language transformation, extraction, summarisation and tool selection; weak at arithmetic, freshness, and any claim not present in the context. **Structured outputs** (JSON schema / constrained decoding) for anything a downstream system consumes — never regex-parse prose. **Function/tool calling** for actions, with the tool contract as the trust boundary: validate arguments server-side, authorise per-user, and make the tool itself idempotent (same `idempotency_key`, same result) because the model *will* retry. **Context management**: budget the window explicitly (system + policy + retrieved chunks + history), compress history by summarisation, drop rather than truncate mid-document. **Model selection** is an architecture decision with an ADR: small/cheap model for classification and routing, frontier model for reasoning-heavy synthesis, and a documented fallback when a region or deployment is unavailable.
+
+### LLM orchestration frameworks
+
+Be able to compare, not just name: **LangChain** (broad integrations, easy start, weaker on long-running control flow), **LangGraph** (explicit graph/state machine, durable checkpoints, best fit when you need resumable, auditable agent runs), **Semantic Kernel** (strongly .NET/Azure-aligned, plugin + planner model, natural fit for a Microsoft-heavy enterprise), **AutoGen** (conversational multi-agent research/experimentation), **CrewAI** (role/task framing, quick to demo). The senior answer is that the framework is replaceable and the *architecture* is not: keep prompts, tool contracts, evaluation harness and state schema outside the framework so a framework swap is a refactor, not a rewrite. Say which you'd choose and why — e.g. LangGraph or Semantic Kernel for a governed enterprise workflow that needs checkpointing and approval gates.
+
+### RAG pipeline design
+
+Ingestion (policy manuals, fare rules, tariff/customs docs, engineering manuals) → parsing/layout-aware extraction (tables in a DGR or tariff document break naive text splitters) → **chunking** (structure-aware by heading/clause with overlap, beats fixed-size; keep the clause identifier in metadata so you can cite "Fare rule 16.2") → **embeddings** (domain-appropriate model, versioned — changing the embedding model means a full re-index) → **vector search** (hybrid: BM25/keyword + vector, because fare codes, AWB numbers and airport codes are lexical, not semantic) → **reranking** (cross-encoder or semantic reranker over top-k to fix recall/precision trade-off) → **context optimisation** (dedupe, order by relevance, budget tokens) → **grounded generation** with mandatory citations and an explicit "not in policy" refusal path. Metadata filters carry entitlement: cabin, market, language, effective-date, and *who is allowed to see this document*. Freshness matters more than cleverness — a correct answer from a superseded fare rule is still a wrong answer, so version and effective-date every chunk.
+
+**RAG vs fine-tuning:** RAG for knowledge that changes (policy, fares, schedules) and needs traceability; fine-tuning for stable format/tone/task shaping; almost never fine-tune to inject facts.
+
+### Vector databases & knowledge retrieval
+
+**Azure AI Search** is the natural default in an Azure-aligned Emirates landscape: hybrid search, semantic reranker, security trimming, and integrated indexers — the security-trimming/filter story is usually the deciding factor in an enterprise. Alternatives: **pgvector** when the corpus is modest and you already run Postgres (one datastore, transactional consistency between metadata and vectors), **Pinecone/Weaviate/Milvus** for very large dedicated vector workloads, **FAISS** for in-process/offline experimentation and benchmarking, not as a governed production store. Selection criteria to state out loud: filtered-search quality, hybrid support, scale/latency at p95, multi-tenancy and access control, data residency (UAE/EU), operational burden, and cost per million vectors. Write it as an ADR with a PoC against representative data — not a vendor preference.
+
+### Model Context Protocol (MCP)
+
+MCP standardises how an AI client discovers and calls **tools**, reads **resources** and uses **prompts** from a server, so capabilities aren't re-implemented per agent or per framework. The enterprise argument: one governed MCP server per bounded context (a *booking* server, a *loyalty* server, a *cargo docs* server) gives you a reusable, versioned capability layer across ARTs instead of five teams writing five bespoke tool integrations. Architectural cautions to raise unprompted: MCP servers are a new privilege boundary — authenticate the caller, propagate *user* identity (not just a service principal) so entitlement checks are real, allow-list tools per agent, validate every argument, rate-limit, and treat tool descriptions themselves as untrusted input (tool-description injection is a real attack). Version tool schemas like APIs and log every invocation with correlation IDs.
+
+### AI tool integration with enterprise systems
+
+Agents reach the Emirates estate the same way any client does — through the **anti-corruption layer and APIM**, never straight into a vendor PSS. Wrap existing REST/GraphQL/SDK capabilities as narrow, well-described tools with explicit schemas; keep write-tools idempotent and scoped; use event-driven integration (Event Hubs/Service Bus) for anything long-running so the agent isn't holding a synchronous connection through a 30-second partner call. Rate limits, circuit breakers and timeouts from Round 4 apply unchanged — an agent is just a very enthusiastic, occasionally confused API client.
+
+### Guardrails & Responsible AI
+
+Layer them: **input** (PII detection/redaction before the prompt, prompt-injection classifiers, jailbreak patterns, topic scoping), **retrieval** (entitlement filters so the index can't leak another market's or another passenger's documents), **tool** (allow-list, argument validation, authorisation on the *user's* identity, spend/action thresholds), **output** (content filtering, groundedness/citation check, schema validation, policy-claim verification), **process** (human approval above risk thresholds, kill switch, immutable audit trail, red-team suite in CI). Indirect prompt injection is the one to name: a malicious instruction embedded in an uploaded customs document or an email the agent reads. Mitigation is defence in depth — never treat retrieved content as instructions, separate data from instruction channels, and make destructive tools require confirmation. Map it to a recognised frame (NIST AI RMF, EU AI Act risk tiers, Microsoft Responsible AI) plus UAE PDPL for personal data.
+
+### Evaluation & observability
+
+Evaluate at three levels: **retrieval** (recall@k, precision, citation coverage), **generation** (groundedness/faithfulness, answer relevance, refusal correctness, safety), **task/agent** (end-to-end task success, tool-selection accuracy, steps-to-completion, cost per resolved case). Build a golden dataset from real policy questions with SME-approved answers; run it in CI so a prompt or model change is gated like a code change; add LLM-as-judge with a human-calibrated sample, never judge-only. **Hallucination detection** in production: groundedness scoring against retrieved context, citation-required outputs, and abstention when confidence or retrieval score is low. **Observability**: OpenTelemetry-style distributed tracing where a trace spans the whole agent run — every LLM call, tool call, retrieved chunk, token count and latency — plus dashboards for cost/request, p95 latency, refusal rate, escalation rate and drift. Close the loop with user feedback (thumbs, escalation reasons, agent-handoff transcripts) feeding the golden set. Define the KPIs with the business up front: containment rate, first-contact resolution, cost per contact, and *no increase* in wrong-policy answers.
+
+### Performance & cost optimisation
+
+Levers in the order you should apply them: route to the smallest model that passes evals (classification/routing on a small model, synthesis on a large one); cache aggressively (exact-match response cache, semantic cache, prompt/prefix caching, and cached embeddings — re-embedding an unchanged corpus is pure waste); trim context (rerank then truncate rather than stuffing top-50 chunks); stream tokens to cut *perceived* latency; parallelise independent tool calls; batch offline workloads; cap agent steps. Then the aviation framing: express it as **cost per resolved contact** or **cost per document processed** against the human baseline, with a p95 latency SLO and a quality floor — an optimisation that breaks the eval suite isn't an optimisation. Provisioned/PTU capacity vs pay-as-you-go is a genuine FinOps trade-off to raise for predictable high-volume workloads.
+
+### Python, FastAPI & software engineering
+
+Expect to defend production Python, not notebooks: **FastAPI** for the service layer (async I/O — LLM and vector calls are I/O-bound; Pydantic models as the schema contract shared with structured outputs; dependency injection for auth and clients; background tasks or a real queue for long-running agent runs; SSE/WebSocket for streaming). Add: typing everywhere, `ruff`/`mypy` in CI, `pytest` with recorded LLM fixtures so tests are deterministic, structured logging with correlation IDs, connection pooling and retry-with-jitter on model endpoints, and graceful degradation when a model region is throttled (429 → fallback deployment).
+
+### Cloud AI platform (Azure) & data
+
+**Azure AI Foundry** for model catalogue, deployments, prompt flow, evaluation and content safety; **Azure OpenAI** for governed model access with private networking, managed identity and regional/residency control; **Azure AI Search** for hybrid retrieval with security trimming; **Azure Machine Learning** for classical ML lifecycle (the pricing/predictive-maintenance models in Round 6), registries and pipelines; **Databricks/Fabric** where the enterprise lakehouse and feature engineering live. Data-engineering framing: ingestion from PSS/loyalty/cargo/ops sources, batch plus streaming (Event Hubs), medallion-style curation, contracts and quality gates on the tables that feed features and knowledge indexes, and Purview for lineage/classification — because a knowledge index inherits every governance obligation of its sources.
+
+### LLMOps, containers & security
+
+CI/CD for AI assets: **prompts, tool schemas, index configuration, embedding model version and evaluation datasets are all versioned artefacts** in Git, promoted dev→test→prod with the eval suite as the release gate; index rebuilds are blue/green with an alias flip so a bad re-index is a one-line rollback; canary a new model deployment behind a routing flag with online quality/cost monitoring. Package agents and RAG services as containers (**Docker**) on **AKS** or Container Apps with HPA/KEDA (queue-depth scaling suits bursty agent load), managed identity for every dependency, secrets in Key Vault (never in prompts or env dumps), private endpoints to model/search/data planes, egress control, and network isolation for anything touching PNR/payment data. Security posture to state: authenticate the user, authorise per tool, propagate identity end-to-end, encrypt in transit and at rest, classify before choosing a region, and log immutably for audit.
+
+### Architecture & technical leadership for AI
+
+The staff-level answer: publish the reference architecture (ingestion → index → retrieval → orchestration → guardrails → observability), ship a golden-path template so teams don't reinvent guardrails, define AI-specific review gates (data classification, eval results, red-team results, cost model, human-approval design) as part of the existing ADR/architecture-board process, tier governance by risk so a low-risk internal summariser doesn't need the same gate as a customer-facing entitlement assistant, and stay hands-on in code and evaluation reviews. Business-value framing throughout: which use case, what KPI, what it costs, what the failure mode is, and who approves it.
+
+---
+
 ## Round 7 · Architecture leadership (ARTs, runway, governance)
 
 **What they're testing:** Can you operate the SAFe/ART machinery in the JD?
@@ -711,6 +783,18 @@ This is credible *because* your guide already reasons in patterns (outbox, circu
 | Amadeus Altéa / PSS integration | Vendor PSS source of truth for RES/INV/DCS | No direct PSS experience | Frame as anti-corruption layer around a vendor system |
 | SkyCargo / OneCargo logistics | Cargo booking, warehouse, ULD, customs, ONE Record | Connected-vehicle telemetry and distributed scale | Emphasize event ingestion and partner integration transferability |
 | GenAI/RAG/agents | Customer assistants, document intelligence, ops copilots | Production GenAI/RAG/multi-agent delivery, AI-102 | Strong differentiator; stress guardrails and evaluation |
+| Agentic AI / multi-agent | Autonomous & supervisor-worker workflows, planning/reasoning, memory, HITL | Production multi-agent delivery | Be ready to justify agent-vs-workflow and show step/cost bounding |
+| LLM orchestration frameworks | LangChain, LangGraph, Semantic Kernel, AutoGen, CrewAI | Hands-on orchestration work | Have a one-line comparison plus a defended choice per scenario |
+| RAG pipeline engineering | Ingestion, chunking, embeddings, hybrid search, reranking, grounding | Production RAG delivery | Rehearse chunking + hybrid + rerank trade-offs on fare-rule/DGR corpora |
+| Vector databases | Azure AI Search, pgvector, Pinecone, Weaviate, Milvus, FAISS | Vector search experience | Prepare explicit selection criteria (filters, security trimming, residency, cost) |
+| Model Context Protocol (MCP) | Standard tool/resource/prompt contract for agents | MCP server & tool integration | Frame as a governed, reusable capability layer *and* a privilege boundary |
+| Guardrails & Responsible AI | Input/retrieval/tool/output/process controls, prompt-injection & PII defence | Guardrail and governance work | Name indirect prompt injection; map to NIST AI RMF / EU AI Act / UAE PDPL |
+| AI evaluation & observability | Golden sets, groundedness, hallucination detection, tracing, feedback loops | Evaluation harness experience | Bring concrete metrics and a CI eval-gate story |
+| AI cost & latency optimisation | Model routing, caching, token/context trimming, provisioned capacity | LLM cost-governance work | Express as cost per resolved contact with a p95 SLO and quality floor |
+| Python / FastAPI | Async production services, Pydantic contracts, streaming | Python delivery | Be ready for a live FastAPI + async + testing discussion, not notebooks |
+| Azure AI platform | AI Foundry, Azure OpenAI, AI Search, Azure ML, Databricks/Fabric | AI-102, Azure AI delivery | Know which service owns which lifecycle stage |
+| LLMOps / MLOps | Prompt & index versioning, eval gates, canary/blue-green, drift monitoring | CI/CD and model governance | Emphasise prompts/indexes as versioned, gated release artefacts |
+| Containers & deployment | Docker, AKS/Container Apps, KEDA/HPA, managed identity | AKS and cloud-native delivery | Tie autoscaling to bursty agent workloads and queue depth |
 | Enterprise data governance | Lineage, classification, data residency, audit evidence | UAE government data-sovereignty, SQL + Purview | Very relevant to UAE/GDPR/PDPL discussion |
 | Regulatory/security | UAE PDPL, TDRA, PCI-DSS, GDPR, IATA security | Regulated government engagements, Azure security certs | Classify data before choosing region |
 | Cost/FinOps | Shared cloud spend, ART chargeback, CFO defense | Cost optimization and platform governance experience | Prepare cost-per-transaction and chargeback examples |
@@ -776,6 +860,32 @@ This is credible *because* your guide already reasons in patterns (outbox, circu
 **Q: How is aircraft predictive maintenance architecturally similar to connected-vehicle telemetry?** Both ingest high-volume time-series events from assets, partition by asset, handle late/out-of-order data, extract features and score risk. Both need replay, drift monitoring and alert routing. Aviation adds stricter safety and maintenance governance.
 
 **Q: How do you keep a customer-facing fare-rules chatbot from hallucinating policy details?** Use RAG over approved policy documents, cite sources, restrict tool actions, set confidence thresholds and escalate uncertain cases. Log prompts, retrieved docs, model version and answer. Deterministic eligibility tools should decide refunds, not free-form text.
+
+### Agentic AI / LLM engineering (JD rapid-fire)
+
+**Q: Agent vs deterministic workflow — how do you decide?** If you can enumerate the steps, orchestrate them deterministically; agency is for bounded-tool, unbounded-path problems. Agents cost latency, tokens and auditability, so justify them per use case and always bound steps, tool calls and budget.
+
+**Q: LangChain vs LangGraph vs Semantic Kernel vs AutoGen vs CrewAI?** LangChain for integration breadth, LangGraph for explicit stateful graphs with durable checkpoints and resumable runs, Semantic Kernel for .NET/Azure-aligned enterprises with plugins and planners, AutoGen for conversational multi-agent exploration, CrewAI for role/task prototyping. Keep prompts, tool contracts, state schema and evals framework-independent so the choice is reversible.
+
+**Q: Which chunking strategy for fare rules or a DGR manual?** Structure-aware chunking on headings/clauses with overlap, retaining the clause ID and effective date in metadata so answers can cite "rule 16.2" and stale versions can be filtered out. Fixed-size splitting destroys tables and clause boundaries.
+
+**Q: Why hybrid search plus a reranker instead of pure vector search?** Airline corpora are full of lexical tokens — fare codes, AWB numbers, airport and RBD codes — that embeddings blur. BM25 catches exact tokens, vectors catch paraphrase, and a cross-encoder reranker over top-k restores precision after you widen recall.
+
+**Q: How do you choose a vector store?** Score candidates on filtered/hybrid search quality, security trimming, p95 latency at scale, multi-tenancy, residency, ops burden and cost per million vectors. Azure AI Search is the default in an Azure estate; pgvector when the corpus is small and Postgres is already there; FAISS is for experiments, not governed production.
+
+**Q: What does MCP give you that a bespoke tool integration doesn't?** A standard discovery/invocation contract for tools, resources and prompts, so one governed server per bounded context is reused across agents and ARTs. Treat the server as a privilege boundary: user-identity propagation, per-agent tool allow-lists, argument validation, versioned schemas and full invocation logging.
+
+**Q: What's indirect prompt injection and how do you defend against it?** Malicious instructions hidden in content the agent reads — an uploaded customs document, an email, a web page. Defend in depth: never treat retrieved content as instructions, separate data and instruction channels, filter and classify inputs, allow-list tools, require confirmation for destructive actions, and red-team it in CI.
+
+**Q: How do you evaluate a RAG assistant before it ships?** Golden dataset of SME-approved questions run in CI as a release gate, scoring retrieval (recall@k, citation coverage), generation (groundedness, relevance, correct refusals) and task success. LLM-as-judge is calibrated against human review, never trusted alone.
+
+**Q: What do you trace in production?** One trace per agent run spanning every LLM call, tool call, retrieved chunk, token count and latency, plus dashboards for cost per request, p95 latency, refusal and escalation rate, groundedness and drift. Feedback and escalations feed back into the golden set.
+
+**Q: Cheapest levers to cut LLM cost without cutting quality?** Route to the smallest model that passes evals, cache (exact, semantic, prefix and embeddings), rerank-then-truncate instead of stuffing context, stream for perceived latency, parallelise independent tool calls, cap agent steps, and consider provisioned capacity for predictable volume. Report it as cost per resolved contact against a quality floor.
+
+**Q: What makes a FastAPI agent service production-grade?** Async I/O for model and retrieval calls, Pydantic schemas shared with structured outputs, dependency-injected auth and clients, queued background execution for long agent runs, streaming responses, retry-with-jitter and fallback deployments on 429s, deterministic tests with recorded LLM fixtures, and structured logs with correlation IDs.
+
+**Q: What does LLMOps version that MLOps doesn't?** Prompts, tool schemas, index and chunking configuration, embedding model version and evaluation datasets — all in Git, promoted through environments with the eval suite as the gate, with blue/green index rebuilds behind an alias and canary model routing for rollback.
 
 ---
 
