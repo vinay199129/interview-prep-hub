@@ -21,6 +21,8 @@ export interface QuickLink {
 export interface Carrier {
   id: string;
   name: string;
+  /** Short label used to disambiguate headings in the combined "All carriers" view. */
+  shortName?: string;
   tagline: string;
   markdown: string;
   toc: TocItem[];
@@ -40,13 +42,15 @@ export function AirlinesClient({ carriers }: Props) {
     <div className="space-y-6">
       <header className="space-y-3">
         <h1 className="text-2xl font-semibold">
-          Airline Solutions Architect — Dubai, UAE
+          Airline Solutions Architect — UAE (Dubai &amp; Abu Dhabi)
         </h1>
         <p className="max-w-3xl text-slate-600 dark:text-slate-300">
-          Complete, round-by-round Solutions Architect interview guides for two
-          Dubai carriers. Pick a carrier to switch the entire guide — interview
-          rounds, system-design cases, tech-stack map, and question banks are
-          tailored to each airline&apos;s real technology landscape. See{" "}
+          Complete, round-by-round Solutions Architect interview guides for the
+          major UAE carriers. Pick a carrier to switch the entire guide —
+          interview rounds, system-design cases, tech-stack map, and question
+          banks are tailored to each airline&apos;s real technology landscape, or
+          choose <strong>All carriers</strong> to read everything in one
+          unfiltered view. See{" "}
           <Link href="/patterns" className="text-brand-600 dark:text-brand-100 underline">
             Company &amp; region patterns
           </Link>{" "}
@@ -58,7 +62,7 @@ export function AirlinesClient({ carriers }: Props) {
         </p>
 
         <div
-          className="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-1"
+          className="flex flex-wrap gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-1 w-fit"
           role="tablist"
           aria-label="Choose a carrier"
         >
