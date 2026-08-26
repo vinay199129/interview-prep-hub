@@ -521,6 +521,74 @@ Publish the reference architecture (ingestion → index → retrieval → orches
 
 ---
 
+## Round 6C · Sovereign & air-gapped AI (government-entity constraints)
+
+**Why this comes up here:** flydubai is wholly owned by the Government of Dubai, operates under UAE PDPL and TDRA rules, integrates with government systems (immigration, customs, API/PNR exchange) and processes EU passengers under GDPR and card data under PCI-DSS. So expect the panel question *"this data can never reach a model vendor — now what?"* The full playbook is Module 14 of the **Agentic AI Solution Architect** guide on this site; this is the flydubai-shaped version, and the LCC lens still applies: the strictest tier is also the most expensive one, so match the tier to the mandate, not to anxiety.
+
+### Decompose the mandate before designing anything
+
+| Requirement | What it forbids | flydubai example |
+| --- | --- | --- |
+| **Residency** | Processing/storage outside the UAE | PDPL-scoped passenger and loyalty data |
+| **Sovereignty** | Foreign jurisdiction over data or operator | Government-integrated datasets, national systems |
+| **Operational sovereignty** | Offshore/uncleared staff operating the platform | Security-adjacent and government-facing systems |
+| **No third-party inference** | Any prompt or document reaching a model vendor | Classified government data, security screening, some API/PNR contexts |
+
+Only the fourth forces local weights. Residency and no-training requirements are normally met by in-tenant Azure OpenAI in a UAE region with private endpoints — and for a cost-disciplined carrier, correctly identifying that is worth real money.
+
+### The tiers, and where an LCC workload lands
+
+1. **Public SaaS AI** — public marketing content only.
+2. **In-tenant Azure OpenAI / AI Foundry, private networking, UAE region, no-training terms** — the default for fare-rules assistants, disruption self-service, ancillary personalisation copy, cargo/customs documents, developer productivity.
+3. **Sovereign / government cloud region, local key custody, in-country operators** — government-integrated or higher-classification datasets.
+4. **Self-hosted open-weight models on your own GPUs (AKS)** — only where "no third-party inference" is an explicit requirement.
+5. **Fully air-gapped** — security/border/classified government workloads, artefacts imported through a controlled path.
+
+Confidential computing (TEE-backed VMs/GPUs, customer-managed HSM keys) is the orthogonal control when the operator is part of the threat model. PCI scope stays isolated at every tier — card data should never be reachable from a prompt, a retrieval index, a trace or a log.
+
+### Proving your knowledge never reaches a model
+
+- **Contractual** — no-training and zero-data-retention terms, disabled abuse-monitoring/human review, sub-processor and jurisdiction disclosure, deletion SLAs. Real at tiers 1–3, irrelevant at 4–5.
+- **Network** — deny-all egress, private endpoints to model/search/storage planes, private DNS, no public IP on inference subnets, allow-listed egress proxy, and a tested alert on any unexpected destination.
+- **Service configuration** — turn off vendor and framework telemetry. The most common real-world leak in a "private" deployment is not the model but the tooling: an orchestration SDK's analytics flag or a default cloud tracing exporter posting prompts and retrieved chunks to a SaaS backend. Self-host the collector; ban public MCP/plugin marketplaces at runtime.
+- **Data handling** — minimise and redact before prompting, classify at ingestion and carry the label through chunks, traces and eval sets, trim retrieval on the caller's clearance, separate indexes per classification, and never fine-tune a vendor-hosted model on internal corpora — that *is* exporting your knowledge into weights you don't control, it's extractable, and it can't enforce entitlement. Use retrieval.
+- **Evidence** — data-flow diagram with every crossing enumerated, network policy as code, tested DLP/egress detection, immutable audit of prompts/retrievals/tool calls/approvals, signed model provenance, and CI conformance checks so a public endpoint or SaaS exporter can't be reintroduced.
+
+### How each capability is achieved with local-only models
+
+- **Models** — open-weight families (Llama, Qwen, Mistral, Gemma, Phi, DeepSeek) plus Arabic-first sovereign models (Falcon, JAIS) where local-language quality or national policy matters. Serve on vLLM/TGI with continuous batching on AKS GPU nodes. Route by task — 7–8B for routing, classification and extraction; 30–70B for synthesis. Quantisation is a measured trade-off re-validated on your eval set, never assumed. Weights are supply chain: provenance, checksums, licence review, malware scanning, signed internal registry.
+- **Orchestration & agents** — frameworks run as your containers with vendored dependencies and telemetry disabled; agent state checkpoints to in-boundary Postgres/Redis. Keep autonomy lower than with a frontier model and prefer plan-approve-execute for anything touching a booking, fare, waiver or refund.
+- **RAG** — local OCR/parsing instead of a cloud document API, locally served embedding and reranker models, in-boundary vector store, effective-dated policy chunks with mandatory citations and a refusal path. Store embedding models locally — you cannot re-download them mid-incident.
+- **Vector store** — pgvector first for a lean team (one datastore, existing DBA model, lowest run cost), otherwise Qdrant/Weaviate/Milvus/OpenSearch self-hosted. Security trimming at query time from the caller's identity; separate indexes where physical separation is expected.
+- **MCP & tools** — in-boundary MCP servers from an internal signed catalogue only, per-agent allow-lists, user-identity propagation, argument validation, no runtime installation, full invocation audit. Agents still reach SabreSonic, loyalty and partner systems only through the ACL and APIM with delegated identity.
+- **Guardrails** — locally served safety and PII classifiers (Llama Guard-class, Presidio) plus deterministic policy code, an output guard against classification spillage, fail-closed defaults, and a spillage runbook covering cache, index, trace and log purge.
+- **Evaluation & observability** — the golden set inherits the classification of its sources, so no public benchmark services and no hosted frontier judge; use a local judge calibrated against SME review. Self-host OpenTelemetry, Grafana and LLM tracing in-cluster, because traces carry prompts and retrieved content.
+- **Cost** — no per-token bill but a fixed GPU cost, so utilisation becomes the objective: batch aggressively, share one served model across use cases behind a gateway, cache semantically, schedule offline work into idle windows, scale non-GPU services to zero. Report cost per resolved contact including amortised GPU, hosting and ops — and state the break-even honestly, because below it an API is cheaper and only the mandate justifies the tier.
+- **LLMOps in an air gap** — signed artefacts (weights, images, dependency bundles, prompts, tool schemas, index config, eval sets) acquired and scanned low-side, imported by approved media or a one-way diode, gated high-side by the eval suite, with blue/green index rebuilds and canary rollouts. Quarterly cadence; keep last known-good weights.
+- **Platform & DR** — internal package mirror and private registry, builds that succeed with the network disabled, in-boundary vault with HSM-backed keys, mTLS and micro-segmentation per zone, and a second in-country site because failing over to a public region isn't available.
+
+### Sovereign use cases to name
+
+- **Low risk / internal** — policy and manual Q&A, SOP and briefing summarisation, Arabic↔English official translation, engineering-manual search, code assistance over internal repositories.
+- **Medium risk / officer-in-the-loop** — tender and contract analysis, customs and dangerous-goods document checking, incident and complaint triage, regulatory-change impact analysis, disruption and roster decision support where a human signs.
+- **Medium risk / customer-facing but bounded** — grounded fare-rule and disruption assistants with citations, refusal paths and human escalation; eligibility *explanation*, never eligibility *decision*.
+- **Higher risk / mandatory human decision** — border and security screening analytics, fraud/AML support, safety-adjacent engineering decision support: the AI produces evidence and a recommendation, a named human decides, and both are recorded.
+- **Cross-entity** — a shared sovereign AI platform tenanted per government entity so nobody builds a solo GPU estate, with federated retrieval leaving data with its owner.
+
+### Rapid-fire
+
+**Q: "It can never go to a model vendor" — first question back?** Which classification levels are in scope and whether the objection is residency, jurisdiction, training or all third-party processing. Only the last one requires local weights.
+
+**Q: How do you prove nothing leaves?** Deny-all egress, private endpoints and DNS, telemetry disabled, self-hosted tracing, tested egress alerts, enumerated data-flow diagram, immutable audit, CI conformance checks.
+
+**Q: Sneakiest leak?** Framework/observability telemetry sending prompts and retrieved chunks to a SaaS backend by default. Then unreviewed public MCP servers or IDE assistants inside the boundary.
+
+**Q: Why not fine-tune on internal data?** It exports knowledge into weights you don't control, it's extractable, it goes stale, and it can't enforce per-user entitlement. Retrieval keeps it governed, fresh and citable.
+
+**Q: What do you lose with a local model, and how do you cover it?** Long-context reasoning and complex tool selection. Cover it with tighter retrieval, task decomposition, constrained decoding, verification steps and more human-in-the-loop — then quantify the gap on your own eval set per use case.
+
+---
+
 ## Round 7 · Architecture leadership (agile, runway, governance)
 
 **What they're testing:** Can you run architecture governance in a lean, fast org — not just design systems?

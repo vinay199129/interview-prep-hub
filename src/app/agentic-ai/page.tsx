@@ -8,7 +8,7 @@ import { extractTopLevelHeadings } from "@/lib/toc";
 export const metadata: Metadata = {
   title: "Agentic AI Solution Architect · Interview Prep Hub",
   description:
-    "Interview prep for a senior Agentic AI / Enterprise AI Solution Architect role: a realistic 6-7 stage loop map, 13 topic modules (agent design patterns, use-case discovery, LLM evaluation & selection, AI security and Responsible AI, guardrails, integration architecture, technical governance, AgentOps), 18 deep dives on trade-offs and decision points, plus a curated external reading list and 4-week study plan.",
+    "Interview prep for a senior Agentic AI / Enterprise AI Solution Architect role: a realistic 6-7 stage loop map, 14 topic modules (agent design patterns, use-case discovery, LLM evaluation & selection, AI security and Responsible AI, guardrails, integration architecture, technical governance, AgentOps, sovereign & air-gapped AI), 18 deep dives on trade-offs and decision points, plus a curated external reading list and 4-week study plan.",
 };
 
 const DOC_REL = path.join("docs", "AGENTIC-AI-SOLUTION-ARCHITECT.md");
@@ -22,7 +22,7 @@ interface Item {
 const MODULES: Item[] = [
   {
     label: "Loop map · The real 6–7 stage loop",
-    href: "#the-real-interview-loop-and-how-the-13-modules-map-to-it",
+    href: "#the-real-interview-loop-and-how-the-14-modules-map-to-it",
     description:
       "What an actual architect loop looks like (recruiter → HM → deep dive → design → security/governance → behavioral → exec) and which modules feed each stage",
   },
@@ -110,6 +110,12 @@ const MODULES: Item[] = [
     description:
       "90-day plan, build vs buy, where agentic AI is genuine vs hype, justifying platform spend to a CFO",
   },
+  {
+    label: "Module 14 · Sovereign & air-gapped AI",
+    href: "#module-14-sovereign-air-gapped-ai-nothing-leaves-the-org",
+    description:
+      "Government/classified constraints: residency vs sovereignty vs no-third-party inference, the 5-tier deployment spectrum, proving nothing leaves, local open-weight models, per-capability air-gapped design, sovereign use cases by risk tier",
+  },
 ];
 
 const QUICK_LINKS: Item[] = [
@@ -188,12 +194,12 @@ export default function AgenticAiPage() {
         </p>
         <p className="max-w-3xl text-sm text-slate-500 dark:text-slate-400">
           <strong className="text-slate-600 dark:text-slate-300">
-            13 modules ≠ 13 rounds.
+            14 modules ≠ 14 rounds.
           </strong>{" "}
           The numbered sections are a topic breakdown; a real loop is 5–7 stages
           over 2–4 weeks. See the{" "}
           <Link
-            href="#the-real-interview-loop-and-how-the-13-modules-map-to-it"
+            href="#the-real-interview-loop-and-how-the-14-modules-map-to-it"
             className="text-brand-600 dark:text-brand-100 underline"
           >
             loop map

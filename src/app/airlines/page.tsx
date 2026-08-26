@@ -76,6 +76,12 @@ const CARRIERS: Carrier[] = [
           "Agents & multi-agent, orchestration frameworks, RAG/vector search, MCP, guardrails, evals & observability, LLMOps, Python/FastAPI, cost",
       },
       {
+        label: "6C · Sovereign & air-gapped AI",
+        href: "#round-6c-sovereign-air-gapped-ai-government-entity-constraints",
+        description:
+          "Government-entity constraints: residency vs sovereignty vs no-vendor-inference, deployment tiers, proving nothing leaves, local open-weight models, sovereign use cases",
+      },
+      {
         label: "7 · Architecture leadership",
         href: "#round-7-architecture-leadership-arts-runway-governance",
         description:
@@ -101,6 +107,13 @@ const CARRIERS: Carrier[] = [
         title: "Agentic AI / LLM depth",
         description:
           "The GenAI skills bar, aviation-contextualised: agents, LangGraph/Semantic Kernel, RAG & vector stores, MCP, guardrails, evals, LLMOps, FastAPI, cost.",
+      },
+      {
+        href: "#round-6c-sovereign-air-gapped-ai-government-entity-constraints",
+        icon: "🛡️",
+        title: "Sovereign & air-gapped AI",
+        description:
+          "When nothing may leave the org: mandate decomposition, deployment tiers, five layers of no-egress proof, local open-weight models, and sovereign use cases by risk tier.",
       },
       {
         href: "#interview-strategy-negotiation-playbook",
@@ -202,6 +215,12 @@ const CARRIERS: Carrier[] = [
           "Agents & multi-agent, orchestration frameworks, RAG/vector search, MCP, guardrails, evals, LLMOps, FastAPI, cost-per-contact",
       },
       {
+        label: "6C · Sovereign & air-gapped AI",
+        href: "#round-6c-sovereign-air-gapped-ai-government-entity-constraints",
+        description:
+          "Government-owned-entity constraints: residency vs sovereignty vs no-vendor-inference, deployment tiers, proving nothing leaves, local models, sovereign use cases",
+      },
+      {
         label: "7 · Architecture leadership",
         href: "#round-7-architecture-leadership-agile-runway-governance",
         description:
@@ -227,6 +246,13 @@ const CARRIERS: Carrier[] = [
         title: "Agentic AI / LLM depth",
         description:
           "The GenAI skills bar for a lean LCC: agents, orchestration frameworks, RAG & vector stores, MCP, guardrails, evals, LLMOps, FastAPI, cost per contact.",
+      },
+      {
+        href: "#round-6c-sovereign-air-gapped-ai-government-entity-constraints",
+        icon: "🛡️",
+        title: "Sovereign & air-gapped AI",
+        description:
+          "Government-owned-entity constraints: mandate decomposition, deployment tiers, five layers of no-egress proof, local open-weight models, sovereign use cases.",
       },
       {
         href: "#technology-skills-map-jd-stack-flydubai-landscape-your-resume",

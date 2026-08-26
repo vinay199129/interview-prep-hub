@@ -2,7 +2,7 @@
 
 A complete preparation guide for a senior/principal **Solution Architect — Agentic AI / Enterprise AI** role. Built from a job description asking for 12+ years in solution architecture, AI/ML and Generative AI, with explicit expectations around **agentic architecture, use-case discovery, LLM selection, AI security and Responsible AI, guardrails, integration architecture, technical governance and stakeholder management**. Used by the `/agentic-ai` page.
 
-> **Structure note.** The 13 numbered sections are **topic modules for study**, not interview rounds — a real loop is 5–7 stages. See [The real interview loop](#the-real-interview-loop-and-how-the-13-modules-map-to-it) for the mapping, and [Deep dives](#deep-dives-trade-offs-decision-points-per-topic) for the trade-off and decision-point material that Stages 3–5 are built around.
+> **Structure note.** The 14 numbered sections are **topic modules for study**, not interview rounds — a real loop is 5–7 stages. See [The real interview loop](#the-real-interview-loop-and-how-the-14-modules-map-to-it) for the mapping, and [Deep dives](#deep-dives-trade-offs-decision-points-per-topic) for the trade-off and decision-point material that Stages 3–5 are built around.
 
 > **Scope note.** No employer's internal architecture is published, so everything below is an **industry-standard pattern you should be able to defend**, backed by primary sources (papers, vendor docs, standards bodies) linked in *Learn it properly* and *Sources*. Treat vendor and product facts as public context, not insider knowledge. Product surfaces in this space change fast — always re-check the linked docs before an interview and say so out loud if a detail is version-dependent; that itself is an architect signal.
 
@@ -28,9 +28,9 @@ A complete preparation guide for a senior/principal **Solution Architect — Age
 
 ---
 
-## The real interview loop — and how the 13 modules map to it
+## The real interview loop — and how the 14 modules map to it
 
-**You will not sit 13 rounds.** A senior/principal Agentic AI Solution Architect loop is typically **5–7 stages over 2–4 weeks**. The 13 numbered sections below are **topic modules** — a study structure, not a schedule. Most stages pull from several modules, and most modules get tested in more than one stage. Here is the realistic mapping.
+**You will not sit 14 rounds.** A senior/principal Agentic AI Solution Architect loop is typically **5–7 stages over 2–4 weeks**. The 14 numbered sections below are **topic modules** — a study structure, not a schedule. Most stages pull from several modules, and most modules get tested in more than one stage. Here is the realistic mapping.
 
 | Stage | Typical format & length | Who runs it | Modules you're drawing on | What decides pass/fail |
 | --- | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ A complete preparation guide for a senior/principal **Solution Architect — Age
 | **2 · Hiring manager** | 45–60 min | The architecture lead / head of AI | 1, 2, 3, 13 | Scope of ownership, governing without authority, whether you say no to bad use cases |
 | **3 · Technical deep dive** | 60–90 min, whiteboard or shared doc | Senior/principal architect peer | 4, 6, 9, 11 | Pattern depth, trade-off fluency, whether you know failure modes |
 | **4 · System design case** | 60–90 min, one scenario end to end | Architect panel (2–3) | 5, 9, 11 (+4, 8) | Requirement-driving, a defensible design, honest trade-offs at 10× scale |
-| **5 · Security / governance / RAI panel** | 45–60 min | Security architect, risk, sometimes legal/privacy | 7, 8, 10 | AI-specific threat modelling, guardrail layering, framework literacy (NIST/OWASP/ISO/EU AI Act) |
+| **5 · Security / governance / RAI panel** | 45–60 min | Security architect, risk, sometimes legal/privacy | 7, 8, 10, 14 | AI-specific threat modelling, guardrail layering, framework literacy (NIST/OWASP/ISO/EU AI Act), data-residency & sovereignty posture |
 | **6 · Stakeholder / behavioral** | 45–60 min | Cross-functional partners (product, delivery, data) | 12, 3, 10 | STAR with artefacts and numbers, conflict handled with evidence |
 | **7 · Executive / bar-raiser** | 30–45 min | Director/VP/CTO, sometimes a business sponsor | 13, 6, 11 | Business framing, build-vs-buy, 90-day plan, unit economics, judgement about hype |
 
@@ -49,6 +49,7 @@ A complete preparation guide for a senior/principal **Solution Architect — Age
 - **A few still run a coding/pairing exercise** even for architects — usually implementing a tool-calling loop, a schema-validated structured output, or debugging a broken agent trace. Modules 4 and 9 cover the substance; practise writing it, not just describing it.
 - **Consulting/SI employers add a client-facing simulation:** run a discovery workshop or defend an estimate. Module 3 and Module 12 carry that.
 - **Product/AI-native companies compress the whole thing to 4 stages** and weight Modules 4, 6 and 11 heavily; **regulated enterprises expand Stage 5** into two separate panels (security, then risk/compliance).
+- **Government, defence and public-sector employers** add a sovereignty/classification panel — data residency, no-third-party-inference mandates, local model hosting, air-gapped operations and evidence of no egress. Module 14 carries that, and in those loops it is a pass/fail gate, not a bonus topic.
 
 **How to use this mapping when you prep:** work the modules for knowledge, then rehearse by *stage* — because a stage is a 60-minute performance with a different audience, not a topic. The most common failure at this level is giving the Stage 3 answer (deep technical) in Stage 7 (executive), or the Stage 7 answer (business framing) in Stage 3. Same knowledge, different altitude.
 
@@ -70,7 +71,7 @@ Then move: architecture → control flow → data/state → evaluation → guard
 
 For leadership rounds, answer with **artefacts**: ADRs, C4 views, a model-selection matrix, an eval suite, a threat model, an AI use-case intake form, a risk register, a golden-path repo, a cost dashboard. Artefacts are how a 12-year architect is distinguished from a very good 6-year engineer.
 
-**Where the trade-off material lives.** Modules 1–13 give you the *answers*; the [deep dives](#deep-dives-trade-offs-decision-points-per-topic) (D1–D18) give you the *decisions* behind them — for each architectural choice, the option space, when each option wins, what you pay for it, and the production signal that tells you the choice was wrong. In Stages 3–5 of a real loop, that is most of what you'll be asked. Rehearse naming the decision, giving 2–3 options, stating your deciding criteria, committing to a choice, and saying what would change your mind.
+**Where the trade-off material lives.** Modules 1–14 give you the *answers*; the [deep dives](#deep-dives-trade-offs-decision-points-per-topic) (D1–D18) give you the *decisions* behind them — for each architectural choice, the option space, when each option wins, what you pay for it, and the production signal that tells you the choice was wrong. In Stages 3–5 of a real loop, that is most of what you'll be asked. Rehearse naming the decision, giving 2–3 options, stating your deciding criteria, committing to a choice, and saying what would change your mind.
 
 ---
 
@@ -635,6 +636,127 @@ Hype: fully autonomous end-to-end business processes in regulated, irreversible 
 ### Q: How do you justify the platform investment to a CFO?
 
 **Answer:** "Marginal cost per use case. The first use case carries the platform: gateway, retrieval, evals, guardrails, governance. The second and third should cost a fraction of it, and I commit to that ratio as a measurable target. I present three numbers: total cost of ownership including run and continuous evaluation (people forget the run cost of a system that must be re-evaluated forever), value per use case with confidence ranges, and the risk-avoidance value — one prevented data-leak or wrong-advice incident often exceeds the annual platform cost. And I'd bring the cost-per-task dashboard, because CFOs trust architects who volunteer unit economics before being asked."
+
+---
+
+## Module 14 · Sovereign & air-gapped AI (nothing leaves the org)
+
+Government entities, defence, central banks, healthcare and national-infrastructure operators buy AI under a different constraint set: **the data, the prompts, the retrieved context, the traces and often the model weights must never leave a controlled boundary.** This module is the architecture for that case, capability by capability, plus how you *evidence* the claim rather than assert it.
+
+### The constraint, stated precisely
+
+Interviewers reward candidates who decompose "it must stay in-country" into the four different requirements it usually hides:
+
+| Requirement | What it actually forbids | Typical driver |
+| --- | --- | --- |
+| **Data residency** | Storage/processing outside a named geography | UAE PDPL, GDPR, national data-protection law, sector regulator |
+| **Data sovereignty** | Foreign legal jurisdiction over the data or the operator (e.g. lawful-access risk) | National policy, cloud-sovereignty programmes |
+| **Operational sovereignty** | Foreign nationals or foreign support staff operating the platform | Security clearance requirements |
+| **No third-party inference** | Any prompt, document or output crossing to a model provider — even in-region | Classified/secret handling, "no data to vendors" mandate |
+
+Only the fourth one forces local models. The other three are frequently satisfiable in a hyperscaler's in-country region with the right controls — and saying so is a *senior* answer, because building an air-gapped GPU estate you didn't need is a very expensive misreading of the requirement. Always ask: **which classification levels does this workload actually touch, and what is the highest one?**
+
+### The deployment spectrum — pick the least isolation that satisfies the mandate
+
+| Tier | Topology | Data egress reality | When it's right |
+| --- | --- | --- | --- |
+| 1 · Public SaaS AI | Vendor multi-tenant API | Leaves your tenant; governed by contract | Public/unclassified content only |
+| 2 · In-tenant PaaS | Azure OpenAI / Bedrock / Vertex in your subscription, private endpoints, no public egress | Stays in your cloud tenant + region; vendor operates the plane | Internal/official data, residency + no-training mandates |
+| 3 · Sovereign / gov cloud region | Dedicated sovereign region or gov cloud, in-country operators, local key custody | In-country, cleared operators | Regulated government workloads, official-sensitive |
+| 4 · Self-hosted open-weight, connected | Your GPUs (on-prem or in-tenant VMs/AKS), model weights you control, internet-restricted | Never reaches a model provider at all | "No third-party inference", high-sensitivity |
+| 5 · Fully air-gapped / disconnected | No internet path; updates enter via controlled media or a one-way diode | Nothing in or out except reviewed artefacts | Classified, defence, isolated national systems |
+
+Add **confidential computing** (TEE/SEV-SNP/TDX-backed VMs and GPUs) as an orthogonal control for tiers 2–4 when the threat model includes the *operator* of the infrastructure, not just the network.
+
+### "How do we make sure our knowledge never reaches a model?"
+
+This is the question the panel really wants answered. Give it in five layers — contractual, network, service-configuration, data-handling and evidence — and be explicit that **only layers 2–5 are architecture; layer 1 is a promise.**
+
+**1 · Contractual (necessary, not sufficient).** No-training clauses, zero-data-retention (ZDR) terms, disabled abuse-monitoring/human-review where the provider supports it, sub-processor and jurisdiction disclosure, deletion SLAs, and audit rights. Useful for tiers 1–3, irrelevant for tiers 4–5 because there's no counterparty.
+
+**2 · Network.** Deny-all egress by default; private endpoints/PrivateLink to the model, search and storage planes; private DNS so the public endpoint doesn't even resolve; no NAT gateway or public IP on inference subnets; a forward proxy with an explicit allow-list for the few internal destinations that remain; and for tier 5, physically no route. Prove it with an egress-monitoring rule that alerts on *any* unexpected destination, and a periodic connectivity test that must fail.
+
+**3 · Service configuration.** Turn off vendor telemetry, diagnostic upload and product-improvement flags in every SDK and framework — orchestration libraries and observability SDKs ship with cloud tracing that will happily ship prompts to a vendor SaaS if you leave the default DSN in place. This is the most common real-world leak: not the model, the *tooling around it*. Pin telemetry to a self-hosted collector, disable auto-instrumentation exporters you don't control, and forbid public plugin/extension marketplaces at runtime.
+
+**4 · Data handling.** Minimise before you prompt: redact PII/identifiers that add no reasoning value, classify every document at ingestion and carry the label through the index and the trace, filter retrieval by the *caller's* clearance rather than the service identity, and never mix classification levels in one index without enforced filters. Never fine-tune a vendor-hosted model on internal knowledge — fine-tuning *is* exfiltration of your knowledge into a weight set you don't control, and it also bakes secrets into a model that can be extracted; use retrieval instead. Keep prompt/response logs, evaluation datasets and traces inside the boundary, with the same classification as their source (an eval set built from classified documents is classified).
+
+**5 · Evidence.** Regulators and security boards don't accept design intent. Produce: a data-flow diagram with the boundary drawn and every crossing enumerated; network policy and firewall configuration as code; a DLP/egress alert with a tested detection; immutable audit logs of every prompt, retrieval, tool call and approval; a signed model/weights provenance record; and a periodic attestation. Automate the checks in CI so a developer can't reintroduce a public endpoint or a cloud tracing exporter without failing the build.
+
+### Model strategy when the model must be local
+
+**Open-weight families to name:** Llama, Qwen, Mistral/Mixtral, Gemma, Phi, DeepSeek and the newer open-weight releases from frontier labs — plus region-specific models where a government explicitly funds a national model (Arabic-first models such as Falcon and JAIS are the relevant example in the Gulf, and "we can run a sovereign Arabic model in-country" is often a procurement requirement, not a nice-to-have).
+
+**Serving stack:** vLLM or TGI for throughput-optimised GPU serving (continuous batching, paged attention), Triton/NIM where the vendor stack is standardised, Ollama/llama.cpp for edge and developer machines, and vendor "local" offerings (Azure Local / AI Foundry on Arc-enabled infrastructure, or an appliance) when you want a managed control plane inside your own datacentre.
+
+**Sizing and quantisation:** route by task — a 7–8B model handles classification, routing, extraction and summarisation of pre-retrieved context; a 30–70B class model handles synthesis and multi-step reasoning. Quantisation (INT8/INT4/AWQ/GPTQ) buys throughput and memory at a measurable quality cost, so it must be re-evaluated against your eval set, never assumed. Capacity planning is now *your* problem: concurrent requests × context length drives KV-cache memory, and p95 latency degrades non-linearly past the batch you sized for.
+
+**Supply chain:** treat weights like any other dependency — verified provenance and checksums, licence review (some "open" licences restrict government or commercial use), malware/pickle scanning, an internal model registry with signed artefacts, and a documented upgrade path, because you no longer get silent vendor improvements and you *do* inherit the responsibility for the model's behaviour.
+
+**The honest trade-off to volunteer:** a local 30–70B model at INT8 will typically trail the frontier hosted model on hard reasoning and long-context tasks. You compensate with architecture — better retrieval, tighter task decomposition, structured outputs, verification steps and human-in-the-loop — and you quantify the gap on your own eval set rather than arguing about leaderboards. If a use case *needs* frontier reasoning on classified data, the correct answer may be "this use case is not approvable yet," and saying that is a maturity signal.
+
+### How each capability is achieved inside the boundary
+
+**Agents & orchestration.** The orchestration framework runs as your container on your cluster — LangGraph, Semantic Kernel and similar are just Python/.NET libraries and work fine offline, provided you vendor the dependencies and disable framework telemetry. Checkpoint agent state to an in-boundary datastore (Postgres/Redis) so runs are resumable without a vendor state service. In air-gapped settings, keep autonomy *lower* than you would elsewhere: smaller models are more prone to loop and mis-select tools, so cap steps hard and prefer plan-approve-execute over free-running ReAct for anything consequential.
+
+**LLM serving & routing.** A self-hosted gateway (LiteLLM-style or your own FastAPI service) in front of vLLM deployments gives you the same benefits as a cloud gateway: model routing, per-tenant quotas, budget accounting, retries, structured-output enforcement and one place to log. Registering local models behind an OpenAI-compatible interface also keeps application code portable, so a workload can be developed against a hosted model on unclassified data and promoted to the local stack without a rewrite — a genuinely useful pattern for delivery velocity.
+
+**RAG.** Nothing about the pipeline changes conceptually; every component becomes self-hosted: local document parsing/OCR (Tesseract/PaddleOCR or a licensed on-prem engine instead of a cloud document API), a local embedding model served alongside the LLM, an in-boundary vector store, and a local cross-encoder reranker. Two air-gap-specific points: embedding models must be versioned and stored locally because you cannot re-download them during an incident, and the index inherits the highest classification of its sources unless you shard by classification level. Grounding matters *more* with smaller models — mandatory citations and abstention are the compensating controls.
+
+**Vector database & retrieval.** Self-hostable options: pgvector (usually the right default — one governed datastore, transactional metadata, existing DBA operating model), Qdrant, Weaviate, Milvus or OpenSearch/Elasticsearch for hybrid lexical+vector. Managed SaaS vector services are out of scope at tiers 4–5. Enforce **security trimming at query time** from the caller's identity and clearance, not by post-filtering results, and keep per-classification indexes where the regulator expects physical separation rather than logical filters.
+
+**MCP & tool layer.** MCP servers are just processes — run them in-boundary, install them from an internal registry rather than a public marketplace, and pin/sign versions. The air-gapped threat model raises two risks: an MCP server pulled from the internet is unreviewed third-party code inside a privileged boundary, and tool *descriptions* are untrusted input that can carry injection. Controls: internal-only server catalogue with code review and signing, per-agent tool allow-lists, user-identity propagation for real entitlement checks, argument validation, no dynamic tool installation at runtime, and full invocation audit.
+
+**Tool & system integration.** Same anti-corruption layer and API gateway as any other client, with delegated (on-behalf-of) identity so the agent can never exceed the user's own authorisation. Long-running work goes onto in-boundary queues. For NL2SQL or data-platform access, use a read-only account, allow-listed views, row-level security and query cost limits — an agent with database credentials is the fastest path to a sovereignty incident that has nothing to do with the model.
+
+**Guardrails.** Content safety must also be local: open-source safety classifiers (Llama Guard-class models, Presidio for PII detection/redaction, prompt-injection classifiers) served alongside the main model, plus deterministic policy code. Two additions specific to this environment — an **egress/classification guard** that blocks a response containing content above the requester's clearance or a marking that must not appear in that channel, and a **spillage runbook** for when it happens anyway (containment, purge of caches/indexes/traces/logs, notification, root cause). Fail-closed is the default posture here, not fail-open.
+
+**Evaluation.** The eval harness runs in-boundary and the golden dataset is itself classified. That means no public benchmark services and no LLM-as-judge calling a hosted frontier model — use a local judge model calibrated against SME review, and accept a larger human-review sample. Evaluate *your* quantised, locally-served model, not the published scores of the unquantised original; re-run the suite on every weight, quantisation, embedding or index change, and gate releases on it. Build the eval set on unclassified representative data wherever possible so the harness itself is easier to handle.
+
+**Observability & AgentOps.** Self-hosted OpenTelemetry collector, Prometheus/Grafana, Loki/OpenSearch, Langfuse/Phoenix-style LLM tracing deployed in-cluster — never a SaaS tracing backend, because traces contain prompts and retrieved content and are therefore the single richest exfiltration channel in the system. Apply the source classification to traces, restrict who can read them, and set retention deliberately.
+
+**Cost & performance.** The economics invert: no per-token bill, but a fixed GPU capital/reserved cost, so the goal becomes **utilisation** rather than token thrift. Batch aggressively (continuous batching), share one served model across use cases via the gateway, right-size per task, cache (semantic and prefix/KV) to raise effective throughput, and schedule offline workloads into idle windows. Report cost per resolved task including amortised GPU, power/hosting and the operations team — and be candid that below a certain volume, self-hosting is more expensive than an API, which is exactly why the *mandate* must justify the tier, not a cost argument.
+
+**Python/FastAPI & engineering.** Identical practices, plus offline-first engineering: an internal PyPI/npm mirror (Artifactory/Nexus), a private container registry, pinned lockfiles with hashes, SBOMs and vulnerability scanning on import, and a build that must succeed with the network disabled — a CI job that runs with egress blocked is the cheapest way to catch an accidental external dependency before it reaches the air gap.
+
+**Data platform.** In-boundary lakehouse (on-prem Spark/Databricks-on-your-infrastructure, or the sovereign-region equivalent), ingestion from internal systems only, classification and lineage applied at ingestion, data contracts and quality gates on anything feeding an index or a feature store, and retention/deletion honoured *through* the AI stack — a subject-access deletion request must remove the record from the source, the index, the caches, the eval set and the traces, which is a design requirement, not an afterthought.
+
+**LLMOps in an air gap.** Everything is a signed artefact promoted through a controlled import path: model weights, container images, dependency bundles, prompts, tool schemas, index configuration and eval sets. Use a staging enclave with internet access to acquire, scan and sign artefacts, then transfer via approved media or a one-way data diode into the high-side environment; the high-side pipeline runs the eval gate and does blue/green index rebuilds and canary model rollouts exactly as a connected pipeline would. Plan for a *slower cadence* — quarterly model updates, not weekly — and keep the previous known-good weights for rollback.
+
+**Identity, security & DR.** Local identity provider integration, managed/workload identities for every service, secrets in an in-boundary vault with an HSM-backed key hierarchy and customer-managed keys, mTLS between services, network micro-segmentation per classification zone, privileged-access workstations for operators, and immutable audit. DR means a second in-country site with replicated weights, indexes and vaults — you cannot fail over to a public region, so the DR design has to be solved up front rather than discovered during an incident.
+
+**Governance & leadership.** The additional artefacts a government board will ask for: a data-classification and AI-usage policy, an AI use-case register with risk tiers, DPIAs/algorithmic-impact assessments, a model card per deployed model, an approved-model list, human-oversight design per use case, red-team results, and a named accountable owner. Tier the governance by risk so an internal document summariser isn't gated like a citizen-facing decision-support system, and map to NIST AI RMF, ISO/IEC 42001, the EU AI Act risk tiers and the national AI ethics/charter framework (in the UAE, the national AI strategy and PDPL; equivalents exist per country).
+
+### Sovereign AI use cases worth naming
+
+Group them by risk tier, because listing use cases without their oversight model is a junior answer.
+
+**Low risk — internal productivity (start here).** Policy and procedure Q&A for staff; internal search across circulars, manuals and archives; meeting minutes and briefing summarisation; document translation, including Arabic↔English at official quality; code assistance over internal repositories; drafting assistance for correspondence and reports.
+
+**Medium risk — officer-in-the-loop decision support.** Tender and procurement analysis (bid comparison, compliance checking against tender conditions); contract and legal-clause review; case-file summarisation for caseworkers; permit, licence and planning-application triage; inspection and audit report drafting; grant and subsidy application pre-screening; regulatory-change impact analysis; incident and complaint classification and routing; knowledge assistants for court registries and legal research over national legislation and precedent.
+
+**Medium risk — citizen-facing, grounded and bounded.** Multilingual citizen-service assistants grounded in published policy with mandatory citations and escalation to a human; eligibility *explanation* (never eligibility *decision*) for benefits and services; form-filling assistance; 24/7 information services for visas, tax, customs and municipal services.
+
+**Higher risk — mandatory human decision, heavy oversight.** Border, security and law-enforcement analytics; fraud, tax-evasion and AML detection support; healthcare clinical decision support; critical-infrastructure operations copilots; defence and intelligence document triage. In every one of these the AI produces evidence and a recommendation; a named accountable human decides, and the decision record captures both.
+
+**Cross-cutting national programmes.** A shared sovereign AI platform (in-country inference, common guardrails, shared evaluation, tenanted per entity) so thirty agencies don't each build a GPU estate; a national Arabic/local-language model capability; digitisation and structuring of national archives; and an inter-agency knowledge exchange where retrieval is federated but data stays with its owning entity.
+
+### Rapid-fire — sovereign & air-gapped
+
+**Q: A minister says "our data can never go to OpenAI." What do you ask first?** Which classification levels the workload touches, whether the objection is jurisdiction, residency, vendor training or any third-party processing at all, and what the regulator has actually written down. The answer chooses the tier, and three of the four possible answers don't require local weights.
+
+**Q: How do you prove nothing leaves?** Deny-all egress with private endpoints and private DNS, disabled vendor/framework telemetry, self-hosted tracing, an egress-detection alert that has been tested, an enumerated data-flow diagram, immutable audit of prompts/retrievals/tool calls, and automated CI conformance checks. Contracts support the claim; the network and configuration prove it.
+
+**Q: The sneakiest leak in a "private" deployment?** Observability and framework telemetry — a default cloud tracing exporter or an SDK's analytics flag shipping prompts and retrieved chunks to a vendor SaaS. Second place: a developer's IDE assistant or a public MCP server pulled into the boundary.
+
+**Q: Why not fine-tune on the internal corpus?** It moves your knowledge into weights you may not control, it's extractable, it's stale the day it finishes, and it can't enforce per-user entitlement at query time. Retrieval keeps knowledge in a governed store with access control, freshness and citations; fine-tune only for format, tone or task shaping, on infrastructure you own.
+
+**Q: How do you handle multiple classification levels in one system?** Separate indexes (and often separate environments) per level, classification labels carried from ingestion through chunk metadata, traces and eval sets, query-time trimming on the caller's clearance, an output guard against over-classification spillage, and no cross-level caching. Where the regulator expects physical separation, logical filters are not an acceptable substitute.
+
+**Q: What breaks when you move from a frontier API to a local 8B model?** Long-context reasoning, complex multi-step tool selection and instruction-following under pressure. Compensate with tighter retrieval, decomposed tasks, constrained decoding for structured outputs, verification steps and more human-in-the-loop — then measure the gap on your own eval set and decide per use case rather than globally.
+
+**Q: How do you patch a model in an air-gapped environment?** Acquire, scan, sign and evaluate on the low side; transfer via approved media or a one-way diode; re-run the full eval suite high-side as the release gate; canary behind a routing flag; keep the previous weights for rollback. Expect a quarterly cadence and design the roadmap around it.
+
+**Q: Is sovereign AI worth the cost?** Only when the mandate requires it. Self-hosting wins on economics only at sustained high utilisation; below that you're paying for compliance, not compute. The senior framing is to price both, state the break-even, and let the classification requirement — not the spreadsheet — pick the tier.
 
 ---
 
