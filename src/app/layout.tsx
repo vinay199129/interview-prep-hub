@@ -8,7 +8,7 @@ import { NavMore } from "@/components/NavMore";
 import { NavLink } from "@/components/NavLink";
 
 // Author / project links — update these to point at your real profiles.
-const AUTHOR_NAME = "Vinay Pratap Singh Bhadauria";
+const AUTHOR_NAME = "Vinay Pratap Singh";
 const REPO_URL = "https://github.com/vinay-p-singh/interview-prep-hub";
 const PROFILE_URL = "https://github.com/vinay-p-singh";
 const PORTFOLIO_URL = "https://vinay-p-singh.github.io/portfolio/";
