@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getAllQuestions, getCategories } from "@/lib/data";
+import { getAllQuestions, getCategories, getDomains } from "@/lib/data";
 import { BrowseClient } from "@/components/BrowseClient";
 import { BrowseSkeleton } from "@/components/Skeletons";
 import type { CategoryId } from "@/lib/types";
@@ -105,6 +105,7 @@ export default function LeadershipPage() {
         <BrowseClient
           categories={categories}
           questions={questions}
+          domains={getDomains()}
           initialCategories={LEADERSHIP_CATEGORIES}
         />
       </Suspense>

@@ -48,37 +48,54 @@ export default function RootLayout({
           Skip to content
         </a>
         <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-6">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3 lg:gap-6">
             <Link
               href="/"
               className="font-semibold text-brand-700 dark:text-brand-100 text-base sm:text-lg shrink-0"
             >
               Interview Prep Hub
             </Link>
-            <nav aria-label="Main" className="flex-1 min-w-0 flex items-center gap-4 text-sm">
-              <div className="flex-1 min-w-0 flex gap-4 overflow-x-auto whitespace-nowrap scrollbar-thin -mx-1 px-1 [mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]">
+            <nav aria-label="Main" className="relative order-last w-full flex flex-wrap items-center gap-2 text-sm lg:order-none lg:w-auto lg:flex-1">
                 <NavLink href="/browse">Browse</NavLink>
-                <NavLink href="/tracks">Tracks</NavLink>
-                <NavLink href="/roles">Roles</NavLink>
-                <NavLink href="/leadership">Leadership</NavLink>
-                <NavLink href="/agentic-ai">Agentic AI</NavLink>
-                <NavLink href="/last-mile">Last-Mile</NavLink>
-                <NavLink href="/airlines">Airlines</NavLink>
-                <NavLink href="/skills-prep">Skills</NavLink>
-                <NavLink href="/patterns">Patterns</NavLink>
-                <NavLink href="/interview">Interview</NavLink>
-                <NavLink href="/practice">Practice</NavLink>
-              </div>
+                <NavMore
+                  label="Prepare"
+                  align="left"
+                  items={[
+                    { href: "/study-guide", label: "Study method", desc: "Revision plans, drills and readiness" },
+                    { href: "/tracks", label: "Career tracks", desc: "Skill-set aligned paths" },
+                    { href: "/roles", label: "Role focuses", desc: "Revise against a real JD" },
+                    { href: "/leadership", label: "Senior & leadership", desc: "Behavioural, EM, Staff+" },
+                    { href: "/patterns", label: "Company & region patterns", desc: "What each archetype probes" },
+                  ]}
+                />
+                <NavMore
+                  label="Guides"
+                  align="left"
+                  items={[
+                    { href: "/agentic-ai", label: "Agentic AI architect", desc: "Deep-dive modules" },
+                    { href: "/airlines", label: "Airlines & aviation", desc: "Carrier-by-carrier prep" },
+                    { href: "/skills-prep", label: "Skills prep", desc: "Close specific gaps" },
+                    { href: "/last-mile", label: "Last-mile delivery EM", desc: "UAE / MENA logistics interviews" },
+                  ]}
+                />
+                <NavMore
+                  label="Practice"
+                  align="left"
+                  items={[
+                    { href: "/practice", label: "Flashcards", desc: "Self-test with progress" },
+                    { href: "/interview", label: "Run an interview", desc: "Build a panel set" },
+                    { href: "/criteria", label: "Evaluation criteria", desc: "The 9-point scorecard" },
+                  ]}
+                />
               <NavMore
                 label="Resources"
                 items={[
                   { href: "/glossary", label: "Glossary" },
-                  { href: "/criteria", label: "Evaluation Criteria" },
                   { href: "/about", label: "About" },
                 ]}
               />
             </nav>
-            <div className="shrink-0 flex items-center gap-2">
+            <div className="ml-auto shrink-0 flex items-center gap-2 lg:ml-0">
               <ThemeToggle />
               <ProfileBadge />
             </div>

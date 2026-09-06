@@ -8,7 +8,7 @@ import { extractTopLevelHeadings } from "@/lib/toc";
 export const metadata: Metadata = {
   title: "Company & region patterns · Interview Prep Hub",
   description:
-    "Interview patterns by region (India, Singapore, UAE) and company archetype (FAANG, AI labs, banks, services firms, gov). Cited from public sources.",
+    "Role-specific rehearsal priorities by region and company archetype, with scoped primary-source regulatory references.",
 };
 
 const DOC_REL = path.join("docs", "COMPANY-PATTERNS.md");
@@ -27,7 +27,7 @@ const SHORTCUTS: Shortcut[] = [
   { label: "GenAI labs", href: "/browse?tag=pattern-genai-lab", description: "OpenAI / Anthropic / DeepMind / GenAI tooling cos; safety + alignment rounds" },
   { label: "Bank / fintech", href: "/browse?tag=pattern-bank-fintech", description: "Idempotency, audit, model risk, MAS / DIFC / RBI / CBUAE constraints" },
   { label: "Services firm", href: "/browse?tag=pattern-services-firm", description: "Case-study presentation, certifications, client-stakeholder behavioral" },
-  { label: "Product startup", href: "/browse?tag=pattern-product-startup", description: "Take-home as primary signal, founder rounds, ambiguity, scrappy execution" },
+  { label: "Product startup", href: "/browse?tag=pattern-product-startup", description: "Scoped implementation, tests, ambiguity and delivery trade-offs" },
   { label: "Gov / public sector", href: "/browse?tag=pattern-gov-public-sector", description: "Mission-pull behavioral, ownership evidence, sovereign-cloud constraints" },
   { label: "Eng Manager loop", href: "/browse?tag=role-eng-manager", description: "IC→Mgr, hiring, performance, conflict, prioritization, org design" },
   { label: "Staff+ IC loop", href: "/browse?tag=role-staff-ic", description: "Scope, influence-without-authority, architecture review, AI strategy" },
@@ -45,8 +45,8 @@ export default function PatternsPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">Company &amp; Region Patterns</h1>
         <p className="max-w-3xl text-slate-600 dark:text-slate-300">
-          Distilled from public interview-experience write-ups, official career
-          pages, regulatory documents, and engineering blogs. Use the shortcut
+          Preparation priorities, illustrative company archetypes and scoped
+          regulatory references. Confirm actual interview stages with the recruiter. Use the shortcut
           buttons to jump into{" "}
           <Link
             href="/browse"

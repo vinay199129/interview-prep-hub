@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ai-engineering",
+    "name": "AI Engineering",
+    "shortName": "AI Eng",
+    "tagline": "Build with LLMs",
+    "description": "The core craft of building on top of language models: how they work, how you prompt them, how you ground them in your own data, and how you know whether the output is any good.",
+    "accent": "indigo",
+    "categoryIds": [
+      "llm-fundamentals",
+      "prompt-engineering",
+      "rag",
+      "vector-search",
+      "evaluation",
+      "foundations"
+    ],
+    "order": 1
+  },
+  {
+    "id": "agentic-systems",
+    "name": "Agentic Systems",
+    "shortName": "Agents",
+    "tagline": "Models that take actions",
+    "description": "Everything that turns a model into a system that acts: planning loops, tool calling, memory, multi-agent orchestration, MCP, and the frameworks that package it all up.",
+    "accent": "orange",
+    "categoryIds": ["agents", "agent-frameworks"],
+    "order": 2
+  },
+  {
+    "id": "production-ai",
+    "name": "Production AI",
+    "shortName": "Production",
+    "tagline": "Ship it and keep it alive",
+    "description": "What separates a demo from a product: system design, deployment and observability, cost control, safety guardrails, and the Azure AI services you compose it from.",
+    "accent": "sky",
+    "categoryIds": ["system-design", "mlops", "safety", "azure-ai"],
+    "order": 3
+  },
+  {
+    "id": "software-cloud",
+    "name": "Software & Cloud",
+    "shortName": "Software",
+    "tagline": "The engineering underneath",
+    "description": "The general engineering interview that still decides most loops: language depth in .NET, Java and Python, frontend work, Azure platform services, and migration strategy.",
+    "accent": "emerald",
+    "categoryIds": [
+      "dotnet",
+      "java",
+      "python",
+      "frontend",
+      "azure-platform",
+      "migration"
+    ],
+    "order": 4
+  },
+  {
+    "id": "leadership-signal",
+    "name": "Leadership & Signal",
+    "shortName": "Leadership",
+    "tagline": "Senior, Staff+ and EM loops",
+    "description": "The rounds that are not about code: STAR stories, people and org leadership, and the scope, influence and technical-strategy signal expected at Staff and above.",
+    "accent": "fuchsia",
+    "categoryIds": ["behavioral", "leadership", "staff-plus"],
+    "order": 5
+  }
+]

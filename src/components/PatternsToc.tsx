@@ -57,6 +57,11 @@ export function PatternsToc({ markdown, toc }: Props) {
           rehypePlugins={[rehypeHighlight]}
           components={{
             h1: () => null,
+            table: ({ children }) => (
+              <div className="overflow-x-auto" role="region" aria-label="Scrollable reference table" tabIndex={0}>
+                <table>{children}</table>
+              </div>
+            ),
             h2: ({ children }) => {
               const slug = slugFor(extractText(children));
               return (

@@ -14,6 +14,11 @@
       "mlops"
     ],
     "targetQuestionCount": 80,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Choose the smallest useful AI approach","questionIds":["p3-llm-008","p3-pe-001","p3-fnd-004"],"practiceTimeMin":20,"exercise":"Take a support-answering feature. Write the simplest non-LLM baseline, then choose prompting, retrieval or fine-tuning. Specify the evidence that would change your choice.","readinessChecks":["Explain token and context limits without confusing them with factual knowledge.","Defend the choice using freshness, quality, privacy and ongoing cost rather than model popularity."]},
+      {"id":"implementation","name":"Make output measurable and testable","questionIds":["pe-structured-output-008","eval-rag-faithfulness-011","debug-llm-001"],"practiceTimeMin":35,"exercise":"Build a ten-case evaluation fixture including malformed output, unanswerable requests and conflicting evidence. Separate retrieval failures from generation failures. Add one regression assertion before proposing a fix.","readinessChecks":["Validate model output before it reaches a side-effecting system.","Show a failing case and explain which measurement identifies the failing component."]},
+      {"id":"defense","name":"Defend a production release","questionIds":["p3-rag-002","p3-saf-001","eval-offline-online-012"],"practiceTimeMin":40,"exercise":"Give a 30-minute design walkthrough and reserve ten minutes for objections. Cover permissions, capacity, evaluation gates, failure handling and rollback; then explain how your design changes at ten times the traffic.","readinessChecks":["State a measurable quality floor and latency/cost budget.","Name a credible injection failure and a release-blocking test, not just a safety prompt."]}
+    ],
     "order": 1
   },
   {
@@ -23,7 +28,12 @@
     "description": "Focused preparation for building grounded AI systems with Azure AI Search, Document Intelligence, embeddings, citations, and production RAG patterns.",
     "categoryIds": ["rag", "azure-ai", "vector-search", "evaluation", "safety"],
     "targetQuestionCount": 55,
-    "order": 2
+    "order": 2,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Model the corpus and retrieval problem","questionIds":["p3-search-001","p3-rag-003","p3-vec-001"],"practiceTimeMin":20,"exercise":"Sketch an index for policies with document version, tenant, access group and effective date. Compare two chunking approaches on the same three documents and state what you would measure.","readinessChecks":["Explain why chunk size and embedding choice need task-specific evaluation.","Keep access filtering and document freshness explicit in the retrieval contract."]},
+      {"id":"diagnosis","name":"Implement and diagnose retrieval","questionIds":["vs-hybrid-fusion-012","debug-vec-001","p3-eval-003"],"practiceTimeMin":35,"exercise":"Calculate reciprocal-rank fusion for two short ranked lists. Then investigate a recall drop after reindexing with a frozen query set, checking filters, embeddings and index configuration one variable at a time.","readinessChecks":["Distinguish recall, ranking quality and answer faithfulness.","Propose a discriminating experiment and a rollback criterion before changing the model."]},
+      {"id":"defense","name":"Defend tenant-safe production RAG","questionIds":["p3-rag-005","p4-aiauth-005","p3-rag-006"],"practiceTimeMin":40,"exercise":"Whiteboard a multi-tenant retrieval service. Trace a request through authorization, retrieval, generation and logging. Inject a stale permission and an unavailable search service, then describe containment and recovery.","readinessChecks":["Enforce authorization independently of generated text and include negative cross-tenant tests.","Explain degradation, index migration and cost/latency trade-offs at higher load."]}
+    ]
   },
   {
     "id": "agentic-ai-engineer",
@@ -39,7 +49,12 @@
       "mlops"
     ],
     "targetQuestionCount": 55,
-    "order": 3
+    "order": 3,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Choose orchestration deliberately","questionIds":["p3-af-001","p3-af-003","p3-af-005"],"practiceTimeMin":20,"exercise":"Compare a deterministic workflow, a single tool-using agent and a multi-agent design for the same approval task. Draw where state lives and where human authority is required.","readinessChecks":["Explain what an agent framework and MCP each provide without treating either as an authorization boundary.","Justify additional agents with measurable benefits over a simpler baseline."]},
+      {"id":"implementation","name":"Bound tool execution","questionIds":["p3-py-018","p3-af-007","p3-saf-004"],"practiceTimeMin":35,"exercise":"Write pseudocode for a bounded tool loop with schema validation, per-tool authorization, timeouts, a step budget and an idempotency key for writes. Test a repeated call, invalid arguments and an injected instruction.","readinessChecks":["Keep permissions outside model control and require approval for consequential actions.","Explain cancellation, retry safety and a visible failure state when a budget is exhausted."]},
+      {"id":"defense","name":"Evaluate the entire workflow","questionIds":["multiagent-supervisor-delegation-001","expert-agents-001","p3-eval-004"],"practiceTimeMin":40,"exercise":"Defend a procurement-agent design under a tool outage and partial completion. Define five end-to-end test cases, intermediate trace checks, cost limits and a human handoff with enough context to continue safely.","readinessChecks":["Measure task success, tool correctness and policy adherence separately.","Describe durable state, recovery and failure isolation rather than assuming each step succeeds."]}
+    ]
   },
   {
     "id": "azure-integration-engineer",
@@ -48,7 +63,12 @@
     "description": "Preparation for Azure API Management, Functions, Logic Apps, messaging, observability, security, migration, and service integration.",
     "categoryIds": ["azure-platform", "system-design", "migration", "mlops", "safety"],
     "targetQuestionCount": 65,
-    "order": 4
+    "order": 4,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Establish integration contracts","questionIds":["p1-apim-001","p1-fn-001","p1-arch-002"],"practiceTimeMin":20,"exercise":"Trace an incoming order from API to background processing. Choose request/response, a work queue or an event stream for each boundary and specify ownership of authentication, validation and retries.","readinessChecks":["Distinguish commands from events and justify delivery semantics.","Avoid treating an API gateway as a substitute for backend authorization."]},
+      {"id":"diagnosis","name":"Diagnose the whole request path","questionIds":["p1-arch-003","debug-prod-001","p1-la-001"],"practiceTimeMin":30,"exercise":"Investigate an intermittent timeout using a trace spanning gateway, compute and database. Rank three hypotheses, name the metric that separates them and define a safe mitigation. Compare code and workflow-based integration ownership.","readinessChecks":["Differentiate queueing, connection exhaustion and downstream latency.","Explain which action reduces impact without hiding the underlying error."]},
+      {"id":"defense","name":"Make recovery part of the design","questionIds":["p2-arch-003","p1-fn-003","p2-arch-001"],"practiceTimeMin":40,"exercise":"Design order processing with human approval. Walk through a crash after a database commit but before publishing, a duplicate message and a poison message. Include reconciliation, replay and observability.","readinessChecks":["Explain outbox and idempotent consumption without promising exactly-once side effects.","Account for backpressure, failure recovery and scaling bottlenecks."]}
+    ]
   },
   {
     "id": "dotnet-cloud-engineer",
@@ -57,7 +77,12 @@
     "description": "Preparation for C#, ASP.NET Core, cloud-native .NET services, integration, architecture, resilience, and Azure platform patterns.",
     "categoryIds": ["dotnet", "azure-platform", "system-design", "mlops"],
     "targetQuestionCount": 60,
-    "order": 5
+    "order": 5,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Reason about request lifetimes","questionIds":["p1-cs-002","p1-cs-005","p1-cs-006"],"practiceTimeMin":20,"exercise":"Trace one HTTP request through middleware and a scoped service into asynchronous I/O. Identify where cancellation flows and explain why a singleton must not capture request-scoped state.","readinessChecks":["Explain await without claiming it always creates a thread.","Predict a lifetime or middleware-ordering bug before running the code."]},
+      {"id":"implementation","name":"Code and diagnose data access","questionIds":["p1-cs-004","p1-cs-008","dotnet-linq-deferred-028"],"practiceTimeMin":35,"exercise":"Implement the order aggregation with tests for empty input, time boundaries and ties. Inspect generated SQL or query counts, then diagnose repeated enumeration and excess materialization with a before/after measurement.","readinessChecks":["State when the query executes and what runs in the database versus memory.","Use profiling evidence rather than adding caching before locating the bottleneck."]},
+      {"id":"defense","name":"Defend a resilient cloud service","questionIds":["p1-arch-001","p1-cs-020","p1-arch-005"],"practiceTimeMin":40,"exercise":"Design a multi-tenant catalog API. Specify access checks, indexing, capacity, cancellation and downstream resilience. Inject a retry storm and a noisy tenant and explain which limit contains each.","readinessChecks":["Make retries bounded and safe for writes.","Explain isolation and cache invalidation alongside latency and scaling trade-offs."]}
+    ]
   },
   {
     "id": "java-cloud-engineer",
@@ -66,7 +91,12 @@
     "description": "Preparation for Java, Spring Boot, cloud-native backend services, migration, integration, architecture, and Azure platform patterns.",
     "categoryIds": ["java", "azure-platform", "system-design", "migration", "mlops"],
     "targetQuestionCount": 60,
-    "order": 6
+    "order": 6,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Explain runtime and dependency behavior","questionIds":["p2-java-001","p2-java-002","p2-spring-001"],"practiceTimeMin":20,"exercise":"Trace an order request through a Spring service. Explain object lifetime, contention and memory growth, then compare a lock-based update with an atomic operation for a narrowly defined invariant.","readinessChecks":["Separate heap pressure, stack exhaustion and thread contention.","Explain dependency injection and concurrency guarantees without relying on annotations as magic."]},
+      {"id":"implementation","name":"Measure query and concurrency failures","questionIds":["p2-java-003","java-springboot-nplusone-028","debug-prod-001"],"practiceTimeMin":35,"exercise":"Implement and test order aggregation. Capture SQL query counts for an endpoint, fix an N+1 pattern and verify pagination still works. Outline how you would distinguish a database bottleneck from GC or thread-pool pressure.","readinessChecks":["Demonstrate a measurable reduction in queries without loading an unbounded graph.","Use traces, pool metrics and GC evidence to eliminate competing hypotheses."]},
+      {"id":"defense","name":"Design migration and delivery safety","questionIds":["p2-arch-003","p2-arch-001","p2-arch-002"],"practiceTimeMin":40,"exercise":"Plan a strangler migration for order processing. Define the routing boundary, data ownership, outbox, replay and rollback. Explain how the system behaves when old and new versions coexist.","readinessChecks":["Avoid unsafe dual writes and specify reconciliation.","Tie migration phases to business continuity, compatibility checks and operational ownership."]}
+    ]
   },
   {
     "id": "python-ai-application-engineer",
@@ -75,7 +105,12 @@
     "description": "Preparation for Python, FastAPI, async services, Azure Functions, RAG applications, Azure AI integration, and production AI app patterns.",
     "categoryIds": ["python", "azure-ai", "rag", "azure-platform", "mlops"],
     "targetQuestionCount": 65,
-    "order": 7
+    "order": 7,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Choose concurrency and streaming boundaries","questionIds":["p3-py-002","p3-py-003","p3-py-004"],"practiceTimeMin":20,"exercise":"Build a typed generator pipeline over synthetic rows. Explain where memory remains bounded and choose an execution model separately for network I/O and CPU-heavy work, stating interpreter assumptions.","readinessChecks":["Distinguish concurrency from parallel execution and state version-specific assumptions.","Handle malformed rows and resource cleanup without loading the entire input."]},
+      {"id":"implementation","name":"Keep an async service responsive","questionIds":["p3-py-001","python-asyncio-blocking-021","p3-py-006"],"practiceTimeMin":35,"exercise":"Write tests exposing shared mutable defaults. For a streaming endpoint, simulate a slow dependency, a disconnected client and CPU-heavy processing. Explain bounded concurrency, cancellation and backpressure.","readinessChecks":["Remove event-loop blocking using an execution model appropriate to the workload.","Verify timeout and cleanup behavior, not only the successful response."]},
+      {"id":"defense","name":"Operate an authenticated AI service","questionIds":["p3-rag-002","p4-aiauth-001","debug-llm-001"],"practiceTimeMin":40,"exercise":"Design a Python RAG service from ingestion to response. Trace workload identity and tenant access, set quality/latency budgets and investigate a sudden hallucination increase using a frozen evaluation set.","readinessChecks":["Separate infrastructure identity from end-user authorization.","Locate the failing pipeline stage before changing a prompt or model."]}
+    ]
   },
   {
     "id": "engineering-manager",
@@ -84,7 +119,12 @@
     "description": "IC→manager and seasoned-manager prep: people, hiring, performance, conflict, prioritization, org design, and behavioral/STAR for AI/cloud teams.",
     "categoryIds": ["leadership", "behavioral", "system-design", "safety", "mlops"],
     "targetQuestionCount": 40,
-    "order": 8
+    "order": 8,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Define your management operating model","questionIds":["lead-em-001","lead-em-003","lead-em-005"],"practiceTimeMin":20,"exercise":"Prepare a two-minute explanation of why management fits your experience. Draft a hiring rubric and a technical-debt decision with explicit business impact, then identify what evidence would change the decision.","readinessChecks":["Use real examples and separate your actions from the team's work.","Describe consistent hiring evidence rather than intuition or culture-fit shorthand."]},
+      {"id":"rehearsal","name":"Rehearse difficult conversations","questionIds":["lead-em-004","lead-em-007","behav-002"],"practiceTimeMin":35,"exercise":"Role-play a conflict and a prioritization disagreement. Prepare a one-minute and a three-minute failure story with your mistake, stakeholder response, measurable outcome and what you changed afterward.","readinessChecks":["Show listening, clear expectations and follow-through without blaming individuals.","Distinguish a real result from a hypothetical improvement; do not invent metrics."]},
+      {"id":"defense","name":"Defend delivery and organizational choices","questionIds":["lead-em-006","lead-em-008","behav-007"],"practiceTimeMin":40,"exercise":"Present a team design and recovery plan for an at-risk AI launch. Allocate owners, reduce scope, state safety gates and explain the escalation and communication plan to a skeptical product partner.","readinessChecks":["Connect staffing and sequencing to dependencies, capacity and customer impact.","Explain a principled stop/go decision and how the team learns without punishment."]}
+    ]
   },
   {
     "id": "staff-plus-ic",
@@ -93,6 +133,11 @@
     "description": "Staff, Principal, Distinguished IC and Architect prep: technical strategy, scope, influence-without-authority, architecture review, AI org strategy.",
     "categoryIds": ["staff-plus", "system-design", "behavioral", "azure-platform", "rag", "agents"],
     "targetQuestionCount": 40,
-    "order": 9
+    "order": 9,
+    "studyPlan": [
+      {"id":"fundamentals","name":"Show scope and technical judgment","questionIds":["staff-001","staff-003","staff-004"],"practiceTimeMin":20,"exercise":"Prepare a one-page technical strategy: problem, constraints, alternatives, recommendation, staged adoption and success measures. Annotate the decisions you owned and the decisions delegated to others.","readinessChecks":["Connect architecture choices to business outcomes and explicit assumptions.","Explain what would invalidate the strategy and which decisions are reversible."]},
+      {"id":"rehearsal","name":"Demonstrate influence and multiplication","questionIds":["staff-002","staff-006","behav-003"],"practiceTimeMin":35,"exercise":"Rehearse a resisted technical change, a mentorship outcome and a disagreement. Identify stakeholders, incentives, the pilot, adoption evidence and how you reduced dependence on yourself.","readinessChecks":["Demonstrate influence without borrowing authority from title or reporting lines.","Show lasting team capability and acknowledge counterarguments and mistakes."]},
+      {"id":"defense","name":"Lead an architecture and strategy review","questionIds":["staff-005","staff-008","expert-sysd-001"],"practiceTimeMin":40,"exercise":"Run a review for an AI capability with strict availability and residency constraints. State assumptions, failure domains, RTO/RPO, cost and staged rollout. Challenge active-active complexity and defend a simpler alternative.","readinessChecks":["Quantify recovery objectives and expose consistency or residency conflicts.","Include organizational ownership, evaluation gates and an exit strategy, not only a component diagram."]}
+    ]
   }
 ]

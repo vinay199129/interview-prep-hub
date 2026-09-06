@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TOPICS } from "./topics";
 
 export const CategoryIdSchema = z.enum([
   "llm-fundamentals",
@@ -47,6 +48,34 @@ export const CategorySchema = z.object({
   order: z.number().int().nonnegative(),
 });
 
+export const DomainIdSchema = z.enum([
+  "ai-engineering",
+  "agentic-systems",
+  "production-ai",
+  "software-cloud",
+  "leadership-signal",
+]);
+
+export const DomainSchema = z.object({
+  id: DomainIdSchema,
+  name: z.string().min(1),
+  shortName: z.string().min(1),
+  tagline: z.string().min(1),
+  description: z.string().min(1),
+  accent: z.string().min(1),
+  categoryIds: z.array(CategoryIdSchema).min(1),
+  order: z.number().int().nonnegative(),
+});
+
+export const StudyStageSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  questionIds: z.array(z.string().min(1)).min(1),
+  exercise: z.string().min(1),
+  practiceTimeMin: z.number().int().positive(),
+  readinessChecks: z.array(z.string().min(1)).min(2),
+});
+
 export const TrackSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -54,13 +83,14 @@ export const TrackSchema = z.object({
   description: z.string().min(1),
   categoryIds: z.array(CategoryIdSchema).min(1),
   targetQuestionCount: z.number().int().positive().optional(),
+  studyPlan: z.array(StudyStageSchema).min(3),
   order: z.number().int().nonnegative(),
 });
 
 export const QuestionSchema = z.object({
   id: z.string().min(1),
   categoryIds: z.array(CategoryIdSchema).min(1),
-  topic: z.string().min(1),
+  topic: z.enum(TOPICS),
   subTopic: z.string().optional(),
   difficulty: DifficultySchema,
   experienceBands: z.array(ExperienceBandSchema).min(1),
@@ -120,6 +150,7 @@ export const RoleFocusSchema = z.object({
 });
 
 export const CategoriesFileSchema = z.array(CategorySchema);
+export const DomainsFileSchema = z.array(DomainSchema);
 export const TracksFileSchema = z.array(TrackSchema);
 export const QuestionsFileSchema = z.array(QuestionSchema);
 export const CriteriaFileSchema = z.array(EvaluationCriterionSchema);

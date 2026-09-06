@@ -11,6 +11,7 @@ import {
   type Category,
   type CategoryId,
   type Difficulty,
+  type Domain,
   type ExperienceBand,
   type Question,
   type QuestionType,
@@ -49,6 +50,7 @@ function isTypingTarget(el: EventTarget | null): boolean {
 interface Props {
   categories: Category[];
   questions: Question[];
+  domains?: Domain[];
   initialCategory?: CategoryId;
   initialCategories?: CategoryId[];
 }
@@ -70,6 +72,7 @@ const TYPES: QuestionType[] = [
 export function BrowseClient({
   categories,
   questions,
+  domains = [],
   initialCategory,
   initialCategories,
 }: Props) {
@@ -92,7 +95,7 @@ export function BrowseClient({
     const cats = catRaw.filter((c) => validCategoryIds.has(c as CategoryId)) as CategoryId[];
     return {
       categories: cats.length ? cats : initialBaseCategories,
-      topics: csv("topic").filter((t) => validTopics.has(t)),
+      topics: csv("topic"),
       difficulties: csv("diff").filter((d) => (DIFFS as string[]).includes(d)) as Difficulty[],
       experienceBands: csv("band").filter((b) => (BANDS as string[]).includes(b)) as ExperienceBand[],
       types: csv("type").filter((t) => (TYPES as string[]).includes(t)) as QuestionType[],
@@ -108,6 +111,7 @@ export function BrowseClient({
   })();
 
   const [filters, setFilters] = useState<Filters>(initialFilters);
+  const unavailableTopics = filters.topics.filter((topic) => !validTopics.has(topic));
   const [topicQuery, setTopicQuery] = useState("");
   const [revealAll, setRevealAll] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
@@ -115,6 +119,7 @@ export function BrowseClient({
   const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
   const [showShortcuts, setShowShortcuts] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollRequested = useRef(false);
   const { map: progressMap, setStatus, clearAll } = useProgress();
 
   // Sync filters → URL (replace, no history spam)
@@ -138,6 +143,27 @@ export function BrowseClient({
   }, [filters, statusFilter, pathname, router]);
 
   const topics = useMemo(() => uniqueTopics(questions), [questions]);
+
+  /**
+   * Category checkboxes grouped under their domain, so the filter reads as five
+   * headings rather than a flat list of twenty-one. Any category not claimed by
+   * a domain falls into a trailing "Other" group instead of disappearing.
+   */
+  const categoryGroups = useMemo(() => {
+    const byId = new Map(categories.map((c) => [c.id, c]));
+    const claimed = new Set<CategoryId>();
+    const groups: { key: string; name: string; categories: Category[] }[] =
+      domains.map((d) => {
+        const cats = d.categoryIds
+          .map((id) => byId.get(id))
+          .filter((c): c is Category => Boolean(c));
+        cats.forEach((c) => claimed.add(c.id));
+        return { key: d.id as string, name: d.shortName, categories: cats };
+      });
+    const rest = categories.filter((c) => !claimed.has(c.id));
+    if (rest.length) groups.push({ key: "other", name: "Other", categories: rest });
+    return groups.filter((g) => g.categories.length > 0);
+  }, [categories, domains]);
   const visibleTopics = useMemo(() => {
     const q = topicQuery.trim().toLowerCase();
     if (!q) return topics;
@@ -187,9 +213,11 @@ export function BrowseClient({
       const key = e.key.toLowerCase();
       if (key === "j") {
         e.preventDefault();
+        scrollRequested.current = true;
         setFocusedIndex((i) => Math.min(total - 1, i + 1));
       } else if (key === "k") {
         e.preventDefault();
+        scrollRequested.current = true;
         setFocusedIndex((i) => Math.max(0, i - 1));
       } else if (key === "r") {
         e.preventDefault();
@@ -213,6 +241,8 @@ export function BrowseClient({
 
   // Scroll focused card into view
   useEffect(() => {
+    if (!scrollRequested.current) return;
+    scrollRequested.current = false;
     const el = cardRefs.current[focusedIndex];
     if (el) {
       el.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -267,20 +297,47 @@ export function BrowseClient({
           />
         </FilterGroup>
 
-        <FilterGroup label="Category" defaultOpen={filters.categories.length > 0} count={filters.categories.length}>
-          {categories.map((c) => (
-            <Check
-              key={c.id}
-              label={c.shortName}
-              checked={filters.categories.includes(c.id)}
-              onChange={() =>
-                setFilters({
-                  ...filters,
-                  categories: toggle(filters.categories, c.id),
-                })
-              }
-            />
-          ))}
+        <FilterGroup label="Domain & category" defaultOpen={filters.categories.length > 0} count={filters.categories.length}>
+          {categoryGroups.map((group) => {
+            const groupIds = group.categories.map((c) => c.id);
+            const allOn = groupIds.every((id) => filters.categories.includes(id));
+            return (
+              <div key={group.key} className="mb-2 last:mb-0">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      categories: allOn
+                        ? filters.categories.filter((id) => !groupIds.includes(id))
+                        : Array.from(new Set([...filters.categories, ...groupIds])),
+                    })
+                  }
+                  className="w-full text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-100"
+                >
+                  {group.name}
+                  <span className="ml-1 font-normal normal-case">
+                    ({allOn ? "clear" : "all"})
+                  </span>
+                </button>
+                <div className="mt-1 pl-1">
+                  {group.categories.map((c) => (
+                    <Check
+                      key={c.id}
+                      label={c.shortName}
+                      checked={filters.categories.includes(c.id)}
+                      onChange={() =>
+                        setFilters({
+                          ...filters,
+                          categories: toggle(filters.categories, c.id),
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </FilterGroup>
 
         <FilterGroup label="Experience band" count={filters.experienceBands.length}>
@@ -403,6 +460,18 @@ export function BrowseClient({
       </aside>
 
       <section className="md:h-full md:overflow-y-auto md:pr-2 space-y-3">
+        {unavailableTopics.length > 0 && (
+          <div role="status" className="border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100">
+            <p>Topic filters no longer available: {unavailableTopics.join(", ")}. These filters have not been removed automatically.</p>
+            <button
+              type="button"
+              className="mt-2 underline"
+              onClick={() => setFilters((current) => ({ ...current, topics: current.topics.filter((topic) => validTopics.has(topic)) }))}
+            >
+              Remove unavailable topic filters
+            </button>
+          </div>
+        )}
         {filters.tags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap text-xs">
             <span className="text-slate-500 dark:text-slate-400">Filtered by tag:</span>

@@ -3,7 +3,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { BrowseClient } from "@/components/BrowseClient";
 import { ProgressStats } from "@/components/ProgressStats";
-import { getAllQuestions, getCategories, getTrackById, getTracks } from "@/lib/data";
+import { StudyPlan } from "@/components/StudyPlan";
+import {
+  getAllQuestions,
+  getCategories,
+  getDomains,
+  getTrackById,
+  getTracks,
+} from "@/lib/data";
 
 export function generateStaticParams() {
   return getTracks().map((track) => ({ id: track.id }));
@@ -60,16 +67,22 @@ export default async function TrackPage({
             );
           })}
         </div>
+        <div className="pt-1 text-xs text-slate-500 dark:text-slate-400">Essential sequence progress</div>
         <ProgressStats
-          questionIds={trackQuestions.map((q) => q.id)}
+          questionIds={track.studyPlan.flatMap((stage) => stage.questionIds)}
           variant="full"
           className="pt-1 max-w-md"
         />
       </header>
+      <StudyPlan stages={track.studyPlan} questions={trackQuestions} />
+      <h2 className="border-t border-slate-200 pt-6 text-xl font-semibold dark:border-slate-800">
+        Full question bank / optional depth ({trackQuestions.length})
+      </h2>
       <Suspense fallback={null}>
         <BrowseClient
           categories={categories}
           questions={questions}
+          domains={getDomains()}
           initialCategories={track.categoryIds}
         />
       </Suspense>

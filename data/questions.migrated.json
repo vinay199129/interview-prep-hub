@@ -657,7 +657,7 @@
   },
   {
     "id": "p1-la-001",
-    "topic": "Azure Logic Apps",
+    "topic": "Azure Platform",
     "subTopic": "When to use",
     "difficulty": "easy",
     "experienceBands": [
@@ -701,7 +701,7 @@
   },
   {
     "id": "p1-la-002",
-    "topic": "Azure Logic Apps",
+    "topic": "Azure Platform",
     "subTopic": "Standard vs Consumption",
     "difficulty": "medium",
     "experienceBands": [
@@ -891,7 +891,7 @@
   },
   {
     "id": "p1-ghcp-001",
-    "topic": "GitHub Copilot",
+    "topic": "AI Agents",
     "subTopic": "Effective use",
     "difficulty": "easy",
     "experienceBands": [
@@ -941,7 +941,7 @@
   },
   {
     "id": "p1-aks-001",
-    "topic": "AKS / Containers",
+    "topic": "Azure Platform",
     "subTopic": "Containerizing .NET",
     "difficulty": "medium",
     "experienceBands": [
@@ -989,7 +989,7 @@
   },
   {
     "id": "p1-aks-002",
-    "topic": "AKS / Containers",
+    "topic": "Azure Platform",
     "subTopic": "Workload identity",
     "difficulty": "hard",
     "experienceBands": [
@@ -1037,7 +1037,7 @@
   },
   {
     "id": "p1-iot-001",
-    "topic": "IoT Migration",
+    "topic": "Azure Platform",
     "subTopic": "Greengrass → Azure IoT",
     "difficulty": "hard",
     "experienceBands": [
@@ -1091,7 +1091,7 @@
   },
   {
     "id": "p1-arch-001",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Resilience patterns",
     "difficulty": "medium",
     "experienceBands": [
@@ -1138,7 +1138,7 @@
   },
   {
     "id": "p1-arch-002",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Messaging",
     "difficulty": "medium",
     "experienceBands": [
@@ -1185,7 +1185,7 @@
   },
   {
     "id": "p1-arch-003",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Observability",
     "difficulty": "medium",
     "experienceBands": [
@@ -1233,7 +1233,7 @@
   },
   {
     "id": "p1-arch-004",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Secrets management",
     "difficulty": "easy",
     "experienceBands": [
@@ -1281,7 +1281,7 @@
   },
   {
     "id": "p1-arch-005",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "End-to-end design",
     "difficulty": "expert",
     "experienceBands": [
@@ -1813,7 +1813,7 @@
   },
   {
     "id": "p1-cs-020",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Multi-tenant SaaS",
     "difficulty": "expert",
     "experienceBands": [
@@ -2325,7 +2325,7 @@
   },
   {
     "id": "p2-fn-java-001",
-    "topic": "Azure Functions (Java)",
+    "topic": "Azure Functions",
     "subTopic": "HTTP trigger",
     "difficulty": "easy",
     "experienceBands": [
@@ -2370,7 +2370,7 @@
   },
   {
     "id": "p2-fn-java-002",
-    "topic": "Azure Functions (Java)",
+    "topic": "Azure Functions",
     "subTopic": "Cold start & performance",
     "difficulty": "hard",
     "experienceBands": [
@@ -2416,7 +2416,7 @@
   },
   {
     "id": "p2-aws-mig-001",
-    "topic": "AWS → Azure Migration",
+    "topic": "Cloud Migration",
     "subTopic": "Service mapping",
     "difficulty": "medium",
     "experienceBands": [
@@ -2463,7 +2463,7 @@
   },
   {
     "id": "p2-aws-mig-002",
-    "topic": "AWS → Azure Migration",
+    "topic": "Cloud Migration",
     "subTopic": "Lambda → Functions",
     "difficulty": "hard",
     "experienceBands": [
@@ -2513,7 +2513,7 @@
   },
   {
     "id": "p2-aws-mig-003",
-    "topic": "AWS → Azure Migration",
+    "topic": "Cloud Migration",
     "subTopic": "Identity & data",
     "difficulty": "hard",
     "experienceBands": [
@@ -2566,7 +2566,7 @@
   },
   {
     "id": "p2-arch-001",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "End-to-end design",
     "difficulty": "expert",
     "experienceBands": [
@@ -3256,7 +3256,7 @@
   },
   {
     "id": "p2-arch-002",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Strangler Fig migration",
     "difficulty": "expert",
     "experienceBands": [
@@ -3310,7 +3310,7 @@
   },
   {
     "id": "p2-arch-003",
-    "topic": "Architecture",
+    "topic": "Software Architecture",
     "subTopic": "Outbox pattern",
     "difficulty": "expert",
     "experienceBands": [
@@ -3590,7 +3590,7 @@
   },
   {
     "id": "p3-fn-py-001",
-    "topic": "Azure Functions (Python)",
+    "topic": "Azure Functions",
     "subTopic": "Programming model",
     "difficulty": "medium",
     "experienceBands": [
@@ -3638,7 +3638,7 @@
   },
   {
     "id": "p3-fn-py-002",
-    "topic": "Azure Functions (Python)",
+    "topic": "Azure Functions",
     "subTopic": "Cold start & init",
     "difficulty": "medium",
     "experienceBands": [
@@ -3836,7 +3836,7 @@
   },
   {
     "id": "p3-docint-001",
-    "topic": "Document Intelligence",
+    "topic": "Azure AI Services",
     "subTopic": "Models",
     "difficulty": "easy",
     "experienceBands": [
@@ -3881,7 +3881,7 @@
   },
   {
     "id": "p3-docint-002",
-    "topic": "Document Intelligence",
+    "topic": "Azure AI Services",
     "subTopic": "Pipelines",
     "difficulty": "medium",
     "experienceBands": [
@@ -4863,7 +4863,7 @@
   },
   {
     "id": "p3-py-017",
-    "topic": "Azure Functions (Python)",
+    "topic": "Azure Functions",
     "subTopic": "Service Bus + Durable",
     "difficulty": "medium",
     "experienceBands": [
@@ -5887,7 +5887,7 @@
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Few-shot vs zero-shot vs chain-of-thought prompting",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -5925,14 +5925,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "Few-shot vs zero-shot vs chain-of-thought prompting"
   },
   {
     "id": "p3-pe-002",
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Structured output: JSON mode, function calling, and schema enforcement",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -5970,14 +5971,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Structured output: JSON mode, function calling, and schema enforcement"
   },
   {
     "id": "p3-pe-003",
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Prompt versioning, evaluation, and rollout",
+    "topic": "Prompt Engineering",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -6015,14 +6017,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Prompt versioning, evaluation, and rollout"
   },
   {
     "id": "p3-saf-001",
     "categoryIds": [
       "safety"
     ],
-    "topic": "Prompt injection: direct and indirect",
+    "topic": "Safety & Responsible AI",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -6060,14 +6063,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Prompt injection: direct and indirect"
   },
   {
     "id": "p3-saf-002",
     "categoryIds": [
       "safety"
     ],
-    "topic": "Content moderation and responsible AI guardrails",
+    "topic": "Safety & Responsible AI",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6105,14 +6109,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Content moderation and responsible AI guardrails"
   },
   {
     "id": "p3-saf-003",
     "categoryIds": [
       "safety"
     ],
-    "topic": "Hallucination mitigation and grounding",
+    "topic": "Safety & Responsible AI",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6150,14 +6155,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Hallucination mitigation and grounding"
   },
   {
     "id": "p3-fe-001",
     "categoryIds": [
       "frontend"
     ],
-    "topic": "Streaming LLM responses to the browser",
+    "topic": "Frontend (Angular/React)",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6194,14 +6200,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Streaming LLM responses to the browser"
   },
   {
     "id": "p3-fe-002",
     "categoryIds": [
       "frontend"
     ],
-    "topic": "Accessible chat UI for AI assistants",
+    "topic": "Frontend (Angular/React)",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6238,14 +6245,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Accessible chat UI for AI assistants"
   },
   {
     "id": "p3-llm-008",
     "categoryIds": [
       "llm-fundamentals"
     ],
-    "topic": "Tokens, context windows, and cost",
+    "topic": "LLM Engineering",
     "difficulty": "easy",
     "experienceBands": [
       "junior",
@@ -6283,14 +6291,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "Tokens, context windows, and cost"
   },
   {
     "id": "p3-llm-009",
     "categoryIds": [
       "llm-fundamentals"
     ],
-    "topic": "Sampling: temperature, top-p, and reproducibility",
+    "topic": "LLM Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6328,14 +6337,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Sampling: temperature, top-p, and reproducibility"
   },
   {
     "id": "p3-pe-004",
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Few-shot example selection",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6372,14 +6382,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Few-shot example selection"
   },
   {
     "id": "p3-pe-005",
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Forcing structured JSON output",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6417,14 +6428,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Forcing structured JSON output"
   },
   {
     "id": "p3-af-006",
     "categoryIds": [
       "agent-frameworks"
     ],
-    "topic": "Choosing between Agent Framework, Semantic Kernel, and LangGraph",
+    "topic": "Agent Frameworks",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6461,7 +6473,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Choosing between Agent Framework, Semantic Kernel, and LangGraph"
   },
   {
     "id": "p3-af-007",
@@ -6469,7 +6482,7 @@
       "agent-frameworks",
       "agents"
     ],
-    "topic": "Stopping conditions and budget caps for agent loops",
+    "topic": "Agent Frameworks",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6507,14 +6520,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Stopping conditions and budget caps for agent loops"
   },
   {
     "id": "p3-vec-001",
     "categoryIds": [
       "vector-search"
     ],
-    "topic": "Choosing an embedding model",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6552,14 +6566,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Choosing an embedding model"
   },
   {
     "id": "p3-vec-002",
     "categoryIds": [
       "vector-search"
     ],
-    "topic": "ANN index tuning: HNSW vs IVF",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -6598,7 +6613,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "ANN index tuning: HNSW vs IVF"
   },
   {
     "id": "p3-saf-004",
@@ -6606,7 +6622,7 @@
       "safety",
       "agents"
     ],
-    "topic": "Defending against indirect prompt injection",
+    "topic": "Safety & Responsible AI",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -6644,14 +6660,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Defending against indirect prompt injection"
   },
   {
     "id": "p3-saf-005",
     "categoryIds": [
       "safety"
     ],
-    "topic": "PII handling in LLM pipelines",
+    "topic": "Safety & Responsible AI",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6689,14 +6706,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "PII handling in LLM pipelines"
   },
   {
     "id": "p3-fnd-006",
     "categoryIds": [
       "foundations"
     ],
-    "topic": "Transformer attention in one paragraph",
+    "topic": "ML Foundations",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6734,14 +6752,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Transformer attention in one paragraph"
   },
   {
     "id": "p3-fnd-007",
     "categoryIds": [
       "foundations"
     ],
-    "topic": "Training objectives: pretraining, SFT, RLHF, DPO",
+    "topic": "ML Foundations",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6780,14 +6799,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Training objectives: pretraining, SFT, RLHF, DPO"
   },
   {
     "id": "p3-azai-001",
     "categoryIds": [
       "azure-ai"
     ],
-    "topic": "Azure OpenAI vs OpenAI API",
+    "topic": "Azure AI Services",
     "difficulty": "easy",
     "experienceBands": [
       "mid",
@@ -6824,7 +6844,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Azure OpenAI vs OpenAI API"
   },
   {
     "id": "p3-azai-002",
@@ -6832,7 +6853,7 @@
       "azure-ai",
       "rag"
     ],
-    "topic": "Azure AI Search for RAG: hybrid + semantic ranking",
+    "topic": "Azure AI Services",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6870,14 +6891,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Azure AI Search for RAG: hybrid + semantic ranking"
   },
   {
     "id": "p3-fe-003",
     "categoryIds": [
       "frontend"
     ],
-    "topic": "Rendering streaming markdown safely",
+    "topic": "Frontend (Angular/React)",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6915,14 +6937,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Rendering streaming markdown safely"
   },
   {
     "id": "p3-fe-004",
     "categoryIds": [
       "frontend"
     ],
-    "topic": "Optimistic UI for chat with retry",
+    "topic": "Frontend (Angular/React)",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -6959,14 +6982,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Optimistic UI for chat with retry"
   },
   {
     "id": "p3-mig-001",
     "categoryIds": [
       "migration"
     ],
-    "topic": "Lambda → Azure Functions (.NET) migration",
+    "topic": "Cloud Migration",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7005,14 +7029,15 @@
       "pattern-faang",
       "pattern-services-firm"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Lambda → Azure Functions (.NET) migration"
   },
   {
     "id": "p3-mig-002",
     "categoryIds": [
       "migration"
     ],
-    "topic": "Containerized workloads: ECS / Cloud Run → Container Apps",
+    "topic": "Cloud Migration",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7051,7 +7076,8 @@
       "pattern-faang",
       "pattern-services-firm"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Containerized workloads: ECS / Cloud Run → Container Apps"
   },
   {
     "id": "p4-auth-001",
@@ -7059,7 +7085,7 @@
       "system-design",
       "azure-platform"
     ],
-    "topic": "Authentication vs authorization",
+    "topic": "AI System Design",
     "difficulty": "easy",
     "experienceBands": [
       "junior",
@@ -7097,7 +7123,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "Authentication vs authorization"
   },
   {
     "id": "p4-auth-002",
@@ -7105,7 +7132,7 @@
       "system-design",
       "azure-platform"
     ],
-    "topic": "OAuth 2.0 and OpenID Connect in one paragraph",
+    "topic": "AI System Design",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7147,7 +7174,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "OAuth 2.0 and OpenID Connect in one paragraph"
   },
   {
     "id": "p4-auth-003",
@@ -7155,7 +7183,7 @@
       "system-design",
       "azure-platform"
     ],
-    "topic": "JWT anatomy and validation",
+    "topic": "AI System Design",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7196,7 +7224,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "JWT anatomy and validation"
   },
   {
     "id": "p4-auth-004",
@@ -7204,7 +7233,7 @@
       "system-design",
       "frontend"
     ],
-    "topic": "Session cookies vs bearer tokens in the browser",
+    "topic": "AI System Design",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7243,7 +7272,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Session cookies vs bearer tokens in the browser"
   },
   {
     "id": "p4-auth-005",
@@ -7251,7 +7281,7 @@
       "system-design",
       "azure-platform"
     ],
-    "topic": "Choosing API auth: API key vs JWT vs mTLS vs OAuth client credentials",
+    "topic": "AI System Design",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7289,7 +7319,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Choosing API auth: API key vs JWT vs mTLS vs OAuth client credentials"
   },
   {
     "id": "p4-az-001",
@@ -7297,7 +7328,7 @@
       "azure-platform",
       "azure-ai"
     ],
-    "topic": "Managed Identity: system-assigned vs user-assigned",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7335,14 +7366,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Managed Identity: system-assigned vs user-assigned"
   },
   {
     "id": "p4-az-002",
     "categoryIds": [
       "azure-platform"
     ],
-    "topic": "Workload Identity Federation",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7380,14 +7412,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Workload Identity Federation"
   },
   {
     "id": "p4-az-003",
     "categoryIds": [
       "azure-platform"
     ],
-    "topic": "App registration vs enterprise application",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7424,7 +7457,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "App registration vs enterprise application"
   },
   {
     "id": "p4-az-004",
@@ -7432,7 +7466,7 @@
       "azure-platform",
       "azure-ai"
     ],
-    "topic": "DefaultAzureCredential and Azure access tokens end-to-end",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7471,14 +7505,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "DefaultAzureCredential and Azure access tokens end-to-end"
   },
   {
     "id": "p4-az-005",
     "categoryIds": [
       "azure-platform"
     ],
-    "topic": "Key Vault references and secret rotation",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7516,14 +7551,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Key Vault references and secret rotation"
   },
   {
     "id": "p4-az-006",
     "categoryIds": [
       "azure-platform"
     ],
-    "topic": "Azure RBAC scope hierarchy and least privilege",
+    "topic": "Azure Platform",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7561,7 +7597,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Azure RBAC scope hierarchy and least privilege"
   },
   {
     "id": "p4-aiauth-001",
@@ -7569,7 +7606,7 @@
       "azure-ai",
       "azure-platform"
     ],
-    "topic": "Authenticating to Azure OpenAI from a webapp end-to-end",
+    "topic": "Azure AI Services",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7608,7 +7645,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Authenticating to Azure OpenAI from a webapp end-to-end"
   },
   {
     "id": "p4-aiauth-002",
@@ -7617,7 +7655,7 @@
       "rag",
       "safety"
     ],
-    "topic": "End-user identity in an LLM app: security trimming",
+    "topic": "Azure AI Services",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -7656,7 +7694,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "End-user identity in an LLM app: security trimming"
   },
   {
     "id": "p4-aiauth-003",
@@ -7665,7 +7704,7 @@
       "agent-frameworks",
       "safety"
     ],
-    "topic": "Agent tool auth: delegated vs application permissions",
+    "topic": "AI Agents",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -7709,7 +7748,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Agent tool auth: delegated vs application permissions"
   },
   {
     "id": "p4-aiauth-004",
@@ -7718,7 +7758,7 @@
       "agent-frameworks",
       "safety"
     ],
-    "topic": "Securing an MCP server",
+    "topic": "AI Agents",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -7757,7 +7797,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Securing an MCP server"
   },
   {
     "id": "p4-aiauth-005",
@@ -7766,7 +7807,7 @@
       "rag",
       "safety"
     ],
-    "topic": "Per-tenant isolation in a multi-tenant AI app",
+    "topic": "Azure AI Services",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -7805,7 +7846,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 11
+    "estimatedTimeMin": 11,
+    "subTopic": "Per-tenant isolation in a multi-tenant AI app"
   },
   {
     "id": "p3-saf-006",
@@ -7813,7 +7855,7 @@
       "safety",
       "system-design"
     ],
-    "topic": "Top JWT and API auth pitfalls",
+    "topic": "Safety & Responsible AI",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -7856,7 +7898,8 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Top JWT and API auth pitfalls"
   },
   {
     "id": "lead-em-001",
@@ -7864,7 +7907,7 @@
       "leadership",
       "behavioral"
     ],
-    "topic": "IC → Manager transition",
+    "topic": "Engineering Leadership",
     "difficulty": "medium",
     "experienceBands": [
       "senior",
@@ -7905,14 +7948,15 @@
       "pattern-faang",
       "career-transition"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "IC → Manager transition"
   },
   {
     "id": "lead-em-002",
     "categoryIds": [
       "leadership"
     ],
-    "topic": "People management",
+    "topic": "Engineering Leadership",
     "subTopic": "Performance management",
     "difficulty": "hard",
     "experienceBands": [
@@ -7958,7 +8002,7 @@
     "categoryIds": [
       "leadership"
     ],
-    "topic": "Hiring",
+    "topic": "Engineering Leadership",
     "subTopic": "Bar-raising",
     "difficulty": "medium",
     "experienceBands": [
@@ -8006,7 +8050,7 @@
     "categoryIds": [
       "leadership"
     ],
-    "topic": "Conflict resolution",
+    "topic": "Engineering Leadership",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -8043,14 +8087,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Conflict resolution"
   },
   {
     "id": "lead-em-005",
     "categoryIds": [
       "leadership"
     ],
-    "topic": "Prioritization",
+    "topic": "Engineering Leadership",
     "subTopic": "Tech debt",
     "difficulty": "medium",
     "experienceBands": [
@@ -8099,7 +8144,7 @@
     "categoryIds": [
       "leadership"
     ],
-    "topic": "Org design",
+    "topic": "Engineering Leadership",
     "difficulty": "hard",
     "experienceBands": [
       "lead"
@@ -8140,14 +8185,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "Org design"
   },
   {
     "id": "lead-em-007",
     "categoryIds": [
       "leadership"
     ],
-    "topic": "Cross-functional partnership",
+    "topic": "Engineering Leadership",
     "subTopic": "Meta XFN round",
     "difficulty": "medium",
     "experienceBands": [
@@ -8194,7 +8240,7 @@
       "leadership",
       "behavioral"
     ],
-    "topic": "Delivery under pressure",
+    "topic": "Engineering Leadership",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -8232,14 +8278,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "Delivery under pressure"
   },
   {
     "id": "lead-em-009",
     "categoryIds": [
       "leadership"
     ],
-    "topic": "1-on-1s",
+    "topic": "Engineering Leadership",
     "difficulty": "easy",
     "experienceBands": [
       "mid",
@@ -8276,7 +8323,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "1-on-1s"
   },
   {
     "id": "lead-em-010",
@@ -8284,7 +8332,7 @@
       "leadership",
       "behavioral"
     ],
-    "topic": "Hiring under bias",
+    "topic": "Engineering Leadership",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -8320,14 +8368,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Hiring under bias"
   },
   {
     "id": "staff-001",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "Scope of impact",
+    "topic": "Staff+ Signal",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -8366,14 +8415,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 20
+    "estimatedTimeMin": 20,
+    "subTopic": "Scope of impact"
   },
   {
     "id": "staff-002",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "Influence without authority",
+    "topic": "Staff+ Signal",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -8415,14 +8465,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "Influence without authority"
   },
   {
     "id": "staff-003",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "Technical strategy",
+    "topic": "Staff+ Signal",
     "difficulty": "expert",
     "experienceBands": [
       "lead"
@@ -8464,14 +8515,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 18
+    "estimatedTimeMin": 18,
+    "subTopic": "Technical strategy"
   },
   {
     "id": "staff-004",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "RFC / ADR culture",
+    "topic": "Staff+ Signal",
     "difficulty": "medium",
     "experienceBands": [
       "senior",
@@ -8508,7 +8560,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "RFC / ADR culture"
   },
   {
     "id": "staff-005",
@@ -8516,7 +8569,7 @@
       "staff-plus",
       "system-design"
     ],
-    "topic": "AI architecture review",
+    "topic": "Staff+ Signal",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -8560,14 +8613,15 @@
       "pattern-faang",
       "pattern-genai-lab"
     ],
-    "estimatedTimeMin": 25
+    "estimatedTimeMin": 25,
+    "subTopic": "AI architecture review"
   },
   {
     "id": "staff-006",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "Mentorship / multiplier effect",
+    "topic": "Staff+ Signal",
     "difficulty": "medium",
     "experienceBands": [
       "senior",
@@ -8604,14 +8658,15 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Mentorship / multiplier effect"
   },
   {
     "id": "staff-007",
     "categoryIds": [
       "staff-plus"
     ],
-    "topic": "Onboarding into Staff role",
+    "topic": "Staff+ Signal",
     "difficulty": "medium",
     "experienceBands": [
       "lead"
@@ -8650,7 +8705,8 @@
       "region-global",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Onboarding into Staff role"
   },
   {
     "id": "staff-008",
@@ -8658,7 +8714,7 @@
       "staff-plus",
       "leadership"
     ],
-    "topic": "AI org strategy",
+    "topic": "Staff+ Signal",
     "difficulty": "expert",
     "experienceBands": [
       "lead"
@@ -8697,7 +8753,8 @@
       "pattern-genai-lab",
       "region-global"
     ],
-    "estimatedTimeMin": 20
+    "estimatedTimeMin": 20,
+    "subTopic": "AI org strategy"
   },
   {
     "id": "staff-009",
@@ -8705,7 +8762,7 @@
       "staff-plus",
       "safety"
     ],
-    "topic": "LLM cost governance",
+    "topic": "Staff+ Signal",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -8745,7 +8802,8 @@
       "pattern-genai-lab",
       "region-global"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "LLM cost governance"
   },
   {
     "id": "staff-010",
@@ -8753,7 +8811,7 @@
       "staff-plus",
       "safety"
     ],
-    "topic": "Model governance",
+    "topic": "Staff+ Signal",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -8802,14 +8860,15 @@
       "pattern-bank-fintech",
       "region-global"
     ],
-    "estimatedTimeMin": 20
+    "estimatedTimeMin": 20,
+    "subTopic": "Model governance"
   },
   {
     "id": "behav-001",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Ownership",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -8847,14 +8906,15 @@
       "role-staff-ic",
       "role-eng-manager"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "Ownership"
   },
   {
     "id": "behav-002",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Failure",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -8892,14 +8952,15 @@
       "role-staff-ic",
       "role-eng-manager"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Failure"
   },
   {
     "id": "behav-003",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Disagreement",
+    "topic": "Behavioral & STAR",
     "subTopic": "Disagree and commit",
     "difficulty": "hard",
     "experienceBands": [
@@ -8944,7 +9005,7 @@
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Ambiguity",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "senior",
@@ -8980,14 +9041,15 @@
       "pattern-faang",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Ambiguity"
   },
   {
     "id": "behav-005",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Working backwards",
+    "topic": "Behavioral & STAR",
     "subTopic": "Amazon PRFAQ",
     "difficulty": "hard",
     "experienceBands": [
@@ -9034,7 +9096,7 @@
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Cross-functional",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -9072,7 +9134,8 @@
       "role-staff-ic",
       "role-eng-manager"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Cross-functional"
   },
   {
     "id": "behav-007",
@@ -9080,7 +9143,7 @@
       "behavioral",
       "safety"
     ],
-    "topic": "AI ethics judgment",
+    "topic": "Behavioral & STAR",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9119,14 +9182,15 @@
       "role-staff-ic",
       "role-eng-manager"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "AI ethics judgment"
   },
   {
     "id": "behav-008",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Sunset",
+    "topic": "Behavioral & STAR",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9164,7 +9228,8 @@
       "role-architect",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Sunset"
   },
   {
     "id": "region-in-001",
@@ -9172,7 +9237,7 @@
       "azure-platform",
       "safety"
     ],
-    "topic": "RBI cloud adoption framework",
+    "topic": "Azure Platform",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9214,7 +9279,8 @@
       "pattern-services-firm",
       "role-architect"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "RBI cloud adoption framework"
   },
   {
     "id": "region-in-002",
@@ -9222,7 +9288,7 @@
       "safety",
       "rag"
     ],
-    "topic": "DPDP Act 2023",
+    "topic": "Safety & Responsible AI",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9261,14 +9327,15 @@
       "pattern-bigtech-india",
       "role-architect"
     ],
-    "estimatedTimeMin": 18
+    "estimatedTimeMin": 18,
+    "subTopic": "DPDP Act 2023"
   },
   {
     "id": "region-in-003",
     "categoryIds": [
       "system-design"
     ],
-    "topic": "UPI architecture",
+    "topic": "AI System Design",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -9313,7 +9380,8 @@
       "role-architect",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 25
+    "estimatedTimeMin": 25,
+    "subTopic": "UPI architecture"
   },
   {
     "id": "region-in-004",
@@ -9321,7 +9389,7 @@
       "rag",
       "llm-fundamentals"
     ],
-    "topic": "Indic NLP",
+    "topic": "RAG",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9364,14 +9432,15 @@
       "pattern-product-startup",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "Indic NLP"
   },
   {
     "id": "region-in-005",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Services → product transition",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -9410,7 +9479,8 @@
       "pattern-bigtech-india",
       "career-transition"
     ],
-    "estimatedTimeMin": 7
+    "estimatedTimeMin": 7,
+    "subTopic": "Services → product transition"
   },
   {
     "id": "region-sg-001",
@@ -9418,7 +9488,7 @@
       "safety",
       "rag"
     ],
-    "topic": "MAS FEAT principles",
+    "topic": "Safety & Responsible AI",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9461,7 +9531,8 @@
       "role-staff-ic",
       "role-architect"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "MAS FEAT principles"
   },
   {
     "id": "region-sg-002",
@@ -9469,7 +9540,7 @@
       "agents",
       "system-design"
     ],
-    "topic": "Multi-agent LLM in production",
+    "topic": "AI Agents",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9513,14 +9584,15 @@
       "role-architect",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 25
+    "estimatedTimeMin": 25,
+    "subTopic": "Multi-agent LLM in production"
   },
   {
     "id": "region-sg-003",
     "categoryIds": [
       "safety"
     ],
-    "topic": "PDPA + AI Verify",
+    "topic": "Safety & Responsible AI",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9563,7 +9635,8 @@
       "role-staff-ic",
       "role-architect"
     ],
-    "estimatedTimeMin": 18
+    "estimatedTimeMin": 18,
+    "subTopic": "PDPA + AI Verify"
   },
   {
     "id": "region-uae-001",
@@ -9571,7 +9644,7 @@
       "rag",
       "system-design"
     ],
-    "topic": "Sovereign cloud RAG",
+    "topic": "RAG",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9615,14 +9688,15 @@
       "role-architect",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 22
+    "estimatedTimeMin": 22,
+    "subTopic": "Sovereign cloud RAG"
   },
   {
     "id": "region-uae-002",
     "categoryIds": [
       "llm-fundamentals"
     ],
-    "topic": "Arabic LLM landscape",
+    "topic": "LLM Engineering",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9668,14 +9742,15 @@
       "pattern-gov-public-sector",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Arabic LLM landscape"
   },
   {
     "id": "region-uae-003",
     "categoryIds": [
       "behavioral"
     ],
-    "topic": "Multicultural team dynamics",
+    "topic": "Behavioral & STAR",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -9714,7 +9789,8 @@
       "role-staff-ic",
       "pattern-faang"
     ],
-    "estimatedTimeMin": 6
+    "estimatedTimeMin": 6,
+    "subTopic": "Multicultural team dynamics"
   },
   {
     "id": "expert-rag-001",
@@ -9722,7 +9798,7 @@
       "rag",
       "evaluation"
     ],
-    "topic": "Production RAG hardening",
+    "topic": "RAG",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9761,7 +9837,8 @@
       "pattern-genai-lab",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 20
+    "estimatedTimeMin": 20,
+    "subTopic": "Production RAG hardening"
   },
   {
     "id": "expert-agents-001",
@@ -9769,7 +9846,7 @@
       "agents",
       "system-design"
     ],
-    "topic": "Agent reliability at scale",
+    "topic": "AI Agents",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9809,7 +9886,8 @@
       "role-staff-ic",
       "role-architect"
     ],
-    "estimatedTimeMin": 22
+    "estimatedTimeMin": 22,
+    "subTopic": "Agent reliability at scale"
   },
   {
     "id": "expert-sysd-001",
@@ -9817,7 +9895,7 @@
       "system-design",
       "azure-platform"
     ],
-    "topic": "Active-active multi-region",
+    "topic": "AI System Design",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9863,7 +9941,8 @@
       "role-architect",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 25
+    "estimatedTimeMin": 25,
+    "subTopic": "Active-active multi-region"
   },
   {
     "id": "expert-saf-001",
@@ -9871,7 +9950,7 @@
       "safety",
       "agents"
     ],
-    "topic": "Prompt injection at scale",
+    "topic": "Safety & Responsible AI",
     "difficulty": "expert",
     "experienceBands": [
       "senior",
@@ -9915,7 +9994,8 @@
       "role-staff-ic",
       "role-architect"
     ],
-    "estimatedTimeMin": 22
+    "estimatedTimeMin": 22,
+    "subTopic": "Prompt injection at scale"
   },
   {
     "id": "debug-llm-001",
@@ -9923,7 +10003,7 @@
       "mlops",
       "evaluation"
     ],
-    "topic": "Hallucination spike",
+    "topic": "MLOps & LLMOps",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -9963,7 +10043,8 @@
       "role-tech-lead",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "Hallucination spike"
   },
   {
     "id": "debug-cost-001",
@@ -9971,7 +10052,7 @@
       "mlops",
       "safety"
     ],
-    "topic": "LLM cost spike",
+    "topic": "MLOps & LLMOps",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -10011,7 +10092,8 @@
       "role-tech-lead",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "LLM cost spike"
   },
   {
     "id": "debug-prod-001",
@@ -10019,7 +10101,7 @@
       "azure-platform",
       "system-design"
     ],
-    "topic": "p99 latency spike",
+    "topic": "Azure Platform",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -10063,7 +10145,8 @@
       "pattern-faang",
       "role-tech-lead"
     ],
-    "estimatedTimeMin": 15
+    "estimatedTimeMin": 15,
+    "subTopic": "p99 latency spike"
   },
   {
     "id": "debug-vec-001",
@@ -10071,7 +10154,7 @@
       "vector-search",
       "rag"
     ],
-    "topic": "Vector search recall regression",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -10114,7 +10197,8 @@
       "pattern-genai-lab",
       "role-tech-lead"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "Vector search recall regression"
   },
   {
     "id": "gcp-vertex-grounding-001",
@@ -10122,7 +10206,7 @@
       "rag",
       "agents"
     ],
-    "topic": "Vertex AI Grounding",
+    "topic": "RAG",
     "subTopic": "Gemini + Vertex AI Search / Google Search",
     "difficulty": "medium",
     "experienceBands": [
@@ -10176,7 +10260,7 @@
       "llm-fundamentals",
       "mlops"
     ],
-    "topic": "Gemini context caching",
+    "topic": "LLM Engineering",
     "subTopic": "Token economics",
     "difficulty": "medium",
     "experienceBands": [
@@ -10229,7 +10313,7 @@
       "vector-search",
       "system-design"
     ],
-    "topic": "AlloyDB pgvector",
+    "topic": "Vector Search & Embeddings",
     "subTopic": "Production RAG on GCP",
     "difficulty": "hard",
     "experienceBands": [
@@ -10284,7 +10368,7 @@
       "agent-frameworks",
       "agents"
     ],
-    "topic": "Google ADK",
+    "topic": "Agent Frameworks",
     "subTopic": "Agent Development Kit",
     "difficulty": "medium",
     "experienceBands": [
@@ -10338,7 +10422,7 @@
       "agents",
       "system-design"
     ],
-    "topic": "Multi-agent supervision",
+    "topic": "AI Agents",
     "subTopic": "Hierarchical delegation",
     "difficulty": "hard",
     "experienceBands": [
@@ -10393,7 +10477,7 @@
       "agent-frameworks",
       "agents"
     ],
-    "topic": "CrewAI",
+    "topic": "Agent Frameworks",
     "subTopic": "Roles, tasks, crews",
     "difficulty": "medium",
     "experienceBands": [
@@ -10446,7 +10530,7 @@
       "agents",
       "system-design"
     ],
-    "topic": "MCP server design",
+    "topic": "AI Agents",
     "subTopic": "Model Context Protocol",
     "difficulty": "hard",
     "experienceBands": [
@@ -10501,7 +10585,7 @@
       "safety",
       "agents"
     ],
-    "topic": "MCP server auth",
+    "topic": "Safety & Responsible AI",
     "subTopic": "OAuth + tenant isolation",
     "difficulty": "hard",
     "experienceBands": [
@@ -10555,7 +10639,7 @@
       "mlops",
       "llm-fundamentals"
     ],
-    "topic": "LLM throughput",
+    "topic": "MLOps & LLMOps",
     "subTopic": "Tokens per second",
     "difficulty": "medium",
     "experienceBands": [
@@ -10607,7 +10691,7 @@
     "categoryIds": [
       "mlops"
     ],
-    "topic": "Cost per request",
+    "topic": "MLOps & LLMOps",
     "subTopic": "LLM unit economics",
     "difficulty": "medium",
     "experienceBands": [
@@ -10662,7 +10746,7 @@
       "behavioral",
       "leadership"
     ],
-    "topic": "FDE discovery",
+    "topic": "Behavioral & STAR",
     "subTopic": "Technical scoping with stakeholders",
     "difficulty": "hard",
     "experienceBands": [
@@ -10716,7 +10800,7 @@
       "behavioral",
       "staff-plus"
     ],
-    "topic": "Field-to-product feedback",
+    "topic": "Behavioral & STAR",
     "subTopic": "Influence without authority",
     "difficulty": "hard",
     "experienceBands": [
@@ -10771,7 +10855,7 @@
       "system-design",
       "migration"
     ],
-    "topic": "Legacy data silo integration",
+    "topic": "AI System Design",
     "subTopic": "Mainframe / on-prem to agent",
     "difficulty": "hard",
     "experienceBands": [
@@ -10830,7 +10914,7 @@
     "categoryIds": [
       "foundations"
     ],
-    "topic": "PyTorch",
+    "topic": "ML Foundations",
     "subTopic": "Training loop + autograd + DDP",
     "difficulty": "hard",
     "experienceBands": [
@@ -10883,7 +10967,7 @@
     "categoryIds": [
       "foundations"
     ],
-    "topic": "Classical ML",
+    "topic": "ML Foundations",
     "subTopic": "XGBoost / LightGBM",
     "difficulty": "medium",
     "experienceBands": [
@@ -10937,7 +11021,7 @@
       "foundations",
       "mlops"
     ],
-    "topic": "PyTorch vs TensorFlow",
+    "topic": "ML Foundations",
     "subTopic": "Production trade-offs",
     "difficulty": "medium",
     "experienceBands": [
@@ -10990,7 +11074,7 @@
       "vector-search",
       "system-design"
     ],
-    "topic": "Vector DB selection",
+    "topic": "Vector Search & Embeddings",
     "subTopic": "Pinecone vs Weaviate vs Milvus vs FAISS",
     "difficulty": "hard",
     "experienceBands": [
@@ -11049,7 +11133,7 @@
       "llm-fundamentals",
       "mlops"
     ],
-    "topic": "Fine-tuning",
+    "topic": "LLM Engineering",
     "subTopic": "LoRA / PEFT vs RAG vs prompting",
     "difficulty": "hard",
     "experienceBands": [
@@ -11103,7 +11187,7 @@
       "evaluation",
       "mlops"
     ],
-    "topic": "RAGAS evaluation",
+    "topic": "LLM Evaluation",
     "subTopic": "RAG eval in CI",
     "difficulty": "medium",
     "experienceBands": [
@@ -11156,7 +11240,7 @@
     "categoryIds": [
       "mlops"
     ],
-    "topic": "MLflow",
+    "topic": "MLOps & LLMOps",
     "subTopic": "Experiment tracking + model registry",
     "difficulty": "medium",
     "experienceBands": [
@@ -11209,7 +11293,7 @@
     "categoryIds": [
       "mlops"
     ],
-    "topic": "ML orchestration",
+    "topic": "MLOps & LLMOps",
     "subTopic": "Airflow vs Dagster vs Prefect",
     "difficulty": "medium",
     "experienceBands": [
@@ -11268,7 +11352,7 @@
       "mlops",
       "system-design"
     ],
-    "topic": "Drift monitoring",
+    "topic": "MLOps & LLMOps",
     "subTopic": "Evidently / Arize + retrain trigger",
     "difficulty": "hard",
     "experienceBands": [
@@ -11325,7 +11409,7 @@
       "mlops",
       "system-design"
     ],
-    "topic": "Feature store",
+    "topic": "MLOps & LLMOps",
     "subTopic": "Online + offline parity",
     "difficulty": "hard",
     "experienceBands": [
@@ -11381,7 +11465,7 @@
       "azure-ai",
       "mlops"
     ],
-    "topic": "Azure ML lifecycle",
+    "topic": "Azure AI Services",
     "subTopic": "Train → register → deploy → monitor",
     "difficulty": "hard",
     "experienceBands": [
@@ -11440,7 +11524,7 @@
       "mlops",
       "system-design"
     ],
-    "topic": "PySpark + Delta Lake",
+    "topic": "MLOps & LLMOps",
     "subTopic": "ML feature pipelines at scale",
     "difficulty": "hard",
     "experienceBands": [
@@ -11495,7 +11579,7 @@
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Structured output",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -11503,12 +11587,12 @@
     ],
     "type": "coding",
     "prompt": "You need an LLM to return strict JSON that downstream code can parse. Compare the approaches and show a robust implementation.",
-    "answer": "Force structure at the API boundary rather than trusting the prompt. The three levers, strongest first: **constrained decoding** (provider-enforced JSON schema / grammar — the model literally cannot emit invalid tokens), **function/tool calling** (the model fills a typed argument object), and **prompt-plus-parse** (ask for JSON, then validate and retry). Use the strongest the provider supports; keep parse-and-retry as a backstop.\n\n## Strong answer\nSchema-enforced output (OpenAI `response_format` with `json_schema`, or Azure OpenAI structured outputs) is the most reliable because validity is guaranteed by the decoder, not by the model's goodwill. Tool calling is nearly as good and composes with multi-tool agents. Plain prompting (\"respond only with JSON\") is the weakest — it breaks on markdown fences, prose preambles, and trailing commas — so always wrap it with a validator and a single bounded retry.\n\n## Example\n```python\nfrom pydantic import BaseModel\nfrom openai import OpenAI\n\nclass Ticket(BaseModel):\n    priority: str\n    summary: str\n\nclient = OpenAI()\nresp = client.chat.completions.parse(\n    model=\"gpt-4o-2024-08-06\",\n    messages=[{\"role\": \"user\", \"content\": text}],\n    response_format=Ticket,  # schema-enforced decoding\n)\nticket = resp.choices[0].message.parsed  # already a validated Ticket\n```\n\n## Trade-offs\n- Constrained decoding can hurt answer quality on reasoning-heavy tasks (the grammar fights the model).\n- Tool calling adds a round-trip and provider lock-in.\n- Prompt-and-parse is portable but needs retries, which cost latency and tokens.\n\n## When to use / avoid\n- Use schema enforcement when a machine consumes the output.\n- Avoid hard schemas when you also want free-form reasoning — split into two calls.\n\n## Interview signal\nNames decoder-level enforcement over prompt wording, and keeps a validate-and-retry fallback.",
+    "answer": "Prefer schema-enforced output when software consumes the result, but distinguish schema adherence from a successful, factually correct response. Refusals, truncation, transport failures and invalid business values still need handling.\n\n## Strong answer\nJSON mode targets valid JSON, not your schema. Structured Outputs constrain supported schemas; strict tool schemas serve tool arguments rather than ordinary answer formatting. Neither mechanism establishes truth or authorizes an action. Validate business rules separately.\n\nUse a supported model and SDK version, bound request time and retries, and classify failures. Retry transient transport errors within a budget; do not blindly retry safety refusals or execute partial tool arguments. SDK parsing may raise on incomplete output before a response object is returned.\n\n## Example\nPython OpenAI SDK Responses API; the caller supplies a configured client and a compatible model, and handles API/parser exceptions.\n\n```python\nfrom typing import Literal\nfrom openai import OpenAI\nfrom pydantic import BaseModel\n\nclass Ticket(BaseModel):\n    priority: Literal[\"low\", \"normal\", \"urgent\"]\n    summary: str\n\ndef extract_ticket(text: str, client: OpenAI, model: str) -> Ticket:\n    response = client.responses.parse(\n        model=model, input=text, text_format=Ticket\n    )\n    if response.status != \"completed\":\n        raise ValueError(\"Incomplete response\")\n    for output in response.output:\n        if output.type == \"message\":\n            if any(part.type == \"refusal\" for part in output.content):\n                raise ValueError(\"Model refused the request\")\n    if response.output_parsed is None:\n        raise ValueError(\"Missing structured output\")\n    return response.output_parsed\n```\n\n## Trade-offs\n- Schema support varies by provider, model and API version.\n- Retries consume time and tokens; schema-valid output can still be semantically wrong.\n\n## When to use / avoid\nUse typed output for extraction and machine-readable answers. Avoid treating successful parsing as sufficient evidence for a consequential action.\n\n## Interview signal\nTests success, refusal, incomplete response and business-rule failure separately.",
     "keyPoints": [
       "Enforce structure at the API boundary, not via prompt wording",
-      "Constrained decoding > tool calling > prompt-and-parse",
+      "Distinguishes JSON mode, structured answers and strict tool arguments",
       "Always validate (Pydantic/Zod) and bound retries",
-      "Schema enforcement can degrade reasoning quality"
+      "Handles refusals, incomplete output and semantic validation separately"
     ],
     "followUps": [
       "How do you handle a field the model keeps hallucinating?",
@@ -11518,12 +11602,12 @@
     "redFlags": [
       "Relies only on 'respond with JSON' in the prompt",
       "No validation or retry path",
-      "Unaware that constrained decoding can hurt quality"
+      "Treats schema-valid output as factually correct or authorized"
     ],
     "references": [
       {
         "title": "OpenAI — Structured Outputs",
-        "url": "https://platform.openai.com/docs/guides/structured-outputs"
+        "url": "https://developers.openai.com/api/docs/guides/structured-outputs"
       },
       {
         "title": "Azure OpenAI — Structured outputs",
@@ -11537,7 +11621,8 @@
       "json",
       "function-calling"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Structured output"
   },
   {
     "id": "pe-injection-defense-009",
@@ -11545,7 +11630,7 @@
       "prompt-engineering",
       "safety"
     ],
-    "topic": "Prompt injection",
+    "topic": "Prompt Engineering",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -11584,14 +11669,15 @@
       "prompt-injection",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "Prompt injection"
   },
   {
     "id": "pe-fewshot-selection-010",
     "categoryIds": [
       "prompt-engineering"
     ],
-    "topic": "Few-shot prompting",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -11628,7 +11714,8 @@
       "few-shot",
       "in-context-learning"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Few-shot prompting"
   },
   {
     "id": "pe-prompt-versioning-011",
@@ -11636,7 +11723,7 @@
       "prompt-engineering",
       "mlops"
     ],
-    "topic": "Prompt lifecycle",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -11675,7 +11762,8 @@
       "llmops",
       "role-tech-lead"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Prompt lifecycle"
   },
   {
     "id": "pe-cot-tradeoffs-012",
@@ -11683,7 +11771,7 @@
       "prompt-engineering",
       "llm-fundamentals"
     ],
-    "topic": "Chain-of-thought",
+    "topic": "Prompt Engineering",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -11720,14 +11808,15 @@
       "chain-of-thought",
       "reasoning"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Chain-of-thought"
   },
   {
     "id": "eval-llm-judge-bias-010",
     "categoryIds": [
       "evaluation"
     ],
-    "topic": "LLM-as-judge",
+    "topic": "LLM Evaluation",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -11766,7 +11855,8 @@
       "llm-as-judge",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 14
+    "estimatedTimeMin": 14,
+    "subTopic": "LLM-as-judge"
   },
   {
     "id": "eval-rag-faithfulness-011",
@@ -11774,7 +11864,7 @@
       "evaluation",
       "rag"
     ],
-    "topic": "RAG metrics",
+    "topic": "LLM Evaluation",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -11812,7 +11902,8 @@
       "ragas",
       "faithfulness"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "RAG metrics"
   },
   {
     "id": "eval-offline-online-012",
@@ -11820,7 +11911,7 @@
       "evaluation",
       "mlops"
     ],
-    "topic": "Eval pipeline",
+    "topic": "LLM Evaluation",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -11858,7 +11949,8 @@
       "llmops",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 20
+    "estimatedTimeMin": 20,
+    "subTopic": "Eval pipeline"
   },
   {
     "id": "eval-agent-trajectory-013",
@@ -11866,7 +11958,7 @@
       "evaluation",
       "agents"
     ],
-    "topic": "Agent evaluation",
+    "topic": "LLM Evaluation",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -11903,14 +11995,15 @@
       "agent-eval",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 14
+    "estimatedTimeMin": 14,
+    "subTopic": "Agent evaluation"
   },
   {
     "id": "vs-hnsw-tuning-011",
     "categoryIds": [
       "vector-search"
     ],
-    "topic": "HNSW tuning",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -11948,7 +12041,8 @@
       "hnsw",
       "ann"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "HNSW tuning"
   },
   {
     "id": "vs-hybrid-fusion-012",
@@ -11956,7 +12050,7 @@
       "vector-search",
       "rag"
     ],
-    "topic": "Hybrid search",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -11994,14 +12088,15 @@
       "bm25",
       "hybrid-search"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Hybrid search"
   },
   {
     "id": "vs-quantization-013",
     "categoryIds": [
       "vector-search"
     ],
-    "topic": "Vector quantization",
+    "topic": "Vector Search & Embeddings",
     "difficulty": "hard",
     "experienceBands": [
       "senior",
@@ -12038,7 +12133,8 @@
       "quantization",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Vector quantization"
   },
   {
     "id": "af-mcp-overview-012",
@@ -12046,7 +12142,7 @@
       "agent-frameworks",
       "agents"
     ],
-    "topic": "Model Context Protocol",
+    "topic": "Agent Frameworks",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -12085,7 +12181,8 @@
       "mcp",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 9
+    "estimatedTimeMin": 9,
+    "subTopic": "Model Context Protocol"
   },
   {
     "id": "af-langgraph-state-013",
@@ -12093,7 +12190,7 @@
       "agent-frameworks",
       "agents"
     ],
-    "topic": "LangGraph",
+    "topic": "Agent Frameworks",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -12131,14 +12228,15 @@
       "state-machine",
       "role-tech-lead"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "LangGraph"
   },
   {
     "id": "af-framework-choice-014",
     "categoryIds": [
       "agent-frameworks"
     ],
-    "topic": "Framework selection",
+    "topic": "Agent Frameworks",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -12177,7 +12275,8 @@
       "framework-selection",
       "role-architect"
     ],
-    "estimatedTimeMin": 12
+    "estimatedTimeMin": 12,
+    "subTopic": "Framework selection"
   },
   {
     "id": "found-finetune-vs-rag-011",
@@ -12185,7 +12284,7 @@
       "foundations",
       "rag"
     ],
-    "topic": "Fine-tune vs RAG",
+    "topic": "ML Foundations",
     "difficulty": "medium",
     "experienceBands": [
       "mid",
@@ -12224,7 +12323,8 @@
       "fine-tuning",
       "rag"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Fine-tune vs RAG"
   },
   {
     "id": "found-eval-leakage-012",
@@ -12232,7 +12332,7 @@
       "foundations",
       "evaluation"
     ],
-    "topic": "Data leakage",
+    "topic": "ML Foundations",
     "difficulty": "medium",
     "experienceBands": [
       "junior",
@@ -12270,14 +12370,15 @@
       "data-leakage",
       "evaluation"
     ],
-    "estimatedTimeMin": 8
+    "estimatedTimeMin": 8,
+    "subTopic": "Data leakage"
   },
   {
     "id": "found-lora-qlora-013",
     "categoryIds": [
       "foundations"
     ],
-    "topic": "Parameter-efficient fine-tuning",
+    "topic": "ML Foundations",
     "difficulty": "hard",
     "experienceBands": [
       "mid",
@@ -12320,14 +12421,15 @@
       "peft",
       "role-staff-ic"
     ],
-    "estimatedTimeMin": 10
+    "estimatedTimeMin": 10,
+    "subTopic": "Parameter-efficient fine-tuning"
   },
   {
     "id": "dotnet-async-deadlock-027",
     "categoryIds": [
       "dotnet"
     ],
-    "topic": "Async/await",
+    "topic": "C# Language",
     "subTopic": "Deadlocks",
     "difficulty": "hard",
     "experienceBands": [
@@ -12335,10 +12437,10 @@
       "senior"
     ],
     "type": "debugging",
-    "prompt": "An ASP.NET endpoint hangs intermittently. The code calls `SomeAsync().Result`. Diagnose and fix the deadlock.",
-    "answer": "Blocking on an async call with `.Result` (or `.Wait()`) deadlocks when the awaited continuation needs the same synchronization context the blocked thread is holding. The thread waits for the task; the task's continuation waits for the thread; neither proceeds.\n\n## Strong answer\nThe classic deadlock appears in code with a synchronization context that marshals continuations back to a specific thread (legacy ASP.NET, WPF/WinForms UI). `await` captures that context by default; when the top-level caller blocks on `.Result`, the captured continuation can never run because its thread is blocked. Modern ASP.NET Core has no synchronization context, so the deadlock often disappears there — but the pattern is still wrong and can deadlock via thread-pool starvation under load. The real fix is async all the way down: never block on async code. As a library-side mitigation, `ConfigureAwait(false)` stops the continuation from capturing the context, avoiding that specific deadlock.\n\n## Example\n```csharp\n// Deadlock-prone (blocks on async):\nvar data = SomeAsync().Result;\n\n// Fix: async all the way down\npublic async Task<IActionResult> Get() {\n    var data = await SomeAsync();   // no blocking\n    return Ok(data);\n}\n\n// Library mitigation: don't capture context\nawait SomeAsync().ConfigureAwait(false);\n```\n\n## Trade-offs\n- Going async-all-the-way can ripple through many signatures.\n- `ConfigureAwait(false)` helps libraries but doesn't fix calling code that still blocks.\n- Sync-over-async sometimes can't be fully removed at boundaries (e.g. constructors).\n\n## When to use / avoid\n- Never block on async in request paths; use `ConfigureAwait(false)` in library code.\n\n## Interview signal\nIdentifies synchronization-context capture as the cause and 'async all the way' as the fix.",
+    "prompt": "An ASP.NET endpoint stalls intermittently and calls `SomeAsync().Result`. How would you distinguish a synchronization-context deadlock from thread-pool starvation, and fix the cause?",
+    "answer": "First identify the host and measure the stall. Sync-over-async can cause a synchronization-context deadlock in older ASP.NET or UI applications; in ASP.NET Core, blocking request threads commonly causes thread-pool starvation under load. These are different mechanisms.\n\n## Strong answer\nA context deadlock occurs when the blocked caller prevents an awaited continuation from re-entering its captured context. ASP.NET Core has no custom synchronization context by default, so that explanation is not sufficient there.\n\nFor starvation, compare request latency, queued work, thread-pool growth and CPU utilization. Inspect stacks or a trace for many workers blocked in Task.Result or Wait. Separate this from lock contention or a slow dependency. Starvation is insufficient available workers, not necessarily a circular wait.\n\nMake the request path asynchronous end to end, propagate cancellation and bound concurrency. ConfigureAwait(false) can avoid context capture in context-independent library code; it does not unblock a caller or fix starvation. Task.Run merely moves blocking work onto the same pool.\n\n## Example\nInside an existing controller with an asynchronous dependency:\n\n```csharp\npublic async Task<IActionResult> Get(CancellationToken cancellationToken)\n{\n    var data = await service.LoadAsync(cancellationToken);\n    return Ok(data);\n}\n```\n\n## Trade-offs\nChanging signatures may span several layers. More worker threads can temporarily hide symptoms while increasing resource use; removing unnecessary blocking addresses the cause.\n\n## When to use / avoid\nUse genuinely asynchronous I/O on request paths. Avoid Result, Wait and blocking initialization; use explicit asynchronous initialization where needed.\n\n## Interview signal\nExplains the host-specific mechanism and verifies improved latency and queueing under representative load.",
     "keyPoints": [
-      "Cause: blocking on async + captured synchronization context",
+      "Distinguishes context deadlock from thread-pool starvation using host and trace evidence",
       "Fix: async all the way down, never .Result/.Wait()",
       "ConfigureAwait(false) avoids context capture in libraries",
       "ASP.NET Core lacks the context but can starve the thread pool"
@@ -12346,7 +12448,7 @@
     "followUps": [
       "Why does this often not repro on ASP.NET Core?",
       "How does thread-pool starvation cause a similar hang?",
-      "Where can't you avoid sync-over-async?"
+      "How would you redesign initialization that currently blocks in a constructor?"
     ],
     "redFlags": [
       "Adds Task.Run to 'fix' it",
@@ -12355,8 +12457,8 @@
     ],
     "references": [
       {
-        "title": "Microsoft — Async guidance (don't block)",
-        "url": "https://learn.microsoft.com/dotnet/csharp/asynchronous-programming/"
+        "title": "Microsoft — Debug ThreadPool starvation",
+        "url": "https://learn.microsoft.com/dotnet/core/diagnostics/debug-threadpool-starvation"
       }
     ],
     "tags": [
@@ -12373,7 +12475,7 @@
     "categoryIds": [
       "dotnet"
     ],
-    "topic": "LINQ",
+    "topic": "C# Language",
     "subTopic": "Deferred execution",
     "difficulty": "medium",
     "experienceBands": [
@@ -12419,7 +12521,7 @@
     "categoryIds": [
       "java"
     ],
-    "topic": "Concurrency",
+    "topic": "Java Language",
     "subTopic": "CompletableFuture",
     "difficulty": "hard",
     "experienceBands": [
@@ -12465,7 +12567,7 @@
     "categoryIds": [
       "java"
     ],
-    "topic": "Spring Data JPA",
+    "topic": "Java Language",
     "subTopic": "N+1 queries",
     "difficulty": "medium",
     "experienceBands": [
@@ -12512,7 +12614,7 @@
     "categoryIds": [
       "python"
     ],
-    "topic": "asyncio",
+    "topic": "Python Language",
     "subTopic": "Event loop blocking",
     "difficulty": "hard",
     "experienceBands": [
@@ -12521,11 +12623,11 @@
     ],
     "type": "debugging",
     "prompt": "A FastAPI service slows to a crawl under load. An async endpoint calls a synchronous, CPU-heavy library. Diagnose and fix.",
-    "answer": "An `async def` endpoint runs on the event loop; calling a blocking/CPU-heavy function inside it freezes the single loop thread, so every other concurrent request stalls until it returns. Async doesn't make blocking code non-blocking — it just shares one thread cooperatively, and a blocking call breaks the cooperation.\n\n## Strong answer\nThe event loop interleaves coroutines only at `await` points. A synchronous call (heavy computation, blocking I/O, `time.sleep`) never yields, so the loop can't service other requests — throughput collapses and latency spikes for everyone. Fix by getting the blocking work off the loop: for blocking I/O or moderate CPU, offload to a thread pool with `asyncio.to_thread(...)` (or `run_in_executor`); for heavy CPU-bound work, use a process pool to sidestep the GIL. In FastAPI specifically, a *sync* `def` endpoint is already run in a threadpool, so making the endpoint `async` and then calling blocking code is the worst of both worlds. Use `await asyncio.to_thread(cpu_fn, ...)` or define the endpoint as plain `def`.\n\n## Example\n```python\nimport asyncio\nfrom fastapi import FastAPI\napp = FastAPI()\n\n@app.get(\"/score\")\nasync def score(x: int):\n    # BAD: blocks the event loop\n    # return heavy_cpu(x)\n    # GOOD: offload to a worker thread/process\n    return await asyncio.to_thread(heavy_cpu, x)\n```\n\n## Trade-offs\n- Thread offload fixes blocking I/O but the GIL limits CPU parallelism — use processes for CPU-bound.\n- Process pools add serialization overhead and complexity.\n- Mixing sync/async endpoints needs care to avoid double threadpool hops.\n\n## When to use / avoid\n- Offload blocking work; reserve `async def` for genuinely awaitable I/O.\n\n## Interview signal\nKnows the loop is single-threaded, that async ≠ parallel, and offloads CPU work to a process pool.",
+    "answer": "A synchronous call inside an async endpoint blocks that worker's event loop until it returns. First distinguish blocking I/O, pure-Python CPU work and native code that releases the GIL; the appropriate offload strategy differs.\n\n## Strong answer\nMeasure event-loop lag, request latency and CPU usage, then profile the suspected function. On a GIL-enabled CPython build, asyncio.to_thread is primarily for blocking I/O; it does not provide parallel execution of pure-Python CPU work. Threads can suit native extensions that release the GIL, subject to measurement. Free-threaded builds require checking the actual runtime and library compatibility.\n\nFor substantial pure-Python CPU work, use a bounded process pool or an external job worker. FastAPI executes ordinary def endpoints in a thread pool, which changes scheduling but does not remove the GIL constraint.\n\n## Example\nThe service supplies a shared, startup-created ProcessPoolExecutor and shuts it down during application shutdown. Keep worker functions importable at module scope.\n\n```python\nimport asyncio\nfrom concurrent.futures import ProcessPoolExecutor\n\ndef cpu_score(limit: int) -> int:\n    return sum(number * number for number in range(limit))\n\nasync def score(limit: int, pool: ProcessPoolExecutor) -> int:\n    loop = asyncio.get_running_loop()\n    return await loop.run_in_executor(pool, cpu_score, limit)\n```\n\n## Trade-offs\nProcesses add serialization, memory and startup costs. Bound admission as well as worker count; a fixed-size pool alone can accumulate pending jobs. Cancelling an await does not reliably terminate already-running CPU work.\n\n## When to use / avoid\nUse async for awaitable I/O, threads for appropriate blocking libraries and processes/jobs for expensive CPU work. Avoid creating a new pool per request.\n\n## Interview signal\nTests responsiveness under load and explains capacity, cancellation and runtime assumptions.",
     "keyPoints": [
       "Blocking call freezes the single event-loop thread",
       "async ≠ parallel; interleaving only at await points",
-      "Offload I/O via asyncio.to_thread; CPU via process pool (GIL)",
+      "Distinguishes pure-Python CPU work from native code that releases the GIL",
       "FastAPI runs sync def endpoints in a threadpool already"
     ],
     "followUps": [
@@ -12536,7 +12638,7 @@
     "redFlags": [
       "Thinks async automatically parallelizes CPU work",
       "Uses a thread pool for CPU-bound work, ignoring the GIL",
-      "Adds more workers without removing the blocking call"
+      "Assumes cancelling an await reliably stops already-running CPU work"
     ],
     "references": [
       {
@@ -12559,7 +12661,7 @@
     "categoryIds": [
       "python"
     ],
-    "topic": "Pydantic",
+    "topic": "Python Language",
     "subTopic": "Request validation",
     "difficulty": "medium",
     "experienceBands": [

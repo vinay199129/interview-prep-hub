@@ -1,8 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getAllQuestions, getCategories, getQuestionById } from "@/lib/data";
+import {
+  getAllQuestions,
+  getCategories,
+  getDomainForCategory,
+  getQuestionById,
+} from "@/lib/data";
+import { getRelatedQuestions } from "@/lib/related";
 import { QuestionCard } from "@/components/QuestionCard";
+import { RelatedQuestions } from "@/components/RelatedQuestions";
 
 export function generateStaticParams() {
   return getAllQuestions().map((q) => ({ id: q.id }));
@@ -35,15 +42,32 @@ export default async function QuestionPage({
   const q = getQuestionById(id);
   if (!q) notFound();
   const categories = getCategories();
+  const allQuestions = getAllQuestions();
+  const related = getRelatedQuestions(q, allQuestions);
+  const domain = getDomainForCategory(q.categoryIds[0]);
+
   return (
     <div className="space-y-4">
-      <Link
-        href="/browse"
-        className="text-sm text-brand-600 dark:text-brand-100 hover:underline"
-      >
-        ← Back to browse
-      </Link>
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm">
+        <Link href="/browse" className="text-brand-600 hover:underline dark:text-brand-100">
+          ← Back to browse
+        </Link>
+        {domain && (
+          <>
+            <span aria-hidden="true" className="text-slate-400">
+              ·
+            </span>
+            <Link
+              href={`/domains/${domain.id}`}
+              className="text-slate-600 hover:text-brand-600 hover:underline dark:text-slate-300 dark:hover:text-brand-100"
+            >
+              {domain.name}
+            </Link>
+          </>
+        )}
+      </nav>
       <QuestionCard q={q} categories={categories} defaultOpen />
+      <RelatedQuestions questions={related} />
     </div>
   );
 }

@@ -45,10 +45,11 @@ export default function TracksPage() {
                 {track.description}
               </p>
               <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                {count} {count === 1 ? "question" : "questions"}
+                {track.studyPlan.flatMap((stage) => stage.questionIds).length} essential questions / {count} in the full bank
               </div>
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Essential sequence progress</div>
               <ProgressStats
-                questionIds={trackQuestions.map((q) => q.id)}
+                questionIds={track.studyPlan.flatMap((stage) => stage.questionIds)}
                 variant="full"
                 className="mt-2"
               />

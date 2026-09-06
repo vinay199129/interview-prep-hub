@@ -44,6 +44,37 @@ export interface Category {
   order: number;
 }
 
+export type DomainId =
+  | "ai-engineering"
+  | "agentic-systems"
+  | "production-ai"
+  | "software-cloud"
+  | "leadership-signal";
+
+/**
+ * A Domain is the top level of the taxonomy: a small, stable set of themes that
+ * group the (many) categories so the site has ~5 entry points instead of ~21.
+ */
+export interface Domain {
+  id: DomainId;
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  accent: string;
+  categoryIds: CategoryId[];
+  order: number;
+}
+
+export interface StudyStage {
+  id: string;
+  name: string;
+  questionIds: string[];
+  exercise: string;
+  practiceTimeMin: number;
+  readinessChecks: string[];
+}
+
 export interface Track {
   id: string;
   name: string;
@@ -51,6 +82,7 @@ export interface Track {
   description: string;
   categoryIds: CategoryId[];
   targetQuestionCount?: number;
+  studyPlan: StudyStage[];
   order: number;
 }
 

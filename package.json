@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "tsx --test tests/study.test.ts",
     "validate-data": "tsx scripts/validate-data.ts"
   },
   "dependencies": {

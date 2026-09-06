@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "node:fs";
 import {
   CategoriesFileSchema,
+  DomainsFileSchema,
   TracksFileSchema,
   QuestionsFileSchema,
   CriteriaFileSchema,
@@ -10,6 +11,7 @@ import {
 } from "./schema";
 import type {
   Category,
+  Domain,
   Question,
   EvaluationCriterion,
   GlossaryTerm,
@@ -18,6 +20,10 @@ import type {
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
+
+export function getStudyGuide(): string {
+  return fs.readFileSync(path.join(process.cwd(), "docs", "STUDY-METHOD.md"), "utf-8");
+}
 
 function readJson<T>(rel: string): T {
   const full = path.join(DATA_DIR, rel);
@@ -35,6 +41,28 @@ export function getTracks(): Track[] {
   const data = readJson<unknown>("tracks.json");
   const parsed = TracksFileSchema.parse(data);
   return [...parsed].sort((a, b) => a.order - b.order);
+}
+
+export function getDomains(): Domain[] {
+  const data = readJson<unknown>("domains.json");
+  const parsed = DomainsFileSchema.parse(data);
+  const seen = new Set<string>();
+  for (const d of parsed) {
+    if (seen.has(d.id)) throw new Error(`Duplicate domain id: ${d.id}`);
+    seen.add(d.id);
+  }
+  return [...parsed].sort((a, b) => a.order - b.order);
+}
+
+export function getDomainById(id: string): Domain | undefined {
+  return getDomains().find((d) => d.id === id);
+}
+
+/** Domain that owns a given category, if any. Categories map to exactly one domain. */
+export function getDomainForCategory(categoryId: string): Domain | undefined {
+  return getDomains().find((d) =>
+    (d.categoryIds as string[]).includes(categoryId),
+  );
 }
 
 export function getCriteria(): EvaluationCriterion[] {

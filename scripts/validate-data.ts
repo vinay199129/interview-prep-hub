@@ -2,6 +2,7 @@ import {
   getAllQuestions,
   getCategories,
   getCriteria,
+  getDomains,
   getGlossary,
   getRoleFocuses,
   getTracks,
@@ -53,6 +54,7 @@ const SPECIAL_TAG_PREFIX = /^(region|pattern|role)-/;
 
 function main() {
   const categories = getCategories();
+  const domains = getDomains();
   const tracks = getTracks();
   const criteria = getCriteria();
   const questions = getAllQuestions();
@@ -64,6 +66,7 @@ function main() {
 
   // Reference checks
   const categoryIds = new Set(categories.map((c) => c.id));
+  const questionById = new Map(questions.map((question) => [question.id, question]));
   for (const q of questions) {
     for (const cid of q.categoryIds) {
       if (!categoryIds.has(cid)) {
@@ -72,10 +75,48 @@ function main() {
     }
   }
   for (const track of tracks) {
+    const stageIds = new Set<string>();
+    const plannedIds = new Set<string>();
+    for (const stage of track.studyPlan) {
+      if (stageIds.has(stage.id)) errors.push({ id: track.id, message: `duplicate study stage ${stage.id}` });
+      stageIds.add(stage.id);
+      for (const questionId of stage.questionIds) {
+        const question = questionById.get(questionId);
+        if (!question) errors.push({ id: track.id, message: `study stage references unknown question ${questionId}` });
+        else if (!question.categoryIds.some((categoryId) => track.categoryIds.includes(categoryId))) {
+          errors.push({ id: track.id, message: `study question ${questionId} is outside the track categories` });
+        }
+        if (plannedIds.has(questionId)) errors.push({ id: track.id, message: `duplicate study question ${questionId}` });
+        plannedIds.add(questionId);
+      }
+    }
     for (const cid of track.categoryIds) {
       if (!categoryIds.has(cid)) {
         errors.push({ id: track.id, message: `track references unknown category ${cid}` });
       }
+    }
+  }
+
+  // Domains must partition the categories: every category in exactly one domain.
+  const categoryToDomain = new Map<string, string>();
+  for (const d of domains) {
+    for (const cid of d.categoryIds) {
+      if (!categoryIds.has(cid)) {
+        errors.push({ id: d.id, message: `domain references unknown category ${cid}` });
+      }
+      const owner = categoryToDomain.get(cid);
+      if (owner) {
+        errors.push({
+          id: d.id,
+          message: `category ${cid} is already owned by domain ${owner}`,
+        });
+      }
+      categoryToDomain.set(cid, d.id);
+    }
+  }
+  for (const c of categories) {
+    if (!categoryToDomain.has(c.id)) {
+      errors.push({ id: c.id, message: `category is not assigned to any domain` });
     }
   }
 
@@ -87,6 +128,8 @@ function main() {
   for (const [id, n] of seen) {
     if (n > 1) errors.push({ id, message: `duplicate id (appears ${n} times)` });
   }
+
+  const topics = new Set(questions.map((question) => question.topic));
 
   // Per-question quality rules
   for (const q of questions) {
@@ -227,6 +270,8 @@ function main() {
 
   // Output
   console.log(`✓ ${categories.length} categories`);
+  console.log(`✓ ${domains.length} domains`);
+  console.log(`✓ ${topics.size} distinct topics`);
   console.log(`✓ ${tracks.length} career tracks`);
   console.log(`✓ ${criteria.length} evaluation criteria`);
   console.log(`✓ ${glossary.length} glossary terms`);
